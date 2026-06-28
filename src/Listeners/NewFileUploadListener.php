@@ -6,7 +6,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Teksite\FileManager\Events\NewFileUploadEvent;
 
-class NewFileUploadKListener
+class NewFileUploadListener
 {
     /**
      * Create the event listener.

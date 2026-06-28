@@ -4,6 +4,7 @@ namespace Teksite\FileManager;
 
 use Illuminate\Support\ServiceProvider;
 use Teksite\FileManager\Providers\RouteServiceProvider;
+use Teksite\FileManager\Providers\EventServiceProvider;
 
 class FileManagerServiceProvider extends ServiceProvider
 {
@@ -25,6 +26,7 @@ class FileManagerServiceProvider extends ServiceProvider
     private function registerProviders(): void
     {
         $this->app->register(RouteServiceProvider::class);
+        $this->app->register(EventServiceProvider::class);
     }
 
     public function registerConfig(): void

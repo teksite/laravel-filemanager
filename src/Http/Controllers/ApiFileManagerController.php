@@ -3,6 +3,9 @@
 namespace Teksite\FileManager\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Teksite\FileManager\Http\Resources\FileCollection;
+use Teksite\FileManager\Http\Resources\FileResource;
+use Teksite\FileManager\Models\UploadFile;
 
 class ApiFileManagerController
 {
@@ -16,7 +19,7 @@ class ApiFileManagerController
     public function show(UploadFile $file)
     {
         $file = FileResource::make($file);
-        return ResponseJson::Success(compact('file'));
+        return response()->json($file)->setStatusCode(200);
     }
 
 

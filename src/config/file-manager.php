@@ -13,7 +13,4 @@ return [
             'middlewares' => [],
         ],
     ],
-
-    'model' => "App\\Models\\UploadFile",
-
 ];

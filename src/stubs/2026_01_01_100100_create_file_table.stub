@@ -25,7 +25,6 @@ return new class extends Migration {
             $table->index(['path', 'disk']);
         });
 
-
         Schema::create('uploaded_files_models', function (Blueprint $table) {
             $table->foreignUlid('upload_id')->constrained('uploaded_files', 'id')->cascadeOnDelete();
             $table->morphs('model');

@@ -1,0 +1,27 @@
+{
+    "name": "teksite/laravel-filemanager",
+    "description": "A simple package for managing files with different divers.",
+    "authors": [
+        {
+            "name": "Sina Zangiband",
+            "email": "sina.zangiband@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Teksite\\FileManager\\": "src/"
+        }
+    },
+    "require": {
+        "laravel/framework": "^13"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Teksite\\FileManager\\FileManagerServiceProvider"
+            ]
+        }
+    }
+}

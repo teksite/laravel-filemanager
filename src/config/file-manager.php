@@ -20,16 +20,18 @@ return [
     'maxUploadFileSize' => null,
 
 
-    'allowFileTypes'    => [],
+    'allowFileTypes' => [],
 
 
-    'hiddenFiles'       => true,
+    'hiddenFiles' => true,
 
 
-    'slugifyNames'      => false,
+    'slugifyNames' => false,
 
-    
-    'keepFileName'      => false,
+
+    'keepFileName' => false,
+
+    'paginate'=>50
 
 
 ];

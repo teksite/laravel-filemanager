@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Teksite\FileManager\Http\Resources\FileCollection;
 use Teksite\FileManager\Http\Resources\FileResource;
 use Teksite\FileManager\Models\UploadFile;
+use Teksite\FileManager\Services\UploaderService;
 
 class ApiFileManagerController
 {
@@ -32,7 +33,6 @@ class ApiFileManagerController
         } else {
             return ResponseJson::Failed(trans('main::messages.global.server_wrong'), trans('uploader::messages.uploader.upload_failed'));
         }
-
     }
 
     public function uploadByModel(Request $request)

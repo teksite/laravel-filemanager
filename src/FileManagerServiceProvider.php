@@ -3,12 +3,15 @@
 namespace Teksite\FileManager;
 
 use Illuminate\Support\ServiceProvider;
+use Teksite\FileManager\Providers\RouteServiceProvider;
 
 class FileManagerServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
         $this->registerConfig();
+        $this->registerProviders();
+
     }
 
     /**
@@ -19,17 +22,23 @@ class FileManagerServiceProvider extends ServiceProvider
         $this->publish();
     }
 
+
+    private function registerProviders(): void
+    {
+        $this->app->register(RouteServiceProvider::class);
+    }
+
     public function registerConfig(): void
     {
-        /*        $configPath = config_path('icon-setting.php');*/
-        /*        $this->mergeConfigFrom(file_exists($configPath) ? $configPath : __DIR__ . '/config/icon-setting.php', 'icon-setting');*/
+        $configPath = config_path('file-manager.php');
+        $this->mergeConfigFrom(file_exists($configPath) ? $configPath : __DIR__ . '/config/file-manager.php', 'file-manager');
     }
 
     public function publish(): void
     {
-      /*  $this->publishes([
-            __DIR__ . '/config/icon-setting.php' => config_path('icon-setting.php'),
-        ], '/icon-setting');*/
+        $this->publishes([
+            __DIR__ . '/config/file-manager.php' => config_path('file-manager.php'),
+        ], '/file-manager');
     }
 }
 

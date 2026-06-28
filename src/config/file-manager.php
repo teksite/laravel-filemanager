@@ -13,4 +13,23 @@ return [
             'middlewares' => [],
         ],
     ],
+
+    'diskList' => ['public'],
+
+
+    'maxUploadFileSize' => null,
+
+
+    'allowFileTypes'    => [],
+
+
+    'hiddenFiles'       => true,
+
+
+    'slugifyNames'      => false,
+
+    
+    'keepFileName'      => false,
+
+
 ];

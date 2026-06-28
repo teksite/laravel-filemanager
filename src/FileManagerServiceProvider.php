@@ -11,7 +11,6 @@ class FileManagerServiceProvider extends ServiceProvider
     {
         $this->registerConfig();
         $this->registerProviders();
-
     }
 
     /**

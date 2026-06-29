@@ -23,10 +23,8 @@ class UploaderService implements FileUploaderInterface
     {
 
         event(new FileUploading($file));
-
         return DB::transaction(function () use ($file, $options) {
             $optionsArray = $options instanceof UploadOptions ? $options->toArray() : $options;
-
             $disk = $optionsArray['disk'] ?? config('filemanager.disk', 'public');
 
             if (!in_array($disk, array_keys(config('filesystems.disks', [])))) throw  new InvalidDiskException();
@@ -46,9 +44,7 @@ class UploaderService implements FileUploaderInterface
                 'path'          => $stored,
                 'disk'          => $disk,
                 'mime_type'     => $file->getMimeType(),
-                'extension'     => $extension,
                 'size'          => $file->getSize(),
-                'hash'          => hash_file('sha256', $file->getRealPath()),
             ]);
 
             event(new FileUploaded($upload));

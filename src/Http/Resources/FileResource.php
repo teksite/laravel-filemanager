@@ -20,7 +20,7 @@ class FileResource extends JsonResource
             'title'         => $this->title,
             'path'          => $this->path,
             'url'           => $this->url,
-            'sizes'         => $this->sizes,
+            'size'          => $this->size,
             'mime_type'     => $this->mime_type,
             'other'         => $this->other,
             'disk'          => $this->disk,

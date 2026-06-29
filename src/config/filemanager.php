@@ -35,7 +35,12 @@ return [
 
     'upload_path' => 'uploads',
 
-    'naming_strategy' => 'uuid', // uuid ,timestamp ,random
+    'naming_strategy' => [
+        'random'    => \Teksite\FileManager\Strategies\RandomFileNameStrategy::class,
+        'timestamp' => \Teksite\FileManager\Strategies\TimestampFileNameStrategy::class,
+        'original'  => \Teksite\FileManager\Strategies\OriginalFileNameStrategy::class,
+        'uuid'      => \Teksite\FileManager\Strategies\UUIDFileNameStrategy::class,
+    ], // uuid ,timestamp ,random
 
     'random_name_length' => 32,
 

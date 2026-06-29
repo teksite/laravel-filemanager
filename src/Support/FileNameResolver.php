@@ -9,15 +9,20 @@ use Teksite\FileManager\Strategies\TimestampFileNameStrategy;
 use Teksite\FileManager\Strategies\UUIDFileNameStrategy;
 
 
-class FileNameResolver {
-    public static function resolve(?string $strategy = null , array|null $options = null) : FileNameGeneratorInterface
+class FileNameResolver
+{
+    public static function resolve(?string $strategy = null, ?array $options = null): FileNameGeneratorInterface
     {
-        $selectedStrategy = is_null($strategy) ? config('filemanager.default_strategy' ,'uuid') : $strategy;
-        return match($selectedStrategy){
-            'random'=> app(RandomFileNameStrategy::class ,[...$options]),
-            'timestamp'=> app(TimestampFileNameStrategy::class ,[...$options]),
-            'original'=> app(OriginalFileNameStrategy::class ,[...$options]),
-            default=> app(UUIDFileNameStrategy::class ,[...$options])
-        };
+        $strategies ??= config('filemanager.naming_strategy', [
+            'random'    => \Teksite\FileManager\Strategies\RandomFileNameStrategy::class,
+            'timestamp' => \Teksite\FileManager\Strategies\TimestampFileNameStrategy::class,
+            'original'  => \Teksite\FileManager\Strategies\OriginalFileNameStrategy::class,
+            'uuid'      => \Teksite\FileManager\Strategies\UUIDFileNameStrategy::class,
+        ]);
+        $options ??= [];
+
+        $class =$strategies[$strategy] ?? UUIDFileNameStrategy::class;
+
+        return app($class, $options);
     }
 }

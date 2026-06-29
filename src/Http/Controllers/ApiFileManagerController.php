@@ -33,7 +33,7 @@ class ApiFileManagerController
     public function store(ApiUploadFileRequest $request)
     {
         $options = UploadOptions::make()
-                                ->disk($request->disk ?? config('file-manager.disk'))
+                                ->disk($request->disk ?? config('filemanager.disk' ,'public'))
                                 ->path($request->path ?? '');
 
         $file = $this->uploader->upload($request->file('file'), $options);
@@ -41,7 +41,7 @@ class ApiFileManagerController
         return response()->json([
             'success' => true,
             'message' => 'File uploaded successfully',
-            'data' => new FileResource($file),
+            'file' => new FileResource($file),
         ], 201);
     }
 

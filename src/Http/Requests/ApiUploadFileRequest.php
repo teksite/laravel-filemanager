@@ -5,6 +5,7 @@ namespace Teksite\FileManager\Http\Requests;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class ApiUploadFileRequest extends FormRequest
 {
@@ -20,7 +21,23 @@ class ApiUploadFileRequest extends FormRequest
             'file'  => ['required', 'file',],
             'title' => ['nullable', 'string', 'max:255'],
             'path'  => ['nullable', 'string'],
-            'disk'  => ['nullable', 'string'],
+            'disk'  => ['nullable', 'string' , Rule::in(array_keys(config('filesystems.disks' ,[])))],
+
+
+            /*
+
+        public ?string $path = null,
+        public ?string $title = null,
+        public ?string $strategy = null,
+        public bool    $overwrite = false,
+        public bool    $slugify = false,
+        public ?int    $length = null,
+
+
+
+
+
+             */
         ];
     }
 

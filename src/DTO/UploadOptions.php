@@ -25,7 +25,7 @@ class UploadOptions
         return $this;
     }
 
-    public function path(string $path): static
+    public function path(?string $path): static
     {
         $this->path = $path;
         return $this;

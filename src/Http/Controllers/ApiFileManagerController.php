@@ -13,12 +13,9 @@ use Teksite\FileManager\Services\UploaderService;
 class ApiFileManagerController
 {
 
-    public function __construct(protected UploaderService $uploader) {
-    }
+    public function __construct(protected UploaderService $uploader) {}
 
-    public function index(Request $request)
-    {
-    }
+    public function index(Request $request) {}
 
     public function show(UploadFile $file)
     {
@@ -33,28 +30,20 @@ class ApiFileManagerController
     public function store(ApiUploadFileRequest $request)
     {
         $options = UploadOptions::make()
-                                ->disk($request->disk ?? config('filemanager.disk' ,'public'))
-            ->strategy('original')
-                                ->path($request->path ?? '');
+                                ->disk($request->disk ?? config('filemanager.disk', 'public'))
+                                ->strategy('original')
+                                ->path($request->path);
 
         $file = $this->uploader->upload($request->file('file'), $options);
 
         return response()->json([
             'success' => true,
             'message' => 'File uploaded successfully',
-            'file' => new FileResource($file),
+            'file'    => new FileResource($file),
         ], 201);
     }
 
-    public function uploadByModel(Request $request)
-    {
+    public function uploadByModel(Request $request) {}
 
-
-    }
-
-    public function delete(UploadFile|string|array $file)
-    {
-
-
-    }
+    public function delete(UploadFile|string|array $file) {}
 }

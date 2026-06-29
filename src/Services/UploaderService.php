@@ -43,7 +43,6 @@ class UploaderService implements FileUploaderInterface
             $path = $this->normalizePath($options->path);
 
             $fullName = $this->resolveName($name, $extension, $path, $disk, $options->overwrite);
-
             try {
                 $stored = $this->storage->save($file, $disk, $path, $fullName);
                 if (!$stored) throw new FileUploadException();
@@ -74,7 +73,6 @@ class UploaderService implements FileUploaderInterface
         $counter = 1;
 
         $filename = "{$name}.{$extension}";
-
         while (Storage::disk($disk)->exists("{$path}/{$filename}")) {
             $filename = "{$name}-{$counter}.{$extension}";
             $counter++;
@@ -84,13 +82,13 @@ class UploaderService implements FileUploaderInterface
 
     private function normalizePath(?string $path = null, array $variables = []): string
     {
-        $path = $path ?? '';
-        $path = str_replace('\\', '/', $path);
-
-        $path = preg_replace('#(\.\.[/\\\\]?)#', '', $path);
-
-        $path = preg_replace('/[^a-zA-Z0-9_\-\/{}]/', '', $path);
-
+        if ($path) {
+            $path= trim($path);
+            $path = str_replace('\\', '/', $path);
+            $path = preg_replace('#(\.\.[/\\\\]?)#', '', $path);
+            $path = preg_replace('/[^a-zA-Z0-9_\-\/{}]/', '', $path);
+            return $path;
+        }
         $now = now();
         $replacements = array_merge([
             '{Y}' => $now->format('Y'),
@@ -103,10 +101,6 @@ class UploaderService implements FileUploaderInterface
 
         $basePath = config('filemanager.upload_path', 'uploads');
 
-        $basePath = str_replace(array_keys($replacements), array_values($replacements), $basePath);
-
-        return collect([trim($basePath, '/'), trim($path, '/')])
-            ->filter()
-            ->implode('/');
+        return str_replace(array_keys($replacements), array_values($replacements), $basePath);
     }
 }

@@ -37,7 +37,7 @@ class ApiFileManagerController
 
     public function uploadByModel(Request $request)
     {
-        $model = User::query()->find(1);
+
         if (!!$model && method_exists($model, 'uploader')) {
             $file = UploaderService::make(DiskType::ARVAN_PRIVATE)->upload($request->file('file'), null, false, null);
             event(new UploadedNewFileEvent($file));
@@ -59,7 +59,7 @@ class ApiFileManagerController
     {
         $res = !!$this->uploaderService->remove($file);
 
-        if ($res) return ResponseJson::Success([], trans('uploader::messages.uploader.delete_success'));
+
 
         return ResponseJson::Failed(trans('main::messages.global.server_wrong'), trans('uploader::messages.uploader.delete_failed'));
     }

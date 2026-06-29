@@ -13,9 +13,11 @@ return [
             'middlewares' => [],
         ],
     ],
+    'hiddenFiles' => true,
 
     'diskList' => ['public'],
 
+    'paginate'=>50,
 
     'maxUploadFileSize' => null,
 
@@ -23,15 +25,25 @@ return [
     'allowFileTypes' => [],
 
 
-    'hiddenFiles' => true,
 
 
-    'slugifyNames' => false,
+    'default_store_disk' => 'public',
 
+    'keep_file_name' => false,
 
-    'keepFileName' => false,
+    'slugify_names' => true,
 
-    'paginate'=>50
+    'overwrite' => false,
+
+    'upload_path' => 'uploads',
+
+    'naming_strategy' => 'uuid',
+
+    'random_name_length' => 32,
+
+    'delete_file_with_model' => true,
+
+    'store_hash' => true,
 
 
 ];

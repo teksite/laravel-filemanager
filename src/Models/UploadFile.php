@@ -6,8 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Modules\Uploader\Enums\DiskType;
-use Modules\Uploader\Service\UploaderService;
+
 
 #[Fillable(['original_name', 'title', 'path', 'size', 'mime_type', 'disk', 'other'])]
 class UploadFile extends Model

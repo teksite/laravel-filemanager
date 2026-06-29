@@ -9,6 +9,7 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Teksite\FileManager\Models\UploadFile;
 
 class FileUploaded
 {
@@ -17,7 +18,7 @@ class FileUploaded
     /**
      * Create a new event instance.
      */
-    public function __construct()
+    public function __construct(public UploadFile $file)
     {
         //
     }

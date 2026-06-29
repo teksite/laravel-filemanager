@@ -2,8 +2,13 @@
 
 namespace Teksite\FileManager\Services;
 
+use Illuminate\Support\Facades\DB;
 use Teksite\FileManager\Contracts\FileUploaderInterface;
 use Teksite\FileManager\DTO\UploadOptions;
+use Teksite\FileManager\Events\FileUploaded;
+use Teksite\FileManager\Events\FileUploading;
+use Teksite\FileManager\Models\UploadFile;
+use Teksite\FileManager\Support\FileNameResolver;
 
 class UploaderService implements FileUploaderInterface
 {
@@ -12,89 +17,37 @@ class UploaderService implements FileUploaderInterface
     public function upload(\Illuminate\Http\UploadedFile $file, UploadOptions|array $options): \Teksite\FileManager\Models\UploadFile
     {
 
-        event( new FileUploading($file) );
+        event(new FileUploading($file));
 
-        return DB::transaction(
-            function () use (
-                $file,
-                $options
-            ) {
+        return DB::transaction(function () use ($file, $options) {
+            $optionsArray = $options instanceof UploadOptions ? $options->toArray() : $options;
 
-                $disk =
-                    $options->disk
-                    ??
-                    config(
-                        'file-manager.disk'
-                    );
+            $disk = $optionsArray['disk'] ?? config('file-manager.disk', 'public');
+            $strategy = FileNameResolver::resolve();
+            $name = $strategy->generate($file);
 
-                $strategy =
-                    FileNameResolver::resolve();
+            $extension = $file->extension();
 
-                $name =
-                    $strategy->generate(
-                        $file
-                    );
+            $fullName = "{$name}.{$extension}";
 
-                $extension =
-                    $file->extension();
+            $path = trim(config('file-manager.upload_path') . '/' . $optionsArray['path'], '/');
 
-                $fullName =
-                    "{$name}.{$extension}";
+            $stored = $this->storage->save($file, $disk, $path, $fullName);
 
-                $path =
-                    trim(
-                        config(
-                            'file-manager.upload_path'
-                        )
-                        . '/'
-                        . $options->path,
-                        '/'
-                    );
+            $upload = UploadFile::query()->create([
+                'original_name' => $file->getClientOriginalName(),
+                'path'          => $stored,
+                'disk'          => $disk,
+                'mime_type'     => $file->getMimeType(),
+                'extension'     => $extension,
+                'size'          => $file->getSize(),
+                'hash'          => hash_file('sha256', $file->getRealPath()),
+            ]);
 
-                $stored =
-                    $this->storage
-                        ->save(
-                            $file,
-                            $disk,
-                            $path,
-                            $fullName
-                        );
+            event(new FileUploaded($upload));
 
-                $upload =
-                    UploadFile::create([
-
-                        'original_name' =>
-                            $file->getClientOriginalName(),
-
-                        'path' => $stored,
-
-                        'disk' => $disk,
-
-                        'mime_type' =>
-                            $file->getMimeType(),
-
-                        'extension' =>
-                            $extension,
-
-                        'size' =>
-                            $file->getSize(),
-
-                        'hash' =>
-                            hash_file(
-                                'sha256',
-                                $file
-                                    ->getRealPath()
-                            ),
-                    ]);
-
-                event(
-                    new FileUploaded(
-                        $upload
-                    )
-                );
-
-                return $upload;
-            }
+            return $upload;
+        }
         );
     }
 }

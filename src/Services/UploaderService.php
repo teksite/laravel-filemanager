@@ -8,6 +8,7 @@ use Teksite\FileManager\Contracts\FileUploaderInterface;
 use Teksite\FileManager\DTO\UploadOptions;
 use Teksite\FileManager\Events\FileUploaded;
 use Teksite\FileManager\Events\FileUploading;
+use Teksite\FileManager\Http\Exceptions\InvalidDiskException;
 use Teksite\FileManager\Models\UploadFile;
 use Teksite\FileManager\Support\FileNameResolver;
 
@@ -26,7 +27,9 @@ class UploaderService implements FileUploaderInterface
         return DB::transaction(function () use ($file, $options) {
             $optionsArray = $options instanceof UploadOptions ? $options->toArray() : $options;
 
-            $disk = $optionsArray['disk'] ?? config('file-manager.disk', 'public');
+            $disk = $optionsArray['disk'] ?? config('filemanager.disk', 'public');
+
+            if (!in_array($disk, array_keys(config('filesystems.disks', [])))) throw  new InvalidDiskException();
             $strategy = FileNameResolver::resolve();
             $name = $strategy->generate($file);
 
@@ -34,7 +37,7 @@ class UploaderService implements FileUploaderInterface
 
             $fullName = "{$name}.{$extension}";
 
-            $path = trim(config('file-manager.upload_path') . '/' . $optionsArray['path'], '/');
+            $path = trim(config('filemanager.upload_path') . '/' . $optionsArray['path'], '/');
 
             $stored = $this->storage->save($file, $disk, $path, $fullName);
 

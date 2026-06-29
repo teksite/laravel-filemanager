@@ -8,7 +8,6 @@ use Teksite\FileManager\Http\Requests\ApiUploadFileRequest;
 use Teksite\FileManager\Http\Resources\FileCollection;
 use Teksite\FileManager\Http\Resources\FileResource;
 use Teksite\FileManager\Models\UploadFile;
-use Teksite\FileManager\Services\SimpleUploaderService;
 use Teksite\FileManager\Services\UploaderService;
 
 class ApiFileManagerController

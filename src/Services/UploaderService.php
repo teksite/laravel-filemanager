@@ -9,6 +9,7 @@ use Teksite\FileManager\Contracts\FileUploaderInterface;
 use Teksite\FileManager\DTO\UploadOptions;
 use Teksite\FileManager\Events\FileUploaded;
 use Teksite\FileManager\Events\FileUploading;
+use Teksite\FileManager\Http\Exceptions\FileUploadException;
 use Teksite\FileManager\Http\Exceptions\InvalidDiskException;
 use Teksite\FileManager\Models\UploadFile;
 use Teksite\FileManager\Support\FileNameResolver;
@@ -57,7 +58,6 @@ class UploaderService implements FileUploaderInterface
                     ]);
             } catch (\Throwable $e) {
                 if (isset($stored)) $this->storage->delete($disk, $stored);
-
                 throw $e;
             }
             event(new FileUploaded($upload));

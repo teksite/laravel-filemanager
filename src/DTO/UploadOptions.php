@@ -11,6 +11,7 @@ class UploadOptions
         public ?string $strategy = null,
         public bool    $overwrite = false,
         public bool    $slugify = false,
+        public ?int    $length = null,
     ) {}
 
     public static function make(): static
@@ -48,6 +49,12 @@ class UploadOptions
         return $this;
     }
 
+    public function length(int $length = 32): static
+    {
+        $this->length = $length;
+        return $this;
+    }
+
     public function toArray(): array
     {
         return [
@@ -56,7 +63,20 @@ class UploadOptions
             'title'     => $this->title,
             'overwrite' => $this->overwrite,
             'slugify'   => $this->slugify,
+            'length'    => $this->length,
             'strategy'  => $this->strategy,
         ];
+    }
+
+    public static function fromArray(array $options = []): static
+    {
+        return new static(
+            disk: $options['disk'] ?? null,
+            path: $options['path'] ?? null,
+            title: $options['title'] ?? null,
+            strategy: $options['strategy'] ?? null,
+            overwrite: $options['overwrite'] ?? false,
+            slugify: $options['slugify'] ?? false,
+        );
     }
 }

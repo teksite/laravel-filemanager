@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Teksite\FileManager\Http\Resources\FileCollection;
 use Teksite\FileManager\Http\Resources\FileResource;
 use Teksite\FileManager\Models\UploadFile;
-use Teksite\FileManager\Services\UploaderService;
+use Teksite\FileManager\Services\SimpleUploaderService;
 
 class ApiFileManagerController
 {
@@ -26,7 +26,7 @@ class ApiFileManagerController
 
     public function upload(Request $request)
     {
-        $file = UploaderService::make(DiskType::ARVAN_PUBLIC)->upload($request->file('file'), null, false, null);
+        $file = SimpleUploaderService::make(DiskType::ARVAN_PUBLIC)->upload($request->file('file'), null, false, null);
         if (!!$file) {
             event(new UploadedNewFileEvent($file));
             return ResponseJson::Success(['file' => FileResource::make($file)], trans('uploader::messages.uploader.upload_success'));
@@ -39,7 +39,7 @@ class ApiFileManagerController
     {
 
         if (!!$model && method_exists($model, 'uploader')) {
-            $file = UploaderService::make(DiskType::ARVAN_PRIVATE)->upload($request->file('file'), null, false, null);
+            $file = SimpleUploaderService::make(DiskType::ARVAN_PRIVATE)->upload($request->file('file'), null, false, null);
             event(new UploadedNewFileEvent($file));
 
             if (!!$file) {

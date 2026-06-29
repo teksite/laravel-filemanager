@@ -2,6 +2,7 @@
 
 namespace Teksite\FileManager\Services;
 
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Teksite\FileManager\Contracts\FileUploaderInterface;
 use Teksite\FileManager\DTO\UploadOptions;
@@ -12,9 +13,12 @@ use Teksite\FileManager\Support\FileNameResolver;
 
 class UploaderService implements FileUploaderInterface
 {
-    public function __construct(FileStorageService $storage) {}
+    public function __construct(protected FileStorageService $storage) {}
 
-    public function upload(\Illuminate\Http\UploadedFile $file, UploadOptions|array $options): \Teksite\FileManager\Models\UploadFile
+    /**
+     * @throws \Throwable
+     */
+    public function upload(UploadedFile $file, UploadOptions|array $options): UploadFile
     {
 
         event(new FileUploading($file));

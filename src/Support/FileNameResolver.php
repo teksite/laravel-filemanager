@@ -11,7 +11,7 @@ class FileNameResolver {
     public static function resolve(?string $strategy = null) : string
     {
         $selectedStrategy = is_null($strategy) ? config('filemanager.default_strategy' ,'uuid') : $strategy;
-        return match(config('filemanager.naming_strategy') ){
+        return match($selectedStrategy){
             'random'=> app(RandomFileNameStrategy::class),
             'timestamp'=> app(TimestampFileNameStrategy::class),
             'original'=> app(OriginalFileNameStrategy::class),

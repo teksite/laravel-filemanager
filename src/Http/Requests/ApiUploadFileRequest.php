@@ -19,25 +19,14 @@ class ApiUploadFileRequest extends FormRequest
         return [
 
             'file'  => ['required', 'file',],
+            'disk'  => ['nullable', 'string', Rule::in(array_keys(config('filesystems.disks', [])))],
             'title' => ['nullable', 'string', 'max:255'],
             'path'  => ['nullable', 'string'],
-            'disk'  => ['nullable', 'string' , Rule::in(array_keys(config('filesystems.disks' ,[])))],
 
-
-            /*
-
-        public ?string $path = null,
-        public ?string $title = null,
-        public ?string $strategy = null,
-        public bool    $overwrite = false,
-        public bool    $slugify = false,
-        public ?int    $length = null,
-
-
-
-
-
-             */
+            'strategy'  => ['nullable', 'string', Rule::in(array_keys(config('filemanager.naming_strategy', [])))],
+            'overwrite' => ['sometimes', 'boolean'],
+            'slugify'   => ['sometimes', 'boolean'],
+            'length'    => ['nullable', 'integer', 'min:1', 'max:64'],
         ];
     }
 
@@ -45,13 +34,13 @@ class ApiUploadFileRequest extends FormRequest
     public function failedValidation(Validator $validator)
     {
         $exception = $validator->getException();
-        $exc=(new $exception($validator))->errorBag($this->errorBag);
+        $exc = (new $exception($validator))->errorBag($this->errorBag);
 
         return throw new HttpResponseException(response()->json([
             'message' => $exc->getMessage(),
-            'errors' => $exc->errors(),
-            'status' => 422,
-            'data' => [],
+            'errors'  => $exc->errors(),
+            'status'  => 422,
+            'data'    => [],
         ])->setStatusCode(422));
 
     }
@@ -61,9 +50,18 @@ class ApiUploadFileRequest extends FormRequest
     {
         return throw new HttpResponseException(response()->json([
             'messages' => trans("Forbidden You don't have permission"),
-            'errors' => ['auth'=>"Forbidden You don't have permission"],
-            'status' => 403,
-            'data' => [],
+            'errors'   => ['auth' => "Forbidden You don't have permission"],
+            'status'   => 403,
+            'data'     => [],
         ])->setStatusCode(403));
+    }
+
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'overwrite' => filter_var($this->overwrite, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
+            'slugify'   => filter_var($this->slugify, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
+        ]);
     }
 }

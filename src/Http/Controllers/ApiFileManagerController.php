@@ -29,12 +29,9 @@ class ApiFileManagerController
      */
     public function store(ApiUploadFileRequest $request)
     {
-        $options = UploadOptions::make()
-                                ->disk($request->disk ?? config('filemanager.disk', 'public'))
-                                ->strategy('original')
-                                ->path($request->path);
+        $options = UploadOptions::fromArray($request->validated());
 
-        $file = $this->uploader->upload($request->file('file'), $options);
+        $file = $this->uploader->upload($request->file('file'), $options , $request->title);
 
         return response()->json([
             'success' => true,

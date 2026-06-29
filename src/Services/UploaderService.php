@@ -29,7 +29,7 @@ class UploaderService implements FileUploaderInterface
 
             $options = $options instanceof UploadOptions ? $options : UploadOptions::fromArray($options);
 
-            $disk = $options->disk;
+            $disk = $options->disk ?? config('filemanager.default_store_disk');
 
             if (!array_key_exists($disk, config('filesystems.disks', []))) throw new InvalidDiskException();
 

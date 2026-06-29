@@ -7,5 +7,5 @@ use Teksite\FileManager\Models\UploadFile;
 
 interface FileNameGeneratorInterface
 {
-    public function generate(UploadedFile $file): string;
+    public function generate(UploadedFile $file , array $options =[]): string;
 }

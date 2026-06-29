@@ -1,6 +1,6 @@
 <?php
 
-namespace Teksite\FileManager\concerts;
+namespace Teksite\FileManager\Concerts;
 
 use Teksite\FileManager\Models\UploadFile;
 

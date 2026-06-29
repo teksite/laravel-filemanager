@@ -19,10 +19,12 @@ class FileResource extends JsonResource
             'original_name' => $this->original_name,
             'title'         => $this->title,
             'path'          => $this->path,
+            'url'           => $this->url,
             'sizes'         => $this->sizes,
             'mime_type'     => $this->mime_type,
             'other'         => $this->other,
             'disk'          => $this->disk,
+            'created_at'    => $this->created_at,
         ];
     }
 }

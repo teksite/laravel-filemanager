@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Storage;
 use Teksite\FileManager\Observer\UploadFileObserver;
 
 #[ObservedBy([UploadFileObserver::class])]
@@ -19,6 +20,9 @@ class UploadFile extends Model
     protected $keyType = 'string';
     protected $table = 'uploaded_files';
 
+    protected $appends = [
+        'url',
+    ];
 
     protected function casts(): array
     {
@@ -32,15 +36,9 @@ class UploadFile extends Model
         return $this->morphedByMany(Model::class, 'model', 'uploaded_files_models', 'model_id')->withPivot(['name']);
     }
 
-    protected static function boot(): void
-    {
-        parent::boot();
 
-        //TODO remove files as deleted from DB
-        /*
-            static::deleting(function ($model) {
-                $diskType= DiskType::tryFrom($model->disk);
-                return (new UploaderService($diskType))->removeFromDisk($model->path);
-            });*/
+    public function getUrlAttribute(): string
+    {
+        return Storage::disk($this->disk)->url($this->path);
     }
 }

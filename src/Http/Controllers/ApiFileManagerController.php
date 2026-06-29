@@ -34,6 +34,7 @@ class ApiFileManagerController
     {
         $options = UploadOptions::make()
                                 ->disk($request->disk ?? config('filemanager.disk' ,'public'))
+            ->strategy('original')
                                 ->path($request->path ?? '');
 
         $file = $this->uploader->upload($request->file('file'), $options);

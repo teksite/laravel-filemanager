@@ -48,14 +48,14 @@ class UploaderService implements FileUploaderInterface
                 $stored = $this->storage->save($file, $disk, $path, $fullName);
                 if (!$stored) throw new FileUploadException();
 
-                $upload =UploadFile::query()->create([
-                        'original_name' => $file->getClientOriginalName(),
-                        'path'          => $stored,
-                        'disk'          => $disk,
-                        'mime_type'     => $file->getMimeType(),
-                        'size'          => $file->getSize(),
-                        'title'         => $title,
-                    ]);
+                $upload = UploadFile::query()->create([
+                    'original_name' => $file->getClientOriginalName(),
+                    'path'          => $stored,
+                    'disk'          => $disk,
+                    'mime_type'     => $file->getMimeType(),
+                    'size'          => $file->getSize(),
+                    'title'         => $title,
+                ]);
             } catch (\Throwable $e) {
                 if (isset($stored)) $this->storage->delete($disk, $stored);
                 throw $e;
@@ -82,15 +82,30 @@ class UploaderService implements FileUploaderInterface
         return $filename;
     }
 
-    private function normalizePath(?string $path = null): string
+    private function normalizePath(?string $path = null, array $variables = []): string
     {
         $path = $path ?? '';
-
         $path = str_replace('\\', '/', $path);
-        $path = str_replace(['../', '..'], '', $path);
-        $path = preg_replace('#/+#', '/', $path);
 
-        return collect([config('filemanager.upload_path', 'uploads'), trim($path, '/')])
+        $path = preg_replace('#(\.\.[/\\\\]?)#', '', $path);
+
+        $path = preg_replace('/[^a-zA-Z0-9_\-\/{}]/', '', $path);
+
+        $now = now();
+        $replacements = array_merge([
+            '{Y}' => $now->format('Y'),
+            '{y}' => $now->format('y'),
+            '{m}' => $now->format('m'),
+            '{d}' => $now->format('d'),
+            '{H}' => $now->format('H'),
+            '{i}' => $now->format('i'),
+        ], $variables);
+
+        $basePath = config('filemanager.upload_path', 'uploads');
+
+        $basePath = str_replace(array_keys($replacements), array_values($replacements), $basePath);
+
+        return collect([trim($basePath, '/'), trim($path, '/')])
             ->filter()
             ->implode('/');
     }

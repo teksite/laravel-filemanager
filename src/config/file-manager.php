@@ -3,12 +3,12 @@
 return [
     'routes'      => [
         'web' => [
-            'prefix'      => '/file-manager/',
+            'prefix'      => '/filemanager/',
             'name'        => 'filemanager',
             'middlewares' => ['web'],
         ],
         'api' => [
-            'prefix'      => '/api/file-manager/',
+            'prefix'      => '/api/filemanager/',
             'name'        => 'api.filemanager',
             'middlewares' => [],
         ],

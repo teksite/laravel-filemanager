@@ -31,15 +31,15 @@ class FileManagerServiceProvider extends ServiceProvider
 
     public function registerConfig(): void
     {
-        $configPath = config_path('file-manager.php');
-        $this->mergeConfigFrom(file_exists($configPath) ? $configPath : __DIR__ . '/config/file-manager.php', 'file-manager');
+        $configPath = config_path('filemanager.php');
+        $this->mergeConfigFrom(file_exists($configPath) ? $configPath : __DIR__ . '/config/filemanager.php', 'filemanager');
     }
 
     public function publish(): void
     {
         $this->publishes([
-            __DIR__ . '/config/file-manager.php' => config_path('file-manager.php'),
-        ], '/file-manager');
+            __DIR__ . '/config/filemanager.php' => config_path('filemanager.php'),
+        ], '/filemanager');
     }
 }
 

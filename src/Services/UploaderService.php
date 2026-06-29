@@ -28,19 +28,19 @@ class UploaderService
 
     public function __construct(?string $disk = null)
     {
-        $this->disk = !is_null($disk) ? $disk : config('file-manager.default_store_disk', 'public');
+        $this->disk = !is_null($disk) ? $disk : config('filemanager.default_store_disk', 'public');
 
-        $this->overwrite = config('file-manager.overwrite', false);
+        $this->overwrite = config('filemanager.overwrite', false);
 
-        $this->keepFileName = config('file-manager.keep_file_name', false);
+        $this->keepFileName = config('filemanager.keep_file_name', false);
 
-        $this->slugifyNames = config('file-manager.slugify_names', false);
+        $this->slugifyNames = config('filemanager.slugify_names', false);
 
-        $this->uploadPath = config('file-manager.upload_path', 'uploads');
+        $this->uploadPath = config('filemanager.upload_path', 'uploads');
 
-        $this->namingStrategy = config('file-manager.naming_strategy', 'uuid');
+        $this->namingStrategy = config('filemanager.naming_strategy', 'uuid');
 
-        $this->randomLength = config('file-manager.random_name_length', 32);
+        $this->randomLength = config('filemanager.random_name_length', 32);
     }
 
     public static function make(?string $disk = null): static

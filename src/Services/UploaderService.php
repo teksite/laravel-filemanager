@@ -4,6 +4,7 @@ namespace Teksite\FileManager\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Teksite\FileManager\Contracts\FileUploaderInterface;
 use Teksite\FileManager\DTO\UploadOptions;
 use Teksite\FileManager\Events\FileUploaded;
@@ -19,38 +20,78 @@ class UploaderService implements FileUploaderInterface
     /**
      * @throws \Throwable
      */
-    public function upload(UploadedFile $file, UploadOptions|array $options): UploadFile
+    public function upload(UploadedFile $file, UploadOptions|array $options, ?string $title = null): UploadFile
     {
-
         event(new FileUploading($file));
-        return DB::transaction(function () use ($file, $options) {
-            $optionsArray = $options instanceof UploadOptions ? $options->toArray() : $options;
-            $disk = $optionsArray['disk'] ?? config('filemanager.disk', 'public');
 
-            if (!in_array($disk, array_keys(config('filesystems.disks', [])))) throw  new InvalidDiskException();
-            $strategy = FileNameResolver::resolve();
+        return DB::transaction(function () use ($title, $file, $options) {
+
+            $options = $options instanceof UploadOptions ? $options : UploadOptions::fromArray($options);
+
+            $disk = $options->disk;
+
+            if (!array_key_exists($disk, config('filesystems.disks', []))) throw new InvalidDiskException();
+
+
+            $strategy = FileNameResolver::resolve($options->strategy, ['slugify' => $options->slugify, 'length' => $options->length]);
+
             $name = $strategy->generate($file);
 
             $extension = $file->extension();
 
-            $fullName = "{$name}.{$extension}";
+            $path = $this->normalizePath($options->path);
 
-            $path = trim(config('filemanager.upload_path') . '/' . $optionsArray['path'], '/');
+            $fullName = $this->resolveName($name, $extension, $path, $disk, $options->overwrite);
 
-            $stored = $this->storage->save($file, $disk, $path, $fullName);
+            try {
+                $stored = $this->storage->save($file, $disk, $path, $fullName);
+                if (!$stored) throw new FileUploadException();
 
-            $upload = UploadFile::query()->create([
-                'original_name' => $file->getClientOriginalName(),
-                'path'          => $stored,
-                'disk'          => $disk,
-                'mime_type'     => $file->getMimeType(),
-                'size'          => $file->getSize(),
-            ]);
+                $upload =UploadFile::query()->create([
+                        'original_name' => $file->getClientOriginalName(),
+                        'path'          => $stored,
+                        'disk'          => $disk,
+                        'mime_type'     => $file->getMimeType(),
+                        'size'          => $file->getSize(),
+                        'title'         => $title,
+                    ]);
+            } catch (\Throwable $e) {
+                if (isset($stored)) $this->storage->delete($disk, $stored);
 
+                throw $e;
+            }
             event(new FileUploaded($upload));
-
             return $upload;
+        });
+    }
+
+    private function resolveName(string $name, string $extension, string $path, $disk, ?bool $overwrite = null): string
+    {
+        $shouldOverWrite = is_null($overwrite) ? config('filemanager.overwrite', false) : $overwrite;
+
+        if ($shouldOverWrite) return "$name.$extension";
+
+        $counter = 1;
+
+        $filename = "{$name}.{$extension}";
+
+        while (Storage::disk($disk)->exists("{$path}/{$filename}")) {
+            $filename = "{$name}-{$counter}.{$extension}";
+            $counter++;
         }
-        );
+        return $filename;
+    }
+
+    private function normalizePath(?string $path = null): string
+    {
+        $path = $path ?? '';
+
+        $path = str_replace('\\', '/', $path);
+        $path = str_replace(['../', '..'], '', $path);
+        $path = preg_replace('#/+#', '/', $path);
+
+        return collect([config('filemanager.upload_path', 'uploads'), trim($path, '/')])
+            ->filter()
+            ->implode('/');
     }
 }

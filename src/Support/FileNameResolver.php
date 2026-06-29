@@ -3,9 +3,6 @@
 namespace Teksite\FileManager\Support;
 
 use Teksite\FileManager\Contracts\FileNameGeneratorInterface;
-use Teksite\FileManager\Strategies\OriginalFileNameStrategy;
-use Teksite\FileManager\Strategies\RandomFileNameStrategy;
-use Teksite\FileManager\Strategies\TimestampFileNameStrategy;
 use Teksite\FileManager\Strategies\UUIDFileNameStrategy;
 
 
@@ -21,7 +18,9 @@ class FileNameResolver
         ]);
         $options ??= [];
 
-        $class =$strategies[$strategy] ?? UUIDFileNameStrategy::class;
+        $strategy ??= config('filemanager.default_naming_strategy', 'uuid');
+
+        $class = $strategies[$strategy] ?? UUIDFileNameStrategy::class;
 
         return app($class, $options);
     }

@@ -10,7 +10,7 @@ class RandomFileNameStrategy implements FileNameGeneratorInterface
 {
     public function generate(UploadedFile $file , ?array $options = null): string
     {
-        $length = $options['length'] ?? $options[0] ??  config('filemanager.random_length', 32);
+        $length = $options['length'] ??  config('filemanager.random_length', 32);
         return Str::random($length);
     }
 }

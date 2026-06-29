@@ -14,39 +14,26 @@ return [
         ],
     ],
     'hiddenFiles' => true,
-
     'diskList' => ['public'],
-
     'paginate' => 50,
 
     'maxUploadFileSize' => null,
-
-
     'allowFileTypes' => [],
 
 
     'default_store_disk' => 'public',
-
-    'keep_file_name' => false,
-
-    'slugify_names' => true,
-
+    'slugify_name' => true,
     'overwrite' => false,
-
     'upload_path' => 'uploads',
-
     'naming_strategy' => [
         'random'    => \Teksite\FileManager\Strategies\RandomFileNameStrategy::class,
         'timestamp' => \Teksite\FileManager\Strategies\TimestampFileNameStrategy::class,
         'original'  => \Teksite\FileManager\Strategies\OriginalFileNameStrategy::class,
         'uuid'      => \Teksite\FileManager\Strategies\UUIDFileNameStrategy::class,
-    ], // uuid ,timestamp ,random
-
+    ],
+    'default_naming_strategy' => 'uuid',
     'random_name_length' => 32,
-
     'delete_file_with_model' => true,
-
-    'store_hash' => true,
 
 
 ];

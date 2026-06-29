@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'routes' => [
+    'routes'      => [
         'web' => [
             'prefix'      => '/file-manager/',
             'name'        => 'filemanager',
@@ -17,14 +17,12 @@ return [
 
     'diskList' => ['public'],
 
-    'paginate'=>50,
+    'paginate' => 50,
 
     'maxUploadFileSize' => null,
 
 
     'allowFileTypes' => [],
-
-
 
 
     'default_store_disk' => 'public',
@@ -37,7 +35,7 @@ return [
 
     'upload_path' => 'uploads',
 
-    'naming_strategy' => 'uuid',
+    'naming_strategy' => 'uuid', // uuid ,timestamp ,random
 
     'random_name_length' => 32,
 

@@ -2,197 +2,193 @@
 
 namespace Teksite\FileManager\Services;
 
-use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 use Teksite\FileManager\Models\UploadFile;
 
 class UploaderService
 {
-    private string $disk;
+    protected string $disk;
 
-    public function __construct(string $disk = 'public')
+    protected bool $overwrite;
+
+    protected bool $keepFileName;
+
+    protected bool $slugifyNames;
+
+    protected string $uploadPath;
+
+    protected string $namingStrategy;
+
+    protected int $randomLength;
+
+    public function __construct(?string $disk = null)
     {
-        if (!in_array($disk, array_keys(config('filesystems.disks', [])))) throw new \InvalidArgumentException('the selected driver is not set in filesystems.disks config');
-        $this->disk = $disk;
+        $this->disk = !is_null($disk) ? $disk : config('file-manager.default_store_disk', 'public');
+
+        $this->overwrite = config('file-manager.overwrite', false);
+
+        $this->keepFileName = config('file-manager.keep_file_name', false);
+
+        $this->slugifyNames = config('file-manager.slugify_names', false);
+
+        $this->uploadPath = config('file-manager.upload_path', 'uploads');
+
+        $this->namingStrategy = config('file-manager.naming_strategy', 'uuid');
+
+        $this->randomLength = config('file-manager.random_name_length', 32);
     }
 
-    /**
-     * Make instance and set pre-configs
-     */
-    public static function resolve(string $disk = 'public'): UploaderService
+    public static function make(?string $disk = null): static
     {
-        return (new UploaderService($disk));
+        return new static($disk);
     }
 
-    /**
-     * Set driver
-     */
-    public function driver(string $disk = 'public'): static
+    public function disk(string $disk): static
     {
         $this->disk = $disk;
         return $this;
     }
 
-
-    public function upload(UploadedFile $file, null|int|string $customName = null, bool $overwrite = false, ?string $path = null, ?string $title = null): false|UploadFile
+    public function overwrite(bool $status = false): static
     {
-        $originalName = $file->getClientOriginalName();
-        $preparedPath = $this->preparePath($path);
-        $mimeType = $file->getMimeType();
-        $size = $file->getSize();
-
-        $preparedFileName = $this->prepareFileName($preparedPath, $originalName, $customName, $overwrite);
-        $savedFilePath = $this->storeInDisk($file, $preparedPath, $preparedFileName, $overwrite);
-
-        if (!$savedFilePath) return false;
-
-        $model = $this->storeInDatabase($originalName, $savedFilePath, $mimeType, $size, $title, $overwrite);
-        if ($model) return $model;
-
-        $this->removeFromDisk($savedFilePath);
-        return false;
-
+        $this->overwrite = $status;
+        return $this;
     }
 
-    /**
-     * @param string $path
-     * @param string $fileName
-     * @param int|string|null $customName
-     * @param bool $overwrite
-     * @return string
-     */
-    public function prepareFileName(string $path, string $fileName, null|int|string $customName = null, bool $overwrite = false): string
+    public function keepFileName(bool $status = true): static
     {
-
-        $extension = pathinfo($fileName, PATHINFO_EXTENSION);
-        $baseName = match (true) {
-            $customName === -1   => Str::uuid()->toString(),
-            $customName !== null => $customName,
-            default              => pathinfo($fileName, PATHINFO_FILENAME)
-        };
-        $fileName = "{$baseName}.{$extension}";
-
-        if ($overwrite) return $fileName;
-
-        $appendix = 1;
-        while (Storage::disk($this->disk->value)->exists("{$path}/{$fileName}")) {
-            $fileName = "{$baseName}_{$appendix}.{$extension}";
-            $appendix++;
-        }
-        return $fileName;
+        $this->keepFileName = $status;
+        return $this;
     }
 
-
-    /**
-     * @param string|null $path
-     * @return string
-     */
-    protected function preparePath(?string $path = null): string
+    public function enableSlugifyName(bool $status = true): static
     {
-        $dir = empty($path)
-            ? 'uploads/' . Carbon::now()->format('Y/m/d')
-            : 'uploads/' . trim($path, '/');
-
-        $storage = Storage::disk($this->disk->value);
-        if (!$storage->exists($dir)) $storage->makeDirectory($dir);
-        return $dir;
+        $this->slugifyNames = $status;
+        return $this;
     }
 
-
-    /**
-     * @param UploadedFile $file
-     * @param string $path
-     * @param string $name
-     * @param bool $overwrite
-     * @return false|string
-     */
-    public function storeInDisk(UploadedFile $file, string $path, string $name, bool $overwrite = false): false|string
+    public function namingStrategy(string $strategy = 'uuid'): static
     {
+        $this->namingStrategy = $strategy;
+        return $this;
+    }
+
+    public function randomLength(int $length = 32): static
+    {
+        $this->randomLength = $length;
+        return $this;
+    }
+
+    public function uploadPath(string $path = 'uploads'): static
+    {
+        $this->slugifyNames = $path;
+        return $this;
+    }
+
+    public function upload(UploadedFile $file, ?string $path = null, ?string $title = null): UploadFile|false
+    {
+        DB::beginTransaction();
+
         try {
-            $fullPath = "{$path}/{$name}";
-            $disk = Storage::disk($this->disk->value);
-            if (!$overwrite && $disk->exists($fullPath)) return $fullPath;
-            $disk->putFileAs($path, $file, $name);
-            return $fullPath;
-        } catch (\Throwable $e) {
-            Log::error($e->getMessage());
-            return false;
-        }
-    }
 
-    /**
-     * @param string $originalName
-     * @param string $path
-     * @param string $mimeType
-     * @param string|int $size
-     * @param string|null $title
-     * @param bool $overWrite
-     * @return false|UploadFile
-     */
-    public function storeInDatabase(string $originalName, string $path, string $mimeType, string|int $size, ?string $title = null, bool $overWrite = false): false|UploadFile
-    {
-        try {
-            $attributes = [
-                'path'      => $path,
-                'disk'      => $this->disk->value,
-                'mime_type' => $mimeType,
-            ];
+            $directory = $this->prepareDirectory($path);
+            $filename = $this->generateFilename($file, $directory);
 
-            $values = [
-                'original_name' => $originalName,
+            $storedPath = Storage::disk($this->disk)->putFileAs($directory, $file, $filename);
+
+            if (!$storedPath) throw new \Exception('File could not be stored');
+
+            $model = UploadFile::query()->create([
+                'original_name' => $file->getClientOriginalName(),
                 'title'         => $title,
-                'size'          => $size,
-            ];
+                'path'          => $storedPath,
+                'disk'          => $this->disk,
+                'mime_type'     => $file->getMimeType(),
+                'size'          => $file->getSize(),
+                'extension'     => $file->extension(),
+                'hash'          => md5_file($file->getRealPath()),
+            ]);
 
-            return $overWrite
-                ? UploadFile::query()->updateOrCreate($attributes, $values)
-                : UploadFile::query()->create($attributes + $values);
+            DB::commit();
+            return $model;
+
         } catch (\Throwable $e) {
-            Log::error($e->getMessage());
+            DB::rollBack();
+
+            Log::error('[FileManager] ' . $e->getMessage(), ['trace' => $e->getTraceAsString(),]);
+
+            if (isset($storedPath)) {
+                Storage::disk($this->disk)->delete($storedPath);
+            }
+
             return false;
         }
     }
 
-    /**
-     * @param UploadFile|string $uploadFile
-     * @param DiskType|null $disk
-     * @return bool
-     */
-    public function remove(UploadFile|string $uploadFile, null|DiskType $disk = null): bool
+    protected function prepareDirectory(?string $path): string
     {
-        $file = $uploadFile instanceof UploadFile
-            ? $uploadFile
-            : UploadFile::query()->where('disk', $disk ?? $this->disk->value)->where('id', $uploadFile)->first();
-
-        if (!$file) return false;
-        return $file->delete();
+        return trim($this->uploadPath . '/' . ($path ?: Carbon::now()->format('Y/m/d')), '/');
     }
 
-    /**
-     * @param string $path
-     * @param DiskType|null $disk
-     * @return bool
-     */
-    public function removeFromDisk(string $path, null|DiskType $disk = null): bool
+    protected function generateFilename(UploadedFile $file, string $directory): string
     {
-        return Storage::disk($disk ?? $this->disk->value)->delete($path);
+        $extension = $file->extension();
+
+        $name = $this->resolveBaseName($file);
+
+        $filename = "{$name}.{$extension}";
+
+        if ($this->overwrite) return $filename;
+
+        return $this->resolveUniqueFilename($directory, $name, $extension);
     }
 
-    /**
-     * @param UploadFile|string $uploadFile
-     * @return bool|null
-     */
-    public function removeFromDatabase(UploadFile|string $uploadFile): bool|null
+    protected function resolveBaseName(UploadedFile $file): string
     {
-        $file = $uploadFile instanceof UploadFile
-            ? $uploadFile
-            : UploadFile::query()->where('disk', $disk ?? $this->disk->value)->where('id', $uploadFile)->first();
+        if (!$this->keepFileName) {
+            return match ($this->namingStrategy) {
+                'timestamp' => now()->timestamp,
+                'random'    => Str::random($this->randomLength),
+                default     => Str::uuid()
+            };
+        }
+        $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 
-        if (!$file) return false;
-
-        return $file?->delete();
+        return $this->slugifyNames ? Str::slug($name) : $name;
     }
+
+    protected function resolveUniqueFilename(string $directory, string $name, string $extension): string
+    {
+        $counter = 1;
+
+        $filename = "{$name}.{$extension}";
+
+        while (Storage::disk($this->disk)->exists("{$directory}/{$filename}")) {
+            $filename = "{$name}-{$counter}.{$extension}";
+            $counter++;
+        }
+        return $filename;
+    }
+
+    public function delete(UploadFile|string $file): bool
+    {
+        $model = $file instanceof UploadFile ? $file : UploadFile::find($file);
+
+        if (!$model) {
+            return false;
+        }
+
+        DB::transaction(function () use ($model) {
+            Storage::disk($model->disk)->delete($model->path);
+            $model->delete();
+        });
+
+        return true;
+    }
+
 }

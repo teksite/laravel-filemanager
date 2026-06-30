@@ -4,9 +4,11 @@ namespace Teksite\FileManager\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Teksite\FileManager\Contracts\FileUploaderInterface;
 use Teksite\FileManager\DTO\UploadOptions;
+use Teksite\FileManager\Events\FileDeleted;
 use Teksite\FileManager\Events\FileDeleting;
 use Teksite\FileManager\Events\FileUploaded;
 use Teksite\FileManager\Events\FileUploading;
@@ -59,6 +61,7 @@ class UploaderService implements FileUploaderInterface
                 ]);
             } catch (\Throwable $e) {
                 if (isset($stored)) $this->storage->delete($disk, $stored);
+                Log::error($e);
                 throw $e;
             }
             event(new FileUploaded($upload));
@@ -70,18 +73,33 @@ class UploaderService implements FileUploaderInterface
     public function delete(UploadFile $file): ?bool
     {
         event(new FileDeleting($file));
-
         try {
             $result = $file->delete();
         } catch (\Throwable $e) {
-            if (isset($stored)) $this->storage->delete($disk, $stored);
-            throw $e;
+            Log::error($e);
+            return false;
         }
-        event(new FileUploaded($file));
-
+        event(new FileDeleted($file));
         return $result;
 
     }
+
+
+    public function deleteByPath(string $path, string $disk): ?bool
+    {
+
+        try {
+            $this->storage->delete($disk, $path);
+            UploadFile::query()->where('path', $path)->where('disk', $disk)->delete();
+            return true;
+        } catch (\Throwable $e) {
+            Log::error($e);
+            return false;
+        }
+
+
+    }
+
 
     private function resolveName(string $name, string $extension, string $path, $disk, ?bool $overwrite = null): string
     {
@@ -91,7 +109,7 @@ class UploaderService implements FileUploaderInterface
 
         $counter = 1;
         $filename = "{$name}.{$extension}";
-        while (Storage::disk($disk)->exists("{$path}/{$filename}")) {
+        while ($this->storage->exists($disk , "{$path}/{$filename}")) {
             $filename = "{$name}-{$counter}.{$extension}";
             $counter++;
         }

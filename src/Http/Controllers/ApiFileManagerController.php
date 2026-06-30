@@ -4,6 +4,7 @@ namespace Teksite\FileManager\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Teksite\FileManager\DTO\UploadOptions;
+use Teksite\FileManager\Http\Requests\ApiDeleteFilePathRequest;
 use Teksite\FileManager\Http\Requests\ApiUploadFileRequest;
 use Teksite\FileManager\Http\Resources\FileCollection;
 use Teksite\FileManager\Http\Resources\FileResource;
@@ -15,7 +16,10 @@ class ApiFileManagerController
 
     public function __construct(protected UploaderService $uploader) {}
 
-    public function index(Request $request) {}
+    public function index(Request $request) {
+
+        //Todo Add index
+    }
 
     public function show(UploadFile $file)
     {
@@ -72,9 +76,22 @@ class ApiFileManagerController
         }
     }
 
-    public function deleteByPath($file)
+    public function deleteByPath(ApiDeleteFilePathRequest $request)
     {
-
+        try {
+            $this->uploader->deleteByPath($request->path , $request->disk);
+            return response()->json([
+                'success' => true,
+                'message' => 'File deleted successfully',
+                'file'    => null,
+            ], 200);
+        } catch (\Exception $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => 'deleting File failed',
+                'errors'  => $exception->getMessage(),
+            ], 500);
         }
+
     }
 }

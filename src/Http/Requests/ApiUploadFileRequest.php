@@ -10,14 +10,13 @@ use Illuminate\Validation\Validator;
 class ApiUploadFileRequest extends FormRequest
 {
 
-
     public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
         $exception = $validator->getException();
         $exc = (new $exception($validator))->errorBag($this->errorBag);
 
         return throw new HttpResponseException(response()->json([
-            'message' => $exc->getMessage(),
+            'message' => trans('failed to upload the file'),
             'errors'  => $exc->errors(),
             'status'  => 422,
             'data'    => [],
@@ -83,15 +82,15 @@ class ApiUploadFileRequest extends FormRequest
         $file = $this->file('file');
         $sizeKB = $file->getSize() / 1024;
 
-        $minSize = config('filemanager.max_file_size', null);
+        $minSize = config('filemanager.min_file_size', null);
         if ($minSize !== null && $sizeKB < $minSize) {
-            $validator->errors()->add('file', __('min allowed file size is {size}', ['size' => $minSize]));
+            $validator->errors()->add('file', trans('min allowed file size is :size KB', ['size' => $minSize]));
             return;
         }
 
         $maxSize = config('filemanager.max_file_size', null);
         if ($maxSize !== null && $sizeKB > $maxSize) {
-            $validator->errors()->add('file', __('max allowed file size is {size}', ['size' => $maxSize]));
+            $validator->errors()->add('file', trans('max allowed file size is :size KB', ['size' => $maxSize]));
             return;
         }
 
@@ -112,7 +111,7 @@ class ApiUploadFileRequest extends FormRequest
         $isValid = in_array($mime, $allowedTypes) || in_array($ext, $allowedTypes);
 
         if (!$isValid) {
-            $validator->errors()->add("file", __("This file type (:attribute) is not allowed.", [':attribute' => "$mime|$ext"]));
+            $validator->errors()->add("file", trans("This file type (:attribute) is not allowed.", [':attribute' => "$mime|$ext"]));
             return;
         }
 
@@ -133,7 +132,7 @@ class ApiUploadFileRequest extends FormRequest
         $isForbidden = in_array($mime, $forbiddenTypes) || in_array($ext, $forbiddenTypes);
 
         if ($isForbidden) {
-            $validator->errors()->add("file", __("This file type (:attribute) is not allowed.", [':attribute' => "$mime|$ext"]));
+            $validator->errors()->add("file", trans("This file type (:attribute) is not allowed.", [':attribute' => "$mime|$ext"]));
             return;
 
         }

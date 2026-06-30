@@ -40,7 +40,7 @@ return [
 
     'diskList' => ['public'],                        // Allowed filesystem disks
 
-    'paginate'          => 50,                       // Default pagination size
+    'paginate' => 50,                       // Default pagination size
 
     /*
     |--------------------------------------------------------------------------
@@ -50,11 +50,14 @@ return [
     | Define upload limitations and allowed file types.
     |
     */
-    'maxUploadFileSize' => null,                  // Maximum allowed upload size in kilobytes (null = unlimited)
 
     'allowFileTypes' => [],                       // Allowed mime types or extensions (empty = allow all)
 
     'forbiddenFileTypes' => [],                   // Forbidden mime types or extensions (empty = allow all)
+
+    'max_file_size' => 5,                         // in KB, (null means no restrictions)
+
+    'min_file_size' => null,                      // in KB, (null means no restrictions)
 
     /*
     |--------------------------------------------------------------------------
@@ -102,10 +105,7 @@ return [
     ],
     'default_naming_strategy' => 'uuid',            // Default file naming strategy
 
-    'random_name_length' => 32,                     // Length used for random file names
-
-    'max_file_size'          => null,               // in KiloByte, (null means no restrictions)
-    'min_file_size'          => null,               // in KiloByte, (null means no restrictions)
+    'random_name_length'     => 32,                     // Length used for random file names
 
     /*
     |--------------------------------------------------------------------------

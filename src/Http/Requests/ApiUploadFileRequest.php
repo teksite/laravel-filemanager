@@ -9,26 +9,6 @@ use Illuminate\Validation\Rule;
 
 class ApiUploadFileRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
-    public function rules(): array
-    {
-        return [
-
-            'file'  => ['required', 'file',],
-            'disk'  => ['nullable', 'string', Rule::in(array_keys(config('filesystems.disks', [])))],
-            'title' => ['nullable', 'string', 'max:255'],
-            'path'  => ['nullable', 'string'],
-
-            'strategy'  => ['nullable', 'string', Rule::in(array_keys(config('filemanager.naming_strategy', [])))],
-            'overwrite' => ['sometimes', 'boolean'],
-            'slugify'   => ['sometimes', 'boolean'],
-            'length'    => ['nullable', 'integer', 'min:1', 'max:64'],
-        ];
-    }
 
 
     public function failedValidation(Validator $validator)
@@ -64,4 +44,30 @@ class ApiUploadFileRequest extends FormRequest
             'slugify'   => filter_var($this->slugify, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
         ]);
     }
+
+
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+
+            'file'  => ['required', 'file',],
+            'disk'  => ['nullable', 'string', Rule::in(array_keys(config('filesystems.disks', [])))],
+            'title' => ['nullable', 'string', 'max:255'],
+            'path'  => ['nullable', 'string'],
+
+            'strategy'  => ['nullable', 'string', Rule::in(array_keys(config('filemanager.naming_strategy', [])))],
+            'overwrite' => ['sometimes', 'boolean'],
+            'slugify'   => ['sometimes', 'boolean'],
+            'length'    => ['nullable', 'integer', 'min:1', 'max:64'],
+        ];
+    }
+
+    //Todo add after to validate allowd forbiden and size of file
+
+
 }

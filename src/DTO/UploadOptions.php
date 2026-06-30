@@ -61,8 +61,8 @@ class UploadOptions
             'path'      => $this->path,
             'overwrite' => $this->overwrite,
             'slugify'   => $this->slugify,
-            'length'    => $this->length,
             'strategy'  => $this->strategy,
+            'length'    => $this->length,
         ];
     }
 
@@ -74,6 +74,7 @@ class UploadOptions
             strategy: $options['strategy'] ?? null,
             overwrite: $options['overwrite'] ?? false,
             slugify: $options['slugify'] ?? false,
+            length: $options['length'] ?? false,
         );
     }
 }

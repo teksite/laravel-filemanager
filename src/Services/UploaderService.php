@@ -34,9 +34,9 @@ class UploaderService implements FileUploaderInterface
             if (!array_key_exists($disk, config('filesystems.disks', []))) throw new InvalidDiskException();
 
 
-            $strategy = FileNameResolver::resolve($options->strategy, ['slugify' => $options->slugify, 'length' => $options->length]);
+            $strategy = FileNameResolver::resolve($options->strategy);
 
-            $name = $strategy->generate($file);
+            $name = $strategy->generate($file ,['slugify' => $options->slugify, 'length' => $options->length] );
 
             $extension = $file->extension();
 

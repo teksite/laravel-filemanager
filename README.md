@@ -24,6 +24,9 @@ Run the following command in your terminal:
 composer require teksite/laravel-filemanager
 ```
 
+        "league/flysystem-ftp": "^3.0",
+        "league/flysystem-sftp-v3": "^3.0"
+        "league/flysystem-aws-s3-v3": "^3.0"
 
 ## Support
 

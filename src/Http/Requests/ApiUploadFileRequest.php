@@ -99,19 +99,17 @@ class ApiUploadFileRequest extends FormRequest
     protected function checkAllowedMimeTypes(Validator $validator): void
     {
         if ($validator->errors()->isNotEmpty()) return;
-        $allowedTypes = config('filemanager.allowFileTypes', []);
+        $allowedTypes = config('filemanager.allow_file_types', []);
 
-        if (config($allowedTypes) === 0) return;
-
+        if (count($allowedTypes) === 0) return;
         $file = $this->file('file');
 
         $mime = $file->getMimeType();
         $ext = strtolower($file->extension());
 
         $isValid = in_array($mime, $allowedTypes) || in_array($ext, $allowedTypes);
-
         if (!$isValid) {
-            $validator->errors()->add("file", trans("This file type (:attribute) is not allowed.", [':attribute' => "$mime|$ext"]));
+            $validator->errors()->add("file", trans("This file type ( :attribute ) is not allowed.", ['attribute' => "$mime|$ext"]));
             return;
         }
 
@@ -120,9 +118,9 @@ class ApiUploadFileRequest extends FormRequest
     protected function checkForbiddenMimeTypes(Validator $validator): void
     {
         if ($validator->errors()->isNotEmpty()) return;
-        $forbiddenTypes = config('filemanager.forbiddenFileTypes', []);
+        $forbiddenTypes = config('filemanager.forbidden_file_types', []);
 
-        if (config($forbiddenTypes) === 0) return;
+        if (count($forbiddenTypes) === 0) return;
 
         $file = $this->file('file');
 
@@ -132,7 +130,7 @@ class ApiUploadFileRequest extends FormRequest
         $isForbidden = in_array($mime, $forbiddenTypes) || in_array($ext, $forbiddenTypes);
 
         if ($isForbidden) {
-            $validator->errors()->add("file", trans("This file type (:attribute) is not allowed.", [':attribute' => "$mime|$ext"]));
+            $validator->errors()->add("file", trans("This file type ( :attribute ) is forbidden.", ['attribute' => "$mime|$ext"]));
             return;
 
         }

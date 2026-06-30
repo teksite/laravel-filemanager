@@ -43,6 +43,7 @@ class UploaderService implements FileUploaderInterface
             $path = $this->normalizePath($options->path);
 
             $fullName = $this->resolveName($name, $extension, $path, $disk, $options->overwrite);
+
             try {
                 $stored = $this->storage->save($file, $disk, $path, $fullName);
                 if (!$stored) throw new FileUploadException();
@@ -71,7 +72,6 @@ class UploaderService implements FileUploaderInterface
         if ($shouldOverWrite) return "$name.$extension";
 
         $counter = 1;
-
         $filename = "{$name}.{$extension}";
         while (Storage::disk($disk)->exists("{$path}/{$filename}")) {
             $filename = "{$name}-{$counter}.{$extension}";

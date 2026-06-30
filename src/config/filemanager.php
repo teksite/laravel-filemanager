@@ -51,11 +51,11 @@ return [
     |
     */
 
-    'allowFileTypes' => [],                       // Allowed mime types or extensions (empty = allow all)
+    'allow_file_types' => [],                       // Allowed mime types or extensions (empty = allow all)
 
-    'forbiddenFileTypes' => [],                   // Forbidden mime types or extensions (empty = allow all)
+    'forbidden_file_types' => [],                   // Forbidden mime types or extensions (empty = allow all)
 
-    'max_file_size' => 5,                         // in KB, (null means no restrictions)
+    'max_file_size' => null,                      // in KB, (null means no restrictions)
 
     'min_file_size' => null,                      // in KB, (null means no restrictions)
 

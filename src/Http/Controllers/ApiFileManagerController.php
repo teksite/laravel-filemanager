@@ -54,7 +54,7 @@ class ApiFileManagerController
 
     public function uploadByModel(Request $request) {}
 
-    public function delete(UploadFile|string|array $file)
+    public function delete(UploadFile $file)
     {
         $file->delete();
         try {
@@ -69,6 +69,12 @@ class ApiFileManagerController
                 'message' => 'deleting File failed',
                 'errors'  => $exception->getMessage(),
             ], 500);
+        }
+    }
+
+    public function deleteByPath($file)
+    {
+
         }
     }
 }

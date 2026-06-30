@@ -5,6 +5,7 @@ use Teksite\FileManager\Http\Controllers\ApiFileManagerController;
 
 Route::middleware([])->group(function () {
 
+//    Route::delete("/}", [ApiFileManagerController::class, 'deleteByPath'])->name('destroy.path');
     Route::delete("/{file}", [ApiFileManagerController::class, 'delete'])->name('destroy');
     Route::get("/{file}", [ApiFileManagerController::class, 'show'])->name('show');
 //    Route::post("/by-model", [ApiFileManagerController::class, 'uploadByModel'])->name('upload.by.model');

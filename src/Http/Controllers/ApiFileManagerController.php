@@ -58,6 +58,8 @@ class ApiFileManagerController
 
     public function uploadByModel(Request $request) {}
 
+
+
     public function delete(UploadFile $file)
     {
         $file->delete();

@@ -13,17 +13,17 @@ return [
     'routes'      => [
 
         'web' => [
-            'prefix' => '/filemanager/',     // Web route URI prefix
+            'prefix' => '/filemanager/',            // Web route URI prefix
 
-            'name'        => 'filemanager',  // Route name prefix
+            'name' => 'filemanager',         // Route name prefix
 
-            'middlewares' => ['web'],        // Applied middleware stack
+            'middlewares' => ['web'],               // Applied middleware stack
         ],
 
         'api' => [
-            'prefix'      => '/api/filemanager/',   // API route URI prefix
+            'prefix' => '/api/filemanager/',   // API route URI prefix
 
-            'name'        => 'api.filemanager',     // Route name prefix
+            'name' => 'api.filemanager',     // Route name prefix
 
             'middlewares' => [],                    // Applied middleware stack
         ],
@@ -36,11 +36,11 @@ return [
      | Configure file visibility and listing behavior.
      |
      */
-    'hiddenFiles' => true,          // Hide system and hidden files from listings
+    'hiddenFiles' => true,                           // Hide system and hidden files from listings
 
-    'diskList'    => ['public'],    // Allowed filesystem disks
+    'diskList' => ['public'],                        // Allowed filesystem disks
 
-    'paginate'    => 50,            // Default pagination size
+    'paginate'          => 50,                       // Default pagination size
 
     /*
     |--------------------------------------------------------------------------
@@ -50,11 +50,11 @@ return [
     | Define upload limitations and allowed file types.
     |
     */
-    'maxUploadFileSize' => null,         // Maximum allowed upload size in kilobytes (null = unlimited)
+    'maxUploadFileSize' => null,                  // Maximum allowed upload size in kilobytes (null = unlimited)
 
-    'allowFileTypes'    => [],          // Allowed mime types or extensions (empty = allow all)
+    'allowFileTypes' => [],                       // Allowed mime types or extensions (empty = allow all)
 
-    'forbiddenFileTypes'    => [],      // Forbidden mime types or extensions (empty = allow all)
+    'forbiddenFileTypes' => [],                   // Forbidden mime types or extensions (empty = allow all)
 
     /*
     |--------------------------------------------------------------------------
@@ -65,9 +65,9 @@ return [
     |
     */
 
-    'default_store_disk'      => 'public',       // Default storage disk
+    'default_store_disk' => 'public',            // Default storage disk
 
-    'slugify_name'            => true,           // Convert original file names into URL-friendly slugs
+    'slugify_name' => true,                      // Convert original file names into URL-friendly slugs
 
     'overwrite'               => false,          // Replace existing files with identical names
 
@@ -100,9 +100,12 @@ return [
         'original'  => \Teksite\FileManager\Strategies\OriginalFileNameStrategy::class,
         'uuid'      => \Teksite\FileManager\Strategies\UUIDFileNameStrategy::class,
     ],
-    'default_naming_strategy' => 'uuid',          // Default file naming strategy
+    'default_naming_strategy' => 'uuid',            // Default file naming strategy
 
-    'random_name_length'      => 32,             // Length used for random file names
+    'random_name_length' => 32,                     // Length used for random file names
+
+    'max_file_size'          => null,               // in KiloByte, (null means no restrictions)
+    'min_file_size'          => null,               // in KiloByte, (null means no restrictions)
 
     /*
     |--------------------------------------------------------------------------
@@ -113,7 +116,7 @@ return [
     | records are deleted.
     |
     */
-    'delete_file_with_model'  => true,
+    'delete_file_with_model' => true,
 
 
 ];

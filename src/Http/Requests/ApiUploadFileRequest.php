@@ -2,16 +2,16 @@
 
 namespace Teksite\FileManager\Http\Requests;
 
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class ApiUploadFileRequest extends FormRequest
 {
 
 
-    public function failedValidation(Validator $validator)
+    public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
         $exception = $validator->getException();
         $exc = (new $exception($validator))->errorBag($this->errorBag);
@@ -58,7 +58,7 @@ class ApiUploadFileRequest extends FormRequest
             'file'  => ['required', 'file',],
             'disk'  => ['nullable', 'string', Rule::in(array_keys(config('filesystems.disks', [])))],
             'title' => ['nullable', 'string', 'max:255'],
-            'path'  => ['nullable', 'string'],
+            'path'  => ['nullable', 'string', 'max:190'],
 
             'strategy'  => ['nullable', 'string', Rule::in(array_keys(config('filemanager.naming_strategy', [])))],
             'overwrite' => ['sometimes', 'boolean'],
@@ -67,7 +67,75 @@ class ApiUploadFileRequest extends FormRequest
         ];
     }
 
-    //Todo add after to validate allowd forbiden and size of file
+    protected function after(): array
+    {
+        return [
+            fn(Validator $validator) => $this->checkSize($validator),
+            fn(Validator $validator) => $this->checkForbiddenMimeTypes($validator),
+            fn(Validator $validator) => $this->checkAllowedMimeTypes($validator),
+        ];
+    }
 
+    protected function checkSize(Validator $validator): void
+    {
+        if ($validator->errors()->isNotEmpty()) return;
 
+        $file = $this->file('file');
+        $sizeKB = $file->getSize() / 1024;
+
+        $minSize = config('filemanager.max_file_size', null);
+        if ($minSize !== null && $sizeKB < $minSize) {
+            $validator->errors()->add('file', __('min allowed file size is {size}', ['size' => $minSize]));
+            return;
+        }
+
+        $maxSize = config('filemanager.max_file_size', null);
+        if ($maxSize !== null && $sizeKB > $maxSize) {
+            $validator->errors()->add('file', __('max allowed file size is {size}', ['size' => $maxSize]));
+            return;
+        }
+
+    }
+
+    protected function checkAllowedMimeTypes(Validator $validator): void
+    {
+        if ($validator->errors()->isNotEmpty()) return;
+        $allowedTypes = config('filemanager.allowFileTypes', []);
+
+        if (config($allowedTypes) === 0) return;
+
+        $file = $this->file('file');
+
+        $mime = $file->getMimeType();
+        $ext = strtolower($file->extension());
+
+        $isValid = in_array($mime, $allowedTypes) || in_array($ext, $allowedTypes);
+
+        if (!$isValid) {
+            $validator->errors()->add("file", __("This file type (:attribute) is not allowed.", [':attribute' => "$mime|$ext"]));
+            return;
+        }
+
+    }
+
+    protected function checkForbiddenMimeTypes(Validator $validator): void
+    {
+        if ($validator->errors()->isNotEmpty()) return;
+        $forbiddenTypes = config('filemanager.forbiddenFileTypes', []);
+
+        if (config($forbiddenTypes) === 0) return;
+
+        $file = $this->file('file');
+
+        $mime = $file->getMimeType();
+        $ext = strtolower($file->extension());
+
+        $isForbidden = in_array($mime, $forbiddenTypes) || in_array($ext, $forbiddenTypes);
+
+        if ($isForbidden) {
+            $validator->errors()->add("file", __("This file type (:attribute) is not allowed.", [':attribute' => "$mime|$ext"]));
+            return;
+
+        }
+    }
 }

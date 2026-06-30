@@ -8,7 +8,7 @@ use Teksite\FileManager\Strategies\UUIDFileNameStrategy;
 
 class FileNameResolver
 {
-    public static function resolve(?string $strategy = null, ?array $options = null): FileNameGeneratorInterface
+    public static function resolve(?string $strategy = null): FileNameGeneratorInterface
     {
         $strategies ??= config('filemanager.naming_strategy', [
             'random'    => \Teksite\FileManager\Strategies\RandomFileNameStrategy::class,
@@ -16,12 +16,10 @@ class FileNameResolver
             'original'  => \Teksite\FileManager\Strategies\OriginalFileNameStrategy::class,
             'uuid'      => \Teksite\FileManager\Strategies\UUIDFileNameStrategy::class,
         ]);
-        $options ??= [];
-
         $strategy ??= config('filemanager.default_naming_strategy', 'uuid');
 
         $class = $strategies[$strategy] ?? UUIDFileNameStrategy::class;
 
-        return app($class, $options);
+        return app($class);
     }
 }

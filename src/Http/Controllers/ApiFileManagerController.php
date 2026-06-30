@@ -20,7 +20,11 @@ class ApiFileManagerController
     public function show(UploadFile $file)
     {
         $file = FileResource::make($file);
-        return response()->json($file)->setStatusCode(200);
+        return response()->json([
+            'success' => true,
+            'message' => 'done',
+            'file'    => new FileResource($file),
+        ])->setStatusCode(200);
     }
 
 
@@ -29,18 +33,42 @@ class ApiFileManagerController
      */
     public function store(ApiUploadFileRequest $request)
     {
-        $options = UploadOptions::fromArray($request->validated());
+        try {
+            $options = UploadOptions::fromArray($request->validated());
 
-        $file = $this->uploader->upload($request->file('file'), $options , $request->title);
+            $file = $this->uploader->upload($request->file('file'), $options, $request->title);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'File uploaded successfully',
-            'file'    => new FileResource($file),
-        ], 201);
+            return response()->json([
+                'success' => true,
+                'message' => 'File uploaded successfully',
+                'file'    => new FileResource($file),
+            ], 201);
+        } catch (\Exception $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File uploaded failed',
+                'errors'  => $exception->getMessage(),
+            ], 500);
+        }
     }
 
     public function uploadByModel(Request $request) {}
 
-    public function delete(UploadFile|string|array $file) {}
+    public function delete(UploadFile|string|array $file)
+    {
+        $file->delete();
+        try {
+            return response()->json([
+                'success' => true,
+                'message' => 'File deleted successfully',
+                'file'    => null,
+            ], 200);
+        } catch (\Exception $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => 'deleting File failed',
+                'errors'  => $exception->getMessage(),
+            ], 500);
+        }
+    }
 }

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Teksite\FileManager\Contracts\FileUploaderInterface;
 use Teksite\FileManager\DTO\UploadOptions;
+use Teksite\FileManager\Events\FileDeleting;
 use Teksite\FileManager\Events\FileUploaded;
 use Teksite\FileManager\Events\FileUploading;
 use Teksite\FileManager\Http\Exceptions\FileUploadException;
@@ -36,7 +37,7 @@ class UploaderService implements FileUploaderInterface
 
             $strategy = FileNameResolver::resolve($options->strategy);
 
-            $name = $strategy->generate($file ,['slugify' => $options->slugify, 'length' => $options->length] );
+            $name = $strategy->generate($file, ['slugify' => $options->slugify, 'length' => $options->length]);
 
             $extension = $file->extension();
 
@@ -65,6 +66,23 @@ class UploaderService implements FileUploaderInterface
         });
     }
 
+
+    public function delete(UploadFile $file): ?bool
+    {
+        event(new FileDeleting($file));
+
+        try {
+            $result = $file->delete();
+        } catch (\Throwable $e) {
+            if (isset($stored)) $this->storage->delete($disk, $stored);
+            throw $e;
+        }
+        event(new FileUploaded($file));
+
+        return $result;
+
+    }
+
     private function resolveName(string $name, string $extension, string $path, $disk, ?bool $overwrite = null): string
     {
         $shouldOverWrite = is_null($overwrite) ? config('filemanager.overwrite', false) : $overwrite;
@@ -83,7 +101,7 @@ class UploaderService implements FileUploaderInterface
     private function normalizePath(?string $path = null, array $variables = []): string
     {
         if ($path) {
-            $path= trim($path);
+            $path = trim($path);
             $path = str_replace('\\', '/', $path);
             $path = preg_replace('#(\.\.[/\\\\]?)#', '', $path);
             $path = preg_replace('/[^a-zA-Z0-9_\-\/{}]/', '', $path);

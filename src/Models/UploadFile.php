@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Teksite\FileManager\Observer\UploadFileObserver;
 
 #[ObservedBy([UploadFileObserver::class])]
-#[Fillable(['original_name', 'title', 'path', 'size', 'mime_type', 'disk', 'other'])]
+#[Fillable(['original_name', 'title', 'path', 'size', 'mime_type', 'disk', 'other' ,'user_id'])]
 class UploadFile extends Model
 {
     use HasUlids;
@@ -40,5 +40,10 @@ class UploadFile extends Model
     public function getUrlAttribute(): string
     {
         return Storage::disk($this->disk)->url($this->path);
+    }
+
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(config('auth.providers.users.model'), 'user_id', 'id');
     }
 }

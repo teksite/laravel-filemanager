@@ -39,8 +39,11 @@ class ApiFileManagerController
     {
         try {
             $options = UploadOptions::fromArray($request->validated());
+            $userId = $request->user_id
+                ?? auth('sanctum')->id()
+                ?? auth()->id();
 
-            $file = $this->uploader->upload($request->file('file'), $options, $request->title);
+            $file = $this->uploader->upload($request->file('file'), $options, $request->title , $userId);
 
             return response()->json([
                 'success' => true,

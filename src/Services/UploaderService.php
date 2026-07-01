@@ -24,11 +24,11 @@ class UploaderService implements FileUploaderInterface
     /**
      * @throws \Throwable
      */
-    public function upload(UploadedFile $file, UploadOptions|array $options, ?string $title = null): UploadFile
+    public function upload(UploadedFile $file, UploadOptions|array $options, ?string $title = null, ?int $userId = null): UploadFile
     {
         event(new FileUploading($file));
 
-        return DB::transaction(function () use ($title, $file, $options) {
+        return DB::transaction(function () use ($userId, $title, $file, $options) {
 
             $options = $options instanceof UploadOptions ? $options : UploadOptions::fromArray($options);
 
@@ -58,6 +58,7 @@ class UploaderService implements FileUploaderInterface
                     'mime_type'     => $file->getMimeType(),
                     'size'          => $file->getSize(),
                     'title'         => $title,
+                    'user_id'       => $userId,
                 ]);
             } catch (\Throwable $e) {
                 if (isset($stored)) $this->storage->delete($disk, $stored);
@@ -98,9 +99,6 @@ class UploaderService implements FileUploaderInterface
 
 
     }
-
-
-
 
 
 }

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Teksite\FileManager\Http\Controllers\GetFilesController;
 use Teksite\FileManager\Http\Controllers\DeleteFileApiController;
+use Teksite\FileManager\Http\Controllers\MediaViewController;
 use Teksite\FileManager\Http\Controllers\StoreFileApiController;
 
 Route::middleware([])->group(function () {
@@ -12,6 +13,9 @@ Route::middleware([])->group(function () {
     Route::get("{file}", [GetFilesController::class, 'show'])->name('show');
     Route::post("/", [StoreFileApiController::class, 'store'])->name('store');
     Route::get("/", [GetFilesController::class, 'index'])->name('index');
+
+    Route::get('/modal', [MediaViewController::class, 'getView'])->name('view.get');
+
 
 //    Route::post("/upload-chunk", [ChunkUploaderController::class , 'upload'])->name('upload-chunk');
 

@@ -38,9 +38,9 @@ return [
      */
     'hiddenFiles' => true,                           // Hide system and hidden files from listings
 
-    'diskList' => ['public'],                        // Allowed filesystem disks
+    'disk_list' => ['public'],                               // Allowed filesystem disks ,[] means show all disk
 
-    'paginate' => 50,                       // Default pagination size
+    'per_page' => 50,                                // Default pagination size
 
     /*
     |--------------------------------------------------------------------------

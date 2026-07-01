@@ -40,9 +40,9 @@ return [
 
     'disk_list' => [],                               // Allowed filesystem disks ,[] means show all disk
 
-    'type_list' => ['images' , 'text'],                               // Allowed mime types ,[] means show all file type (image, video , text, audio)
+    'type_list' => ['image' , 'text'],                               // Allowed mime types ,[] means show all file type (image, video , text, audio)
 
-    'per_page' => 50,                                // Default pagination size
+    'per_page' => 5,                                // Default pagination size
 
     /*
     |--------------------------------------------------------------------------

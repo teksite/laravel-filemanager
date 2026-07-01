@@ -1,8 +1,8 @@
 class MediaManager {
     constructor(options = {}) {
-
         this.mode = options.mode ?? 'single';
         this.disks = options.disks ?? [];
+        this.mimeTypes = options.mimes ?? [];
         this.onSelect = options.onSelect ?? (() => {
         });
 
@@ -194,6 +194,11 @@ class MediaManager {
                 .map(disk => `<option value="${disk}">${disk}</option>`)
                 .join('');
 
+        const mimeTypeOptions =
+            this.mimeTypes
+                .map(mimeType => `<option value="${mimeType}">${mimeType}</option>`)
+                .join('');
+
         this.overlay = document.createElement('div');
 
         this.overlay.className = 'filemanager overlay';
@@ -234,19 +239,15 @@ class MediaManager {
         </aside>
 
         <header class="header">
-            <select class="mime-filter">
-                <option value="">
-                    All types
+            <select class="mime-filter" id="mime-filter">
+                  <option value="">
+                    All mimes
                 </option>
-                <option value="image">
-                    Image
-                </option>
-                <option value="video">
-                    Video
-                </option>
+                ${mimeTypeOptions}
+            </select>
             </select>
 
-            <select class="disk-filter">
+            <select class="disk-filter" id="disk-filter">
                 <option value="">
                     All disks
                 </option>
@@ -334,35 +335,15 @@ class MediaManager {
 }
 
 
-document
-    .getElementById(
-        'openMedia'
-    )
-    ?.addEventListener(
-        'click',
-        () => {
+document.getElementById('openMedia')?.addEventListener('click', () => {
+        new MediaManager({
+            mode: 'multi',
+            disks: ['public' , 'local', 's3', 's3-arvan_private', 's3-arvan_public',],
+            mimes: ['image', 'video', 'text'],
+            onSelect: files => {
+                console.log(files);
+            }
+        });
 
-            new MediaManager({
-
-                mode: 'single',
-
-                disks: [
-                    'local',
-                    'public',
-                    's3',
-                    's3-arvan_private',
-                    's3-arvan_public',
-                ],
-
-                onSelect: files => {
-
-                    console.log(
-                        files
-                    );
-
-                }
-
-            });
-
-        }
-    );
+    }
+);

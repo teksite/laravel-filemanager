@@ -5,7 +5,6 @@
             <option value="{{ $mime }}">{{ $mime }}</option>
         @endforeach
     </select>
-
     <select data-disk>
         <option value="">All disks</option>
         @foreach($disks as $disk)

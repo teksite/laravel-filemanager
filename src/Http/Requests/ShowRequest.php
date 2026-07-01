@@ -8,7 +8,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 use Teksite\FileManager\Support\AuthorizeRequestResolver;
 
-class ApiDeleteFilePathRequest extends FormRequest
+class ShowRequest extends FormRequest
 {
 
     public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
@@ -17,7 +17,7 @@ class ApiDeleteFilePathRequest extends FormRequest
         $exc = (new $exception($validator))->errorBag($this->errorBag);
 
         return throw new HttpResponseException(response()->json([
-            'message' => trans('failed to delete the file'),
+            'message' => trans('failed to get the file'),
             'errors'  => $exc->errors(),
             'status'  => 422,
             'data'    => [],
@@ -37,17 +37,23 @@ class ApiDeleteFilePathRequest extends FormRequest
     }
 
 
+
     public function authorize(): bool
     {
-        return AuthorizeRequestResolver::resolve('delete', $this);
+        return AuthorizeRequestResolver::resolve('get_all', $this);
     }
 
     public function rules(): array
     {
         return [
 
-            'path' => ['required', 'string', 'max:255'],
-            'disk' => ['nullable', 'string', Rule::in(array_keys(config('filesystems.disks', [])))],
+            'disk'  => ['nullable', 'string', Rule::in(array_keys(config('filesystems.disks', [])))],
+            'search'    => ['nullable', 'string'],
+            'mime_type' => ['nullable', 'string'],
+            'per_page'=>['nullable', 'integer', 'min:1', 'max:100'],
+
+            'user_id' => 'nullable|exists:users,id',
+
         ];
     }
 

@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
+use Teksite\FileManager\Support\AuthorizeRequestResolver;
 
 class FileIndexRequest extends FormRequest
 {
@@ -16,7 +17,7 @@ class FileIndexRequest extends FormRequest
         $exc = (new $exception($validator))->errorBag($this->errorBag);
 
         return throw new HttpResponseException(response()->json([
-            'message' => trans('failed to get the files'),
+            'message' => trans('failed to get files'),
             'errors'  => $exc->errors(),
             'status'  => 422,
             'data'    => [],
@@ -36,20 +37,19 @@ class FileIndexRequest extends FormRequest
     }
 
 
-
     public function authorize(): bool
     {
-        return true;
+        return AuthorizeRequestResolver::resolve('get_all', $this);
     }
 
     public function rules(): array
     {
         return [
 
-            'disk'  => ['nullable', 'string', Rule::in(array_keys(config('filesystems.disks', [])))],
+            'disk'      => ['nullable', 'string', Rule::in(array_keys(config('filesystems.disks', [])))],
             'search'    => ['nullable', 'string'],
             'mime_type' => ['nullable', 'string'],
-            'per_page'=>['nullable', 'integer', 'min:1', 'max:100'],
+            'per_page'  => ['nullable', 'integer', 'min:1', 'max:100'],
 
             'user_id' => 'nullable|exists:users,id',
 

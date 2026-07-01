@@ -118,5 +118,28 @@ return [
     */
     'delete_file_with_model' => true,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Authorization
+    |--------------------------------------------------------------------------
+    |
+    | Customize authorization logic for package actions.
+    | Each action should point to a class implementing:
+    |
+    | Teksite\FileManager\Contracts\AuthorizationInterface
+    |
+    */
+
+    'authorization' => [
+
+        'upload' => \Teksite\FileManager\Http\Requests\Authorization\CanUpload::class,
+
+        'get_one' =>\Teksite\FileManager\Http\Requests\Authorization\CanGetOne::class,
+
+        'get_all' =>\Teksite\FileManager\Http\Requests\Authorization\CanGetAll::class,
+
+        'delete' => \Teksite\FileManager\Http\Requests\Authorization\CanDelete::class,
+    ],
+
 
 ];

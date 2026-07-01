@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
+use Teksite\FileManager\Support\AuthorizeRequestResolver;
 
 class ApiUploadFileRequest extends FormRequest
 {
@@ -47,7 +48,7 @@ class ApiUploadFileRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return true;
+        return AuthorizeRequestResolver::resolve('upload', $this);
     }
 
     public function rules(): array

@@ -5,7 +5,6 @@ namespace Teksite\FileManager\Services;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Teksite\FileManager\Contracts\FileUploaderInterface;
 use Teksite\FileManager\DTO\UploadOptions;
 use Teksite\FileManager\Events\FileDeleted;
@@ -82,7 +81,6 @@ class UploaderService implements FileUploaderInterface
         }
         event(new FileDeleted($file));
         return $result;
-
     }
 
 
@@ -96,8 +94,6 @@ class UploaderService implements FileUploaderInterface
             Log::error($e);
             return false;
         }
-
-
     }
 
 

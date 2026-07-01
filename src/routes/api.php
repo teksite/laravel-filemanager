@@ -9,10 +9,8 @@ Route::middleware([])->group(function () {
     Route::delete("{file}", [ApiFileManagerController::class, 'delete'])->name('destroy');
     Route::get("{file}", [ApiFileManagerController::class, 'show'])->name('show');
     Route::post("/", [ApiFileManagerController::class, 'store'])->name('store');
+    Route::get("/", [ApiFileManagerController::class, 'index'])->name('index');
 
-
-//    Route::get("/", [ApiFileManagerController::class, 'index'])->name('index');
-//    Route::post("/by-model", [ApiFileManagerController::class, 'uploadByModel'])->name('upload.by.model');
 //    Route::post("/upload-chunk", [ChunkUploaderController::class , 'upload'])->name('upload-chunk');
 
 });

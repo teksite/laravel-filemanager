@@ -16,9 +16,9 @@ class ApiFileManagerController
 
     public function __construct(protected UploaderService $uploader) {}
 
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
 
-        //Todo Add index
     }
 
     public function show(UploadFile $file)
@@ -39,6 +39,7 @@ class ApiFileManagerController
     {
         try {
             $options = UploadOptions::fromArray($request->validated());
+
             $userId = $request->user_id
                 ?? auth('sanctum')->id()
                 ?? auth()->id();
@@ -59,14 +60,10 @@ class ApiFileManagerController
         }
     }
 
-    public function uploadByModel(Request $request) {}
-
-
-
     public function delete(UploadFile $file)
     {
-        $file->delete();
         try {
+            $this->uploader->delete($file);
             return response()->json([
                 'success' => true,
                 'message' => 'File deleted successfully',

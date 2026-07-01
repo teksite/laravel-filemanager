@@ -1,112 +1,530 @@
 class MediaManager {
+
     constructor(options = {}) {
-        this.page = 1;
+
+        this.mode = options.mode ?? 'single';
+
+        this.cursor = null;
         this.loading = false;
-        this.selected = [];
-        this.mode = options.mode || 'single';
+        this.hasMore = true;
+
         this.mimeType = null;
         this.disk = null;
 
+        this.selected = [];
+
+        this.container = null;
+        this.grid = null;
+        this.overlay = null;
+
+        this.abortController = null;
+
         this.init();
     }
-    init() {
+
+
+    async init() {
         this.renderPopup();
-        this.load();
+        await this.load();
     }
 
-    async load() {
+
+    async load(reset = false) {
+
         if (this.loading) return;
-        this.loading = true;
 
-        const res = await fetch(`/api/filemanager?type=cursor=cursor&$cursor=${this.page || ''}&mime_type=${this.mimeType || ''}&disk=${this.disk || ''}`);
+        try {
+            this.loading = true;
+            this.toggleLoader(true);
 
-        const data = await res.json();
-        const files = data?.files ?? [];
-        const hasMore = data?.meta?.has_more ?? false;
-        const nextCursor = data?.meta?.next_cursor ?? null;
+            if (reset) {
+                this.cursor = null;
+                this.hasMore = true;
+                this.grid.innerHTML = '';
+            }
 
-        this.renderGrid(files);
-        if (hasMore && nextCursor) {
-            this.page = nextCursor
+            if (!this.hasMore) return;
+
+            if (this.abortController) {
+                this.abortController.abort();
+            }
+
+            this.abortController = new AbortController();
+
+
+            const query = new URLSearchParams({
+                type: 'cursor',
+                cursor: this.cursor || '',
+                mime_type: this.mimeType || '',
+                disk: this.disk || ''
+            });
+
+
+            const response = await fetch(
+                `/api/filemanager?${query}`,
+                {
+                    signal: this.abortController.signal
+                }
+            );
+
+
+            if (!response.ok) {
+                throw new Error(`Request failed (${response.status})`);
+            }
+
+
+            const data = await response.json();
+
+            const files = data?.files ?? [];
+
+            this.cursor = data?.meta?.next_cursor ?? null;
+
+            this.hasMore = data?.meta?.has_more ?? false;
+
+            this.renderGrid(files);
+
+            this.updateLoadButton();
+
+        } catch (error) {
+            if (error.name === "AbortError") {
+                return;
+            }
+
+            console.error('MediaManager Error:', error);
+
+            this.showError('Failed to load media files');
+        } finally {
+
+            this.loading = false;
+            this.toggleLoader(false);
         }
-        this.loading = false;
 
     }
 
-    renderGrid(items) {
+    renderGrid(items = []) {
+        const fragment = document.createDocumentFragment();
+
         items.forEach(item => {
-            let div = document.createElement('div');
-            div.className = 'media-card';
-            div.innerHTML = `<div class="media-thumb">${this.renderItem(item)}</div><div class="media-name"> ${item.title}</div>`;
-            div.onclick = () => {
+            const card = this.createMediaCard(item);
+            fragment.appendChild(card);
+        });
+        this.grid.appendChild(fragment);
+    }
 
-                if (this.mode === 'single') {
-                    document.querySelectorAll('.media-card')
-                        .forEach(x => x.classList.remove('selected'));
-                    this.selected = [item];
 
-                    div.classList.add(
-                        'selected'
+    createMediaCard(item) {
+
+        const card = document.createElement('div');
+        card.className = 'media-card';
+        card.innerHTML = `<div class="media-thumb">${this.renderItem(item)}</div>`;
+        card.addEventListener('click', () => this.selectItem(item, card));
+
+        return card;
+
+    }
+
+
+    selectItem(item, element) {
+
+        if (this.mode === "single") {
+            this.grid.querySelectorAll('.media-card.selected')
+                .forEach(x => x.classList.remove('selected'));
+
+            this.selected = [item];
+
+            element.classList.add('selected');
+        } else {
+
+            element.classList.toggle(
+                'selected'
+            );
+
+            const exists =
+                this.selected.find(
+                    x => x.id === item.id
+                );
+
+            if (exists) {
+
+                this.selected =
+                    this.selected.filter(
+                        x => x.id !== item.id
                     );
 
-                } else {
+            } else {
 
-                    div.classList.toggle(
-                        'selected'
-                    );
+                this.selected.push(
+                    item
+                );
+            }
 
+        }
+
+        this.updatePreview(item);
+
+    }
+
+
+    updatePreview(item) {
+
+        this.preview.innerHTML =
+            this.renderItem(item);
+
+        this.titleEl.textContent =
+            item.title || '-';
+
+        this.urlEl.textContent =
+            item.url || '-';
+
+        this.diskEl.textContent =
+            item.disk || '-';
+
+    }
+
+
+    renderItem(item) {
+
+        const type =
+            item?.mime_type
+                ?.split('/')[0]
+                ?.toLowerCase();
+
+
+        switch (type) {
+
+            case 'image':
+
+                return `
+                    <img
+                        src="${item.url}"
+                        alt="${item.title}"
+                        loading="lazy"
+                    >
+                `;
+
+
+            case 'video':
+
+                return `
+                    <video
+                        src="${item.url}"
+                    ></video>
+                `;
+
+
+            case 'audio':
+
+                return `
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 3v18"/>
+                    </svg>
+                `;
+
+
+            case 'text':
+
+                return `
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 6h12"/>
+                    </svg>
+                `;
+
+            default:
+
+                return `
+                    <svg viewBox="0 0 24 24">
+                        <path d="M5 5h14v14H5z"/>
+                    </svg>
+                `;
+        }
+
+    }
+
+
+    updateLoadButton() {
+
+        this.loadMoreBtn.style.display =
+            this.hasMore
+                ? 'block'
+                : 'none';
+
+    }
+
+
+    toggleLoader(show) {
+
+        this.loader.style.display =
+            show
+                ? 'flex'
+                : 'none';
+
+    }
+
+
+    showError(message) {
+
+        const div =
+            document.createElement('div');
+
+        div.className =
+            'media-error';
+
+        div.textContent =
+            message;
+
+        this.grid.prepend(div);
+
+        setTimeout(() => {
+            div.remove();
+        }, 3000);
+
+    }
+
+
+    close() {
+
+        this.abortController?.abort();
+
+        this.overlay.remove();
+
+    }
+
+
+    renderPopup() {
+
+        this.overlay =
+            document.createElement(
+                'div'
+            );
+
+        this.overlay.className =
+            'filemanager overlay';
+
+
+        this.container =
+            document.createElement(
+                'section'
+            );
+
+        this.container.className =
+            'filemanager media-container';
+
+
+        this.container.innerHTML = `
+
+        <aside class="filemanager aside">
+
+            <div class="preview-box">
+                Select media
+            </div>
+
+            <div class="file-info">
+
+                <h3>
+                    File Info
+                </h3>
+
+                <div>
+                    <b>title:</b>
+                    <span class="title">-</span>
+                </div>
+
+                <div>
+                    <b>url:</b>
+                    <span class="url">-</span>
+                </div>
+
+                <div>
+                    <b>disk:</b>
+                    <span class="disk">-</span>
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <header class="filemanager header">
+
+            <select class="mime-filter">
+                <option value="">
+                    All Types
+                </option>
+
+                <option value="image">
+                    Images
+                </option>
+
+                <option value="video">
+                    Videos
+                </option>
+
+                <option value="audio">
+                    Audio
+                </option>
+
+            </select>
+
+        </header>
+
+
+        <div class="media-grid"></div>
+
+
+        <footer class="filemanager footer">
+
+            <div>
+
+                <button class="close-btn">
+                    Close
+                </button>
+
+                <button class="load-more-btn">
+                    Load More
+                </button>
+
+            </div>
+
+
+            <button class="select-btn">
+                Select
+            </button>
+
+        </footer>
+
+
+        <div
+            id="loader"
+            style="display:none"
+        >
+            Loading...
+        </div>
+
+        `;
+
+
+        this.overlay.appendChild(
+            this.container
+        );
+
+        document.body.appendChild(
+            this.overlay
+        );
+
+
+        this.grid =
+            this.container.querySelector(
+                '.media-grid'
+            );
+
+        this.preview =
+            this.container.querySelector(
+                '.preview-box'
+            );
+
+        this.titleEl =
+            this.container.querySelector(
+                '.title'
+            );
+
+        this.urlEl =
+            this.container.querySelector(
+                '.url'
+            );
+
+        this.diskEl =
+            this.container.querySelector(
+                '.disk'
+            );
+
+        this.loader =
+            this.container.querySelector(
+                '#loader'
+            );
+
+        this.loadMoreBtn =
+            this.container.querySelector(
+                '.load-more-btn'
+            );
+
+
+        this.bindEvents();
+
+    }
+
+
+    bindEvents() {
+
+        this.overlay.addEventListener(
+            'click',
+            e => {
+
+                if (
+                    e.target === this.overlay
+                ) {
+                    this.close();
                 }
 
-            };
+            }
+        );
 
-            this.grid.append(div);
 
-        });
-    }
+        this.container
+            .querySelector(
+                '.close-btn'
+            )
+            .addEventListener(
+                'click',
+                () => this.close()
+            );
 
-    renderItem(item){
-        const fileType=(item?.mime_type?.toLowerCase()?.split("/") ?? [])[0]
-        if (fileType === 'image')  return `<img src="${item.url}" alt="${item?.title ?? item?.original_name ?? 'not specified'}" width="300" height="200" />`;
-        if (fileType === 'video')  return `<video src="${item.url}" width="300" height="200" controls></video>`;
-        if (fileType === 'audio')  return `<audio src="${item.url}" controls></audio>`;
-        if (fileType === 'text')  return `<div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="svg-icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024">
-              <path d="M1005.714286 1005.714286H18.285714V18.285714h712.594286L877.714286 164.571429l128 128v713.142857z" fill="#BBCADC"/>
-              <path d="M1024 1024H0V0h738.377143L1024 285.074286zM36.571429 987.428571h950.857142V300.068571L723.382857 36.571429H36.571429z" fill="#97ABC1"/>
-              <path d="M731.428571 0v292.571429h292.571429L731.428571 0z" fill="#97ABC1"/>
-              <path d="M378.88 408.868571a138.605714 138.605714 0 0 1 28.708571-45.714285 128 128 0 0 1 44.434286-29.988572 148.48 148.48 0 0 1 58.148572-10.971428 182.857143 182.857143 0 0 1 69.485714 11.52 130.925714 130.925714 0 0 1 44.617143 28.342857 100.022857 100.022857 0 0 1 24.32 36.571428 103.131429 103.131429 0 0 1 7.314285 36.571429 123.977143 123.977143 0 0 1-7.314285 46.262857 108.434286 108.434286 0 0 1-18.285715 30.902857 117.76 117.76 0 0 1-23.954285 21.942857c-8.777143 6.034286-17.188571 12.068571-24.868572 18.285715a111.542857 111.542857 0 0 0-20.845714 20.662857 59.062857 59.062857 0 0 0-11.337143 29.257143v22.308571h-78.811428v-26.331428a115.017143 115.017143 0 0 1 27.977142-71.131429 148.114286 148.114286 0 0 1 22.308572-20.845714c7.862857-5.851429 14.994286-11.702857 21.577143-18.285715a74.971429 74.971429 0 0 0 16.091428-18.285714 47.725714 47.725714 0 0 0 5.668572-26.331428 53.76 53.76 0 0 0-13.165715-39.862858 50.102857 50.102857 0 0 0-36.571428-12.8 57.6 57.6 0 0 0-27.245714 6.034286 54.857143 54.857143 0 0 0-18.285715 16.457143 70.217143 70.217143 0 0 0-10.971428 23.954286 126.537143 126.537143 0 0 0-3.474286 29.622857h-85.942857a168.411429 168.411429 0 0 1 10.422857-58.148572z m175.177143 251.062858V749.714286h-91.428572v-89.782857z" fill="#FFFFFF"/>
-          </svg>
-      </div>`;
-        return `<div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="svg-icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024">
-              <path d="M1005.714286 1005.714286H18.285714V18.285714h712.594286L877.714286 164.571429l128 128v713.142857z" fill="#BBCADC"/>
-              <path d="M1024 1024H0V0h738.377143L1024 285.074286zM36.571429 987.428571h950.857142V300.068571L723.382857 36.571429H36.571429z" fill="#97ABC1"/>
-              <path d="M731.428571 0v292.571429h292.571429L731.428571 0z" fill="#97ABC1"/>
-              <path d="M378.88 408.868571a138.605714 138.605714 0 0 1 28.708571-45.714285 128 128 0 0 1 44.434286-29.988572 148.48 148.48 0 0 1 58.148572-10.971428 182.857143 182.857143 0 0 1 69.485714 11.52 130.925714 130.925714 0 0 1 44.617143 28.342857 100.022857 100.022857 0 0 1 24.32 36.571428 103.131429 103.131429 0 0 1 7.314285 36.571429 123.977143 123.977143 0 0 1-7.314285 46.262857 108.434286 108.434286 0 0 1-18.285715 30.902857 117.76 117.76 0 0 1-23.954285 21.942857c-8.777143 6.034286-17.188571 12.068571-24.868572 18.285715a111.542857 111.542857 0 0 0-20.845714 20.662857 59.062857 59.062857 0 0 0-11.337143 29.257143v22.308571h-78.811428v-26.331428a115.017143 115.017143 0 0 1 27.977142-71.131429 148.114286 148.114286 0 0 1 22.308572-20.845714c7.862857-5.851429 14.994286-11.702857 21.577143-18.285715a74.971429 74.971429 0 0 0 16.091428-18.285714 47.725714 47.725714 0 0 0 5.668572-26.331428 53.76 53.76 0 0 0-13.165715-39.862858 50.102857 50.102857 0 0 0-36.571428-12.8 57.6 57.6 0 0 0-27.245714 6.034286 54.857143 54.857143 0 0 0-18.285715 16.457143 70.217143 70.217143 0 0 0-10.971428 23.954286 126.537143 126.537143 0 0 0-3.474286 29.622857h-85.942857a168.411429 168.411429 0 0 1 10.422857-58.148572z m175.177143 251.062858V749.714286h-91.428572v-89.782857z" fill="#FFFFFF"/>
-          </svg>
-      </div>`
 
-    }
+        this.loadMoreBtn
+            .addEventListener(
+                'click',
+                () => this.load()
+            );
 
-    renderPopup(){
-        const overall = document.createElement('div');
-        overall.classList.add('filemanager','overlay');
-        document.body.appendChild(overall);
 
-        const container =document.createElement('section');
-        document.body.appendChild('media-container');
+        this.container
+            .querySelector(
+                '.mime-filter'
+            )
+            .addEventListener(
+                'change',
+                e => {
 
-        this.grid=overall;
+                    this.mimeType =
+                        e.target.value;
+
+                    this.load(true);
+
+                }
+            );
 
     }
 
 }
 
 
-const standaloneBtn = document.getElementById('openMedia');
-if (standaloneBtn) {
-    standaloneBtn.onclick = (e) => {
-        e.preventDefault();
-        new MediaManager({mode: 'multi'});
-    }
+const openButton =
+    document.getElementById(
+        'openMedia'
+    );
+
+if (openButton) {
+
+    openButton.addEventListener(
+        'click',
+        e => {
+
+            e.preventDefault();
+
+            new MediaManager({
+                mode: 'multi'
+            });
+
+        }
+    );
+
 }

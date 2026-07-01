@@ -2,6 +2,7 @@
 
 namespace Teksite\FileManager;
 
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Teksite\FileManager\Providers\RouteServiceProvider;
 use Teksite\FileManager\Providers\EventServiceProvider;
@@ -20,6 +21,7 @@ class FileManagerServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publish();
+        $this->bootViews();
     }
 
 
@@ -40,6 +42,40 @@ class FileManagerServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/config/filemanager.php' => config_path('filemanager.php'),
         ], '/filemanager');
+    }
+
+
+    /**
+     * Register views.
+     */
+    protected function bootViews(): void
+    {
+        $filemanager = 'filemanager';
+
+        $viewPath = resource_path('views/filemanager/');
+        $sourcePath = __DIR__ . "/views/";
+
+        $this->publishes([$sourcePath => $viewPath], ['filemanager', $filemanager . '-views']);
+        $this->loadViewsFrom(array_merge($this->publishableViewPaths($filemanager), [$sourcePath]), $filemanager);
+
+        $componentNamespace = 'Teksite\\FileManager\\Views\\';
+
+        Blade::componentNamespace($componentNamespace, $filemanager);
+    }
+
+
+    /**
+     * Get the paths where the module views are published.
+     */
+    protected function publishableViewPaths(string $filemanager): array
+    {
+        $paths = [];
+        foreach (config('view.paths') as $path) {
+            if (is_dir($path . '/' . $filemanager)) {
+                $paths[] = $path . '/' . $filemanager;
+            }
+        }
+        return $paths;
     }
 }
 

@@ -20,17 +20,17 @@ class FileCollection extends ResourceCollection
             'files' =>  FileResource::collection( $this->collection ),
 
             'links' => [
-                'self' => $this->url($this->currentPage()),
+/*                'self' => $this->url($this->currentPage()),
                 'first' => $this->url(1),
                 'last' => $this->url($this->lastPage()),
                 'prev' => $this->previousPageUrl(),
-                'next' => $this->nextPageUrl(),
+                'next' => $this->nextPageUrl(),*/
             ],
             'meta' => [
-                'current_page' => $this->currentPage(),
+/*                'current_page' => $this->currentPage(),
                 'last_page' => $this->lastPage(),
                 'per_page' => $this->perPage(),
-                'total' => $this->total(),
+                'total' => $this->total(),*/
 
                 'has_more'=> $this->hasMorePages(),
                 'next_cursor'=> optional($this->nextCursor())->encode(),

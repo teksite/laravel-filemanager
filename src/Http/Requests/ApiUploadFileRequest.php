@@ -53,6 +53,7 @@ class ApiUploadFileRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'user_id' => 'nullable|exists:users,id',
 
             'file'  => ['required', 'file',],
             'disk'  => ['nullable', 'string', Rule::in(array_keys(config('filesystems.disks', [])))],

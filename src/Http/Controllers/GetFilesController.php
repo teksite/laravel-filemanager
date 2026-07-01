@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Teksite\FileManager\Http\Requests\FileIndexRequest;
 use Teksite\FileManager\Http\Resources\FileCollection;
 use Teksite\FileManager\Http\Resources\FileResource;
+use Teksite\FileManager\Http\Resources\PaginateFileCollection;
 use Teksite\FileManager\Models\UploadFile;
 use Teksite\FileManager\Services\GetFileService;
 
@@ -16,13 +17,17 @@ class GetFilesController
 
     public function index(FileIndexRequest $request)
     {
-        $files = new FileCollection($this->getFiles->execute($request->validated()));
 
-        return response()->json(
-            $files,
-       )->setStatusCode(200);
+        $type = strtolower(trim($request->input('type', 'cursor')));
+        if ($type === 'pagination') {
+            $files = new PaginateFileCollection($this->getFiles->ByPagination($request->validated()));
+            return response()->json($files)->setStatusCode(200);
+        }
 
+        $files = new FileCollection($this->getFiles->ByCursor($request->validated()));
+        return response()->json($files)->setStatusCode(200);
     }
+
 
     public function show(UploadFile $file)
     {

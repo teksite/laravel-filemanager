@@ -9,10 +9,8 @@ class GetFileService
 {
     public function __construct(protected GetFileFilter $filter) {}
 
-    public function execute(array $filters): \Illuminate\Pagination\CursorPaginator
+    private function filtering(array $filters): \Illuminate\Database\Eloquent\Builder
     {
-        $perPage = min($filters['per_page'] ?? config('filemanager.per_page', 50), 100);
-
         $sort = $filters['sort'] ?? '-created_at';
 
         $direction = str_starts_with($sort, '-') ? 'desc' : 'asc';
@@ -21,7 +19,20 @@ class GetFileService
 
         return $this->filter
             ->apply(UploadFile::query(), $filters)
-            ->orderBy($column, $direction)
-            ->cursorPaginate($perPage);
+            ->orderBy($column, $direction);
+
     }
+
+    public function ByCursor(array $filters) :\Illuminate\Pagination\CursorPaginator
+    {
+        $perPage = min($filters['per_page'] ?? config('filemanager.per_page', 50), 100);
+        return $this->filtering($filters)->cursorPaginate($perPage);
+    }
+
+    public function ByPagination(array $filters): \Illuminate\Pagination\LengthAwarePaginator
+    {
+        $perPage = min($filters['per_page'] ?? config('filemanager.per_page', 50), 100);
+        return $this->filtering($filters)->paginate($perPage);
+    }
+
 }

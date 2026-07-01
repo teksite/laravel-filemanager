@@ -1,0 +1,14 @@
+<div class="filemanager overlay" id="fileManagerRoot">
+
+    <section class="media-container" data-fm>
+
+        @include('filemanager::partials.sidebar')
+
+        @include('filemanager::partials.header')
+
+        @include('filemanager::partials.grid')
+
+        @include('filemanager::partials.footer')
+
+    </section>
+</div>

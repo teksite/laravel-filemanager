@@ -13,13 +13,11 @@ use Teksite\FileManager\Services\GetFileService;
 
 class MediaViewController
 {
-
-
     public function getView(FileIndexRequest $request)
     {
-        return view('filemanager.modal', [
-            'disks' => config('filemanager.disks'),
-            'mimes' => config('filemanager.mimes'),
+        return view('filemanager::selector', [
+            'disks' => config('filemanager.disk_list' ,[]),
+            'mimes' => config('filemanager.type_list' ,[]),
         ]);
     }
 }

@@ -50,17 +50,16 @@ class FileManagerServiceProvider extends ServiceProvider
      */
     protected function bootViews(): void
     {
-        $filemanager = 'filemanager';
+        $name = 'filemanager';
 
-        $viewPath = resource_path('views/filemanager/');
-        $sourcePath = __DIR__ . "/views/";
+        $viewPath = resource_path("views/{$name}");
+        $sourcePath = __DIR__ . "/resources/views/";
 
-        $this->publishes([$sourcePath => $viewPath], ['filemanager', $filemanager . '-views']);
-        $this->loadViewsFrom(array_merge($this->publishableViewPaths($filemanager), [$sourcePath]), $filemanager);
+        $this->publishes([$sourcePath => $viewPath,], [$name, "{$name}-views"]);
 
-        $componentNamespace = 'Teksite\\FileManager\\Views\\';
+        $this->loadViewsFrom([$sourcePath, ...$this->publishableViewPaths($name),], $name);
 
-        Blade::componentNamespace($componentNamespace, $filemanager);
+        Blade::componentNamespace('Teksite\\FileManager\\Views\\', $name);
     }
 
 

@@ -25,6 +25,7 @@ class GetFileService
 
     public function ByCursor(array $filters) :\Illuminate\Pagination\CursorPaginator
     {
+
         $perPage = min($filters['per_page'] ?? config('filemanager.per_page', 50), 100);
         return $this->filtering($filters)->cursorPaginate($perPage);
     }

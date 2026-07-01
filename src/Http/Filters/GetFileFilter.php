@@ -10,7 +10,7 @@ class GetFileFilter
     {
         $disks = (array)($filters['disk'] ?? config('filemanager.disk_list', []));
         $search = $filters['search'] ?? null;
-        $mines = $filters['mime_type'] ?? null;
+        $mimeType = $filters['mime_type'] ?? null;
         $userId = $filters['user_id'] ?? null;
         return $query
             ->when(
@@ -24,8 +24,8 @@ class GetFileFilter
                           ->orWhere('original_name', 'like', "%{$search}%");
                 })
             )->when(
-                !!$mines,
-                fn(Builder $q, $mime) => $q->where('mime_type', $mime)
+                !!$mimeType,
+                fn(Builder $q, $mime) => $q->where('mime_type', 'like',"%{$mimeType}%")
             )->when(
                 !!$userId,
                 fn(Builder $q) => $q->where('user_id', $userId)

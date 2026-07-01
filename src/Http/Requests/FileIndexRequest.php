@@ -13,10 +13,9 @@ class FileIndexRequest extends BaseApiRequest
     public function rules(): array
     {
         return [
-
             'disk'      => ['nullable', 'string', Rule::in(array_keys(config('filesystems.disks', [])))],
             'search'    => ['nullable', 'string'],
-            'mime_type' => ['nullable', 'string'],
+            'mime_type' => ['nullable', 'string', ],
             'per_page'  => ['nullable', 'integer', 'min:1', 'max:100'],
 
             'user_id' => 'nullable|exists:users,id',

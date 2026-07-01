@@ -20,6 +20,7 @@ class GetFilesController
     {
 
         $type = strtolower(trim($request->input('type', 'cursor')));
+
         if ($type === 'pagination') {
             $files = new PaginateFileCollection($this->getFiles->ByPagination($request->validated()));
             return response()->json($files)->setStatusCode(200);

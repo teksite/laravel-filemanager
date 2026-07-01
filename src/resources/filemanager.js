@@ -1,27 +1,29 @@
 class MediaManager {
-
     constructor(options = {}) {
 
         this.mode = options.mode ?? 'single';
+        this.disks = options.disks ?? [];
+        this.onSelect = options.onSelect ?? (() => {
+        });
 
         this.cursor = null;
         this.loading = false;
         this.hasMore = true;
 
-        this.mimeType = null;
-        this.disk = null;
+        this.mimeType = '';
+        this.disk = '';
 
         this.selected = [];
 
-        this.container = null;
-        this.grid = null;
-        this.overlay = null;
-
         this.abortController = null;
 
-        this.init();
-    }
+        this.overlay = null;
+        this.container = null;
+        this.grid = null;
 
+        this.init();
+
+    }
 
     async init() {
         this.renderPopup();
@@ -30,9 +32,7 @@ class MediaManager {
 
 
     async load(reset = false) {
-
         if (this.loading) return;
-
         try {
             this.loading = true;
             this.toggleLoader(true);
@@ -44,34 +44,32 @@ class MediaManager {
             }
 
             if (!this.hasMore) return;
-
-            if (this.abortController) {
-                this.abortController.abort();
-            }
+            this.abortController?.abort();
 
             this.abortController = new AbortController();
 
 
-            const query = new URLSearchParams({
-                type: 'cursor',
-                cursor: this.cursor || '',
-                mime_type: this.mimeType || '',
-                disk: this.disk || ''
-            });
+            const query =
+                new URLSearchParams({
+                    type: 'cursor',
+                    cursor: this.cursor || '',
+                    mime_type: this.mimeType,
+                    disk: this.disk
+                });
 
 
-            const response = await fetch(
-                `/api/filemanager?${query}`,
-                {
-                    signal: this.abortController.signal
-                }
-            );
+            const response =
+                await fetch(`/api/filemanager?${query}`,
+                    {
+                        signal:
+                        this.abortController.signal
+                    }
+                );
 
 
             if (!response.ok) {
-                throw new Error(`Request failed (${response.status})`);
+                throw new Error(`HTTP ${response.status}`);
             }
-
 
             const data = await response.json();
 
@@ -83,448 +81,288 @@ class MediaManager {
 
             this.renderGrid(files);
 
-            this.updateLoadButton();
+            this.loadMoreBtn.style.display = this.hasMore ? 'block' : 'none';
 
         } catch (error) {
-            if (error.name === "AbortError") {
-                return;
-            }
+            if (error.name === 'AbortError') return;
 
-            console.error('MediaManager Error:', error);
+            console.error(error);
+            this.showError('Failed loading media');
 
-            this.showError('Failed to load media files');
         } finally {
-
             this.loading = false;
             this.toggleLoader(false);
         }
-
     }
+
 
     renderGrid(items = []) {
         const fragment = document.createDocumentFragment();
 
+
         items.forEach(item => {
-            const card = this.createMediaCard(item);
-            fragment.appendChild(card);
+            const card = document.createElement('div');
+
+            card.className = 'media-card';
+
+            card.innerHTML = `<div class="media-thumb">${this.renderItem(item)}</div>`;
+
+            card.onclick = () => {
+                this.selectItem(item, card);
+            };
+            fragment.append(card);
         });
-        this.grid.appendChild(fragment);
+        this.grid.append(fragment);
     }
 
 
-    createMediaCard(item) {
+    selectItem(item, card) {
 
-        const card = document.createElement('div');
-        card.className = 'media-card';
-        card.innerHTML = `<div class="media-thumb">${this.renderItem(item)}</div>`;
-        card.addEventListener('click', () => this.selectItem(item, card));
-
-        return card;
-
-    }
-
-
-    selectItem(item, element) {
-
-        if (this.mode === "single") {
+        if (this.mode === 'single') {
             this.grid.querySelectorAll('.media-card.selected')
-                .forEach(x => x.classList.remove('selected'));
+                .forEach(
+                    x => x.classList.remove('selected')
+                );
 
             this.selected = [item];
-
-            element.classList.add('selected');
+            card.classList.add('selected');
         } else {
 
-            element.classList.toggle(
-                'selected'
-            );
+            card.classList.toggle('selected');
 
-            const exists =
-                this.selected.find(
-                    x => x.id === item.id
-                );
+            const exists = this.selected.find(x => x.id === item.id);
 
             if (exists) {
-
-                this.selected =
-                    this.selected.filter(
-                        x => x.id !== item.id
-                    );
+                this.selected = this.selected.filter(x => x.id !== item.id);
 
             } else {
-
-                this.selected.push(
-                    item
-                );
+                this.selected.push(item);
             }
 
         }
-
         this.updatePreview(item);
-
     }
 
 
     updatePreview(item) {
+        this.preview.innerHTML = this.renderItem(item);
 
-        this.preview.innerHTML =
-            this.renderItem(item);
+        this.titleEl.textContent = item.title ?? '-';
 
-        this.titleEl.textContent =
-            item.title || '-';
+        this.urlEl.textContent = item.url ?? '-';
 
-        this.urlEl.textContent =
-            item.url || '-';
-
-        this.diskEl.textContent =
-            item.disk || '-';
-
+        this.diskEl.textContent = item.disk ?? '-';
     }
 
 
     renderItem(item) {
 
-        const type =
-            item?.mime_type
-                ?.split('/')[0]
-                ?.toLowerCase();
-
+        const type = item?.mime_type?.split('/')[0]?.toLowerCase();
 
         switch (type) {
-
             case 'image':
-
-                return `
-                    <img
-                        src="${item.url}"
-                        alt="${item.title}"
-                        loading="lazy"
-                    >
-                `;
-
-
+                return `<img src="${item.url}" alt="${item.title}" loading="lazy" >`;
             case 'video':
-
-                return `
-                    <video
-                        src="${item.url}"
-                    ></video>
-                `;
-
-
+                return `<video src="${item.url}"></video>`;
             case 'audio':
-
-                return `
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 3v18"/>
-                    </svg>
-                `;
-
-
-            case 'text':
-
-                return `
-                    <svg viewBox="0 0 24 24">
-                        <path d="M6 6h12"/>
-                    </svg>
-                `;
-
+                return `<audio src="${item.url}"></audio>`;
             default:
-
-                return `
-                    <svg viewBox="0 0 24 24">
-                        <path d="M5 5h14v14H5z"/>
-                    </svg>
-                `;
+                return `<div style="display:flex;justify-content:center;align-items:center;height:100%;font-size:40px">📄</div>`;
         }
-
-    }
-
-
-    updateLoadButton() {
-
-        this.loadMoreBtn.style.display =
-            this.hasMore
-                ? 'block'
-                : 'none';
 
     }
 
 
     toggleLoader(show) {
-
-        this.loader.style.display =
-            show
-                ? 'flex'
-                : 'none';
-
+        this.loader.style.display = show ? 'flex' : 'none';
     }
 
 
     showError(message) {
-
-        const div =
-            document.createElement('div');
-
-        div.className =
-            'media-error';
-
-        div.textContent =
-            message;
-
-        this.grid.prepend(div);
-
-        setTimeout(() => {
-            div.remove();
-        }, 3000);
-
+        alert(message);
     }
-
 
     close() {
-
         this.abortController?.abort();
-
-        this.overlay.remove();
-
+        this.overlay?.remove();
     }
-
 
     renderPopup() {
 
-        this.overlay =
-            document.createElement(
-                'div'
-            );
+        const diskOptions =
+            this.disks
+                .map(disk => `<option value="${disk}">${disk}</option>`)
+                .join('');
 
-        this.overlay.className =
-            'filemanager overlay';
+        this.overlay = document.createElement('div');
+
+        this.overlay.className = 'filemanager overlay';
 
 
-        this.container =
-            document.createElement(
-                'section'
-            );
+        this.container = document.createElement('section');
 
-        this.container.className =
-            'filemanager media-container';
-
+        this.container.className = 'filemanager media-container';
 
         this.container.innerHTML = `
-
-        <aside class="filemanager aside">
-
+        <aside class="aside">
             <div class="preview-box">
                 Select media
             </div>
-
             <div class="file-info">
-
                 <h3>
                     File Info
                 </h3>
-
                 <div>
-                    <b>title:</b>
-                    <span class="title">-</span>
+                    <b>Title</b>
+                    <span class="title">
+                        -
+                    </span>
                 </div>
-
                 <div>
-                    <b>url:</b>
-                    <span class="url">-</span>
+                    <b>URL</b>
+                    <span class="url">
+                        -
+                    </span>
                 </div>
-
                 <div>
-                    <b>disk:</b>
-                    <span class="disk">-</span>
+                    <b>Disk</b>
+                    <span class="disk">
+                        -
+                    </span>
                 </div>
-
             </div>
-
         </aside>
 
-
-        <header class="filemanager header">
-
+        <header class="header">
             <select class="mime-filter">
                 <option value="">
-                    All Types
+                    All types
                 </option>
-
                 <option value="image">
-                    Images
+                    Image
                 </option>
-
                 <option value="video">
-                    Videos
+                    Video
                 </option>
-
-                <option value="audio">
-                    Audio
-                </option>
-
             </select>
 
+            <select class="disk-filter">
+                <option value="">
+                    All disks
+                </option>
+                ${diskOptions}
+            </select>
         </header>
-
 
         <div class="media-grid"></div>
 
-
-        <footer class="filemanager footer">
-
+        <footer class="footer">
             <div>
-
                 <button class="close-btn">
                     Close
                 </button>
-
                 <button class="load-more-btn">
                     Load More
                 </button>
-
             </div>
-
-
             <button class="select-btn">
                 Select
             </button>
-
         </footer>
-
-
-        <div
-            id="loader"
-            style="display:none"
-        >
+        <div id="loader"  style="display:none">
             Loading...
-        </div>
+        </div>`;
 
-        `;
+        this.overlay.append(this.container);
 
+        document.body.append(this.overlay);
 
-        this.overlay.appendChild(
-            this.container
-        );
+        this.grid = this.container.querySelector('.media-grid');
 
-        document.body.appendChild(
-            this.overlay
-        );
+        this.preview = this.container.querySelector('.preview-box');
 
+        this.titleEl = this.container.querySelector('.title');
 
-        this.grid =
-            this.container.querySelector(
-                '.media-grid'
-            );
+        this.urlEl = this.container.querySelector('.url');
 
-        this.preview =
-            this.container.querySelector(
-                '.preview-box'
-            );
+        this.diskEl = this.container.querySelector('.disk');
 
-        this.titleEl =
-            this.container.querySelector(
-                '.title'
-            );
+        this.loader = this.container.querySelector('#loader');
 
-        this.urlEl =
-            this.container.querySelector(
-                '.url'
-            );
-
-        this.diskEl =
-            this.container.querySelector(
-                '.disk'
-            );
-
-        this.loader =
-            this.container.querySelector(
-                '#loader'
-            );
-
-        this.loadMoreBtn =
-            this.container.querySelector(
-                '.load-more-btn'
-            );
-
+        this.loadMoreBtn = this.container.querySelector('.load-more-btn');
 
         this.bindEvents();
-
     }
-
 
     bindEvents() {
 
-        this.overlay.addEventListener(
-            'click',
-            e => {
-
-                if (
-                    e.target === this.overlay
-                ) {
-                    this.close();
-                }
-
+        this.overlay.onclick = e => {
+            if (e.target === this.overlay) {
+                this.close();
             }
-        );
+        };
+
+        this.container.querySelector('.close-btn').onclick = () => this.close();
+
+        this.loadMoreBtn.onclick = () => this.load();
+
+        this.container.querySelector('.mime-filter').onchange = e => {
+            this.mimeType = e.target.value;
+            this.load(true);
+        };
+
+        this.container.querySelector('.disk-filter').onchange = e => {
+            this.disk = e.target.value;
+            this.load(true);
+        };
 
 
-        this.container
-            .querySelector(
-                '.close-btn'
-            )
-            .addEventListener(
-                'click',
-                () => this.close()
-            );
+        this.container.querySelector('.select-btn').onclick = () => {
+            if (!this.selected.length) {
+                this.showError('Select at least one file');
+                return;
+            }
+            const result = this.mode === 'single' ? this.selected[0] : this.selected;
 
+            this.onSelect(result);
+            this.close();
 
-        this.loadMoreBtn
-            .addEventListener(
-                'click',
-                () => this.load()
-            );
-
-
-        this.container
-            .querySelector(
-                '.mime-filter'
-            )
-            .addEventListener(
-                'change',
-                e => {
-
-                    this.mimeType =
-                        e.target.value;
-
-                    this.load(true);
-
-                }
-            );
+        };
 
     }
 
 }
 
 
-const openButton =
-    document.getElementById(
+document
+    .getElementById(
         'openMedia'
-    );
-
-if (openButton) {
-
-    openButton.addEventListener(
+    )
+    ?.addEventListener(
         'click',
-        e => {
-
-            e.preventDefault();
+        () => {
 
             new MediaManager({
-                mode: 'multi'
+
+                mode: 'single',
+
+                disks: [
+                    'local',
+                    'public',
+                    's3',
+                    's3-arvan_private',
+                    's3-arvan_public',
+                ],
+
+                onSelect: files => {
+
+                    console.log(
+                        files
+                    );
+
+                }
+
             });
 
         }
     );
-
-}

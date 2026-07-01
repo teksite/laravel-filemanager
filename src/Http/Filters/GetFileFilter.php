@@ -8,20 +8,28 @@ class GetFileFilter
 {
     public function apply(Builder $query, array $filters): Builder
     {
+        $disks = (array)($filters['disk'] ?? config('filemanager.disk_list', []));
+        $search = $filters['search'] ?? null;
+        $mines = $filters['mime_type'] ?? null;
+        $userId = $filters['user_id'] ?? null;
         return $query
             ->when(
-                $filters['disk'] ?? (count(config('filemanager.list_disk', []))),
-                fn(Builder $q, $disk) => $q->whereIn('disk', (array)$disk)
+                !!count($disks),
+                fn(Builder $q) => $q->whereIn('disk', $disks)
             )->when(
-                $filters['search'] ?? null,
-                fn(Builder $q, $search) => $q->where(function (Builder $query) use ($search) {
+                !!$search,
+                fn(Builder $q) => $q->where(function (Builder $query) use ($search) {
                     $query->where('id', "$search")
                           ->orWhere('title', 'like', "%{$search}%")
                           ->orWhere('original_name', 'like', "%{$search}%");
                 })
             )->when(
-                $filters['mime_type'] ?? null,
+                !!$mines,
                 fn(Builder $q, $mime) => $q->where('mime_type', $mime)
+            )->when(
+                !!$userId,
+                fn(Builder $q) => $q->where('user_id', $userId)
             );
+
     }
 }

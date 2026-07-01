@@ -36,14 +36,6 @@ class FileIndexRequest extends FormRequest
     }
 
 
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'overwrite' => filter_var($this->overwrite, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
-            'slugify'   => filter_var($this->slugify, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
-        ]);
-    }
-
 
     public function authorize(): bool
     {
@@ -57,77 +49,12 @@ class FileIndexRequest extends FormRequest
             'disk'  => ['nullable', 'string', Rule::in(array_keys(config('filesystems.disks', [])))],
             'search'    => ['nullable', 'string'],
             'mime_type' => ['nullable', 'string'],
-            'per_page'  => ['nullable', 'integer', 'min:1', 'max:100'],
-            'sort'      => ['nullable', 'string'],
+            'per_page'=>['nullable', 'integer', 'min:1', 'max:100'],
+
+            'user_id' => 'nullable|exists:users,id',
+
         ];
     }
 
-    protected function after(): array
-    {
-        return [
-            fn(Validator $validator) => $this->checkForbiddenMimeTypes($validator),
-            fn(Validator $validator) => $this->checkAllowedMimeTypes($validator),
-        ];
-    }
 
-    protected function checkSize(Validator $validator): void
-    {
-        if ($validator->errors()->isNotEmpty()) return;
-
-        $file = $this->file('file');
-        $sizeKB = $file->getSize() / 1024;
-
-        $minSize = config('filemanager.min_file_size', null);
-        if ($minSize !== null && $sizeKB < $minSize) {
-            $validator->errors()->add('file', trans('min allowed file size is :size KB', ['size' => $minSize]));
-            return;
-        }
-
-        $maxSize = config('filemanager.max_file_size', null);
-        if ($maxSize !== null && $sizeKB > $maxSize) {
-            $validator->errors()->add('file', trans('max allowed file size is :size KB', ['size' => $maxSize]));
-            return;
-        }
-
-    }
-
-    protected function checkAllowedMimeTypes(Validator $validator): void
-    {
-        if ($validator->errors()->isNotEmpty()) return;
-        $allowedTypes = config('filemanager.allow_file_types', []);
-
-        if (count($allowedTypes) === 0) return;
-        $file = $this->file('file');
-
-        $mime = $file->getMimeType();
-        $ext = strtolower($file->extension());
-
-        $isValid = in_array($mime, $allowedTypes) || in_array($ext, $allowedTypes);
-        if (!$isValid) {
-            $validator->errors()->add("file", trans("This file type ( :attribute ) is not allowed.", ['attribute' => "$mime|$ext"]));
-            return;
-        }
-
-    }
-
-    protected function checkForbiddenMimeTypes(Validator $validator): void
-    {
-        if ($validator->errors()->isNotEmpty()) return;
-        $forbiddenTypes = config('filemanager.forbidden_file_types', []);
-
-        if (count($forbiddenTypes) === 0) return;
-
-        $file = $this->file('file');
-
-        $mime = $file->getMimeType();
-        $ext = strtolower($file->extension());
-
-        $isForbidden = in_array($mime, $forbiddenTypes) || in_array($ext, $forbiddenTypes);
-
-        if ($isForbidden) {
-            $validator->errors()->add("file", trans("This file type ( :attribute ) is forbidden.", ['attribute' => "$mime|$ext"]));
-            return;
-
-        }
-    }
 }

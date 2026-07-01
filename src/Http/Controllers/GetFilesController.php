@@ -4,6 +4,7 @@ namespace Teksite\FileManager\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Teksite\FileManager\Http\Requests\FileIndexRequest;
+use Teksite\FileManager\Http\Requests\ShowRequest;
 use Teksite\FileManager\Http\Resources\FileCollection;
 use Teksite\FileManager\Http\Resources\FileResource;
 use Teksite\FileManager\Http\Resources\PaginateFileCollection;
@@ -29,7 +30,7 @@ class GetFilesController
     }
 
 
-    public function show(UploadFile $file)
+    public function show(ShowRequest $request, UploadFile $file)
     {
         $file = FileResource::make($file);
 

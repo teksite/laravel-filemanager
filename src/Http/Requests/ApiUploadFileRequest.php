@@ -3,39 +3,11 @@
 namespace Teksite\FileManager\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
-use Teksite\FileManager\Support\AuthorizeRequestResolver;
 
-class ApiUploadFileRequest extends FormRequest
+class ApiUploadFileRequest  extends BaseApiRequest
 {
-
-    public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
-    {
-        $exception = $validator->getException();
-        $exc = (new $exception($validator))->errorBag($this->errorBag);
-
-        return throw new HttpResponseException(response()->json([
-            'message' => trans('failed to upload the file'),
-            'errors'  => $exc->errors(),
-            'status'  => 422,
-            'data'    => [],
-        ])->setStatusCode(422));
-
-    }
-
-
-    public function failedAuthorization()
-    {
-        return throw new HttpResponseException(response()->json([
-            'messages' => trans("Forbidden You don't have permission"),
-            'errors'   => ['auth' => "Forbidden You don't have permission"],
-            'status'   => 403,
-            'data'     => [],
-        ])->setStatusCode(403));
-    }
-
 
     protected function prepareForValidation(): void
     {
@@ -43,12 +15,6 @@ class ApiUploadFileRequest extends FormRequest
             'overwrite' => filter_var($this->overwrite, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
             'slugify'   => filter_var($this->slugify, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
         ]);
-    }
-
-
-    public function authorize(): bool
-    {
-        return AuthorizeRequestResolver::resolve('upload', $this);
     }
 
     public function rules(): array
@@ -136,5 +102,15 @@ class ApiUploadFileRequest extends FormRequest
             return;
 
         }
+    }
+
+    protected function generalFailedValidationMessages(): string
+    {
+        return trans('failed to upload the file');
+    }
+
+    protected function setAction(): string
+    {
+       return 'upload';
     }
 }

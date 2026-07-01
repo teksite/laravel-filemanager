@@ -8,40 +8,8 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 use Teksite\FileManager\Support\AuthorizeRequestResolver;
 
-class FileIndexRequest extends FormRequest
+class FileIndexRequest extends BaseApiRequest
 {
-
-    public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
-    {
-        $exception = $validator->getException();
-        $exc = (new $exception($validator))->errorBag($this->errorBag);
-
-        return throw new HttpResponseException(response()->json([
-            'message' => trans('failed to get files'),
-            'errors'  => $exc->errors(),
-            'status'  => 422,
-            'data'    => [],
-        ])->setStatusCode(422));
-
-    }
-
-
-    public function failedAuthorization()
-    {
-        return throw new HttpResponseException(response()->json([
-            'messages' => trans("Forbidden You don't have permission"),
-            'errors'   => ['auth' => "Forbidden You don't have permission"],
-            'status'   => 403,
-            'data'     => [],
-        ])->setStatusCode(403));
-    }
-
-
-    public function authorize(): bool
-    {
-        return AuthorizeRequestResolver::resolve('get_all', $this);
-    }
-
     public function rules(): array
     {
         return [
@@ -52,9 +20,17 @@ class FileIndexRequest extends FormRequest
             'per_page'  => ['nullable', 'integer', 'min:1', 'max:100'],
 
             'user_id' => 'nullable|exists:users,id',
-
         ];
     }
 
 
+    protected function generalFailedValidationMessages(): string
+    {
+        return  trans('failed to get files');
+    }
+
+    protected function setAction(): string
+    {
+        return 'get_all';
+    }
 }

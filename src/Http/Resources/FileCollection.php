@@ -14,8 +14,11 @@ class FileCollection extends ResourceCollection
      */
     public function toArray(Request $request): array
     {
+
+
         return [
-            'files' => $this->collection,
+            'files' =>  FileResource::collection( $this->collection ),
+
             'links' => [
                 'self' => $this->url($this->currentPage()),
                 'first' => $this->url(1),
@@ -28,6 +31,9 @@ class FileCollection extends ResourceCollection
                 'last_page' => $this->lastPage(),
                 'per_page' => $this->perPage(),
                 'total' => $this->total(),
+
+                'has_more'=> $this->hasMorePages(),
+                'next_cursor'=> optional($this->nextCursor())->encode(),
             ],
         ];
     }

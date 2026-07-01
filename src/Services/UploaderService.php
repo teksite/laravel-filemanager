@@ -95,6 +95,4 @@ class UploaderService implements FileUploaderInterface
             return false;
         }
     }
-
-
 }

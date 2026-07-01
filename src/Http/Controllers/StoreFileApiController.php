@@ -3,6 +3,7 @@
 namespace Teksite\FileManager\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Teksite\FileManager\DTO\UploadOptions;
 use Teksite\FileManager\Http\Requests\ApiUploadFileRequest;
 use Teksite\FileManager\Http\Resources\FileResource;
@@ -22,9 +23,7 @@ class StoreFileApiController
         try {
             $options = UploadOptions::fromArray($request->validated());
 
-            $userId = $request->user_id
-                ?? auth('sanctum')->id()
-                ?? auth()->id();
+            $userId = $request->user_id  ?? auth()->id();
 
             $file = $this->uploader->upload($request->file('file'), $options, $request->title, $userId);
 
@@ -33,11 +32,13 @@ class StoreFileApiController
                 'message' => 'File uploaded successfully',
                 'file'    => new FileResource($file),
             ], 201);
-        } catch (\Exception $exception) {
+        } catch (\Exception $e) {
+            Log::error($e);
+
             return response()->json([
                 'success' => false,
                 'message' => 'File uploaded failed',
-                'errors'  => $exception->getMessage(),
+                'errors'  => $e->getMessage(),
             ], 500);
         }
     }

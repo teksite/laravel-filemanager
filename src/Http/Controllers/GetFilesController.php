@@ -9,7 +9,7 @@ use Teksite\FileManager\Http\Resources\FileResource;
 use Teksite\FileManager\Models\UploadFile;
 use Teksite\FileManager\Services\GetFileService;
 
-class GetFileController
+class GetFilesController
 {
 
     public function __construct(protected GetFileService $getFiles) {}

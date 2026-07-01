@@ -57,7 +57,7 @@ class FileStorageService
 
         $counter = 1;
         $filename = "{$name}.{$extension}";
-        while ($this->storage->exists($disk , "{$path}/{$filename}")) {
+        while ($this->exists($disk , "{$path}/{$filename}")) {
             $filename = "{$name}-{$counter}.{$extension}";
             $counter++;
         }

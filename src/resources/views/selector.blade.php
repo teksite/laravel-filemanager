@@ -3,6 +3,8 @@
 
     <section class="media-container" data-fm>
 
+        @include('filemanager::partials.sidebar')
+
         @include('filemanager::partials.header')
 
         @include('filemanager::partials.grid')

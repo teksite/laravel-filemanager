@@ -16,5 +16,12 @@
             <b>Disk</b>
             <span data-disk>-</span>
         </div>
+        // TODO: multi select delete or single select delete
+        // TODO: change title fir single select
+        // add upload section
+
+        {{--        <form action="{{route('api.filemanager.destroy')}}" data-delete>--}}
+        {{--            <button class="" id="delete"></button>--}}
+        {{--        </form>--}}
     </div>
 </aside>

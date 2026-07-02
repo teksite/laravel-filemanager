@@ -147,6 +147,8 @@ return [
         'get_all' => \Teksite\FileManager\Http\Requests\Authorization\CanGetAll::class,
 
         'delete' => \Teksite\FileManager\Http\Requests\Authorization\CanDelete::class,
+
+        'update' => \Teksite\FileManager\Http\Requests\Authorization\CanUpload::class,
     ],
 
 

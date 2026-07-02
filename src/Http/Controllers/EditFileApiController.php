@@ -5,8 +5,10 @@ namespace Teksite\FileManager\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Teksite\FileManager\DTO\UploadOptions;
+use Teksite\FileManager\Http\Requests\ApiUpdateFileRequest;
 use Teksite\FileManager\Http\Requests\ApiUploadFileRequest;
 use Teksite\FileManager\Http\Resources\FileResource;
+use Teksite\FileManager\Models\UploadFile;
 use Teksite\FileManager\Services\UploaderService;
 
 class EditFileApiController
@@ -18,18 +20,15 @@ class EditFileApiController
     /**
      * @throws \Throwable
      */
-    public function update(ApiUploadFileRequest $request)
+    public function update(ApiUpdateFileRequest $request , UploadFile $file)
     {
         try {
-            $options = UploadOptions::fromArray($request->validated());
 
-            $userId = $request->user_id  ?? auth()->id();
-
-            $file = $this->uploader->upload($request->file('file'), $options, $request->title, $userId);
+            $file = $this->uploader->update($file, $request->validated());
 
             return response()->json([
                 'success' => true,
-                'message' => 'File uploaded successfully',
+                'message' => 'File Updated successfully',
                 'file'    => new FileResource($file),
             ], 201);
         } catch (\Exception $e) {
@@ -37,7 +36,7 @@ class EditFileApiController
 
             return response()->json([
                 'success' => false,
-                'message' => 'File uploaded failed',
+                'message' => 'File Updating failed',
                 'errors'  => $e->getMessage(),
             ], 500);
         }

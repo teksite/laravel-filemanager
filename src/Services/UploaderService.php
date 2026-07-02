@@ -95,4 +95,16 @@ class UploaderService implements FileUploaderInterface
             return false;
         }
     }
+
+    public function update(UploadFile $file ,array $inputs): UploadFile|false
+    {
+        try {
+            $file->update($inputs);
+            return $file->refresh();
+        }catch (\Exception $e){
+            Log::error($e);
+            return false;
+        }
+    }
+
 }

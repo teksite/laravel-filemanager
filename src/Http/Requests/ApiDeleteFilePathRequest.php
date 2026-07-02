@@ -21,6 +21,6 @@ class ApiDeleteFilePathRequest extends BaseApiRequest
 
     protected function setAction(): string
     {
-        return 'delete';
+        return 'update';
     }
 }

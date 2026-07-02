@@ -30,7 +30,16 @@
         </div>
     </div>
     <div data-uploader-section>
-        <span>upload</span>
-        <input type="file" name="file"/>
+       @if(count($allowedDisks))
+            <span>upload</span>
+            <form action="">
+                <input type="file" name="file"/>
+                <select data-allowedDisks>
+                    @foreach($allowedDisks as $disk)
+                        <option value="{{ $disk }}">{{ $disk }}</option>
+                    @endforeach
+                </select>
+            </form>
+       @endif
     </div>
 </header>

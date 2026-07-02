@@ -20,6 +20,7 @@ class DatabaseFileManager {
             disk: document.querySelector('[data-disk]')
         };
         this.initialize();
+        this.selected = null;
     }
 
     initialize() {
@@ -127,6 +128,7 @@ class DatabaseFileManager {
         this.state.cursor = null;
         this.state.hasMore = true;
         this.elements.grid.innerHTML = '';
+
     }
 
     renderGrid(items = []) {
@@ -141,10 +143,17 @@ class DatabaseFileManager {
             card.className = 'media-card';
 
             card.innerHTML = `<div class="media-thumb">${this.renderItem(item)}</div> `;
+
+            card.addEventListener('click', () => {
+                this.selectItem(item);
+            });
             fragment.append(card);
         });
 
+
+
         this.elements.grid.append(fragment);
+
     }
 
     renderItem(item) {
@@ -158,14 +167,119 @@ class DatabaseFileManager {
                 return `<video src="${item.url}"></video>`;
             case 'audio':
                 return ` <audiosrc="${item.url}"></audio>`;
-            default: return `<div>📄</div>`;
+            default:
+                return `<div>📄</div>`;
         }
+
+    }
+
+
+    selectItem(item) {
+        this.selected = item;
+        this.renderPreview(item);
+        this.renderInfo(item);
 
     }
 
     toggleLoader(show) {
         if (!this.elements.loader) return;
         this.elements.loader.style.display = show ? 'flex' : 'none';
+    }
+
+    // sidebar info
+    renderPreview(item) {
+
+        const box =
+            document.querySelector('[data-preview]');
+
+        if (!box) return;
+
+        const type =
+            item.mime_type?.split('/')[0];
+
+        let html = '';
+
+        switch (type) {
+            case 'image':
+                html = `<img src="${item.url}" />`;
+                break;
+
+            case 'video':
+                html = `<video controls src="${item.url}"></video>`;
+                break;
+
+            case 'audio':
+                html = `<audio controls src="${item.url}"></audio>`;
+                break;
+
+            default:
+                html = this.renderFallbackIcon(type);
+        }
+        box.innerHTML = html;
+    }
+
+    renderFallbackIcon(type) {
+
+        const icons = {
+
+            text: `<svg width="64" height="64" viewBox="0 0 24 24"><path fill="currentColor" d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6 a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/></svg>`,
+            file: ` <svg width="64" height="64" viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16 a2 2 0 0 0 2 2h12 a2 2 0 0 0 2-2V8z"/></svg>`
+        };
+        return `<div class="fallback-icon">${icons[type] || icons.file}</div>`;
+    }
+
+
+    renderInfo(item) {
+        const set = (key, value) => {
+            const el = document.querySelector(`[data-${key}]`);
+            if (el) el.textContent = value ?? '-';
+        };
+        set('id', item.id);
+        set('title', item.title || item.original_name);
+        set('size', this.formatSize(item.size));
+        set('mime', item.mime_type);
+        set('disk', item.disk);
+        set('created', new Date(item.created_at).toLocaleString());
+
+        const urlEl = document.querySelector('[data-url]');
+
+        if (urlEl) urlEl.textContent = item.url;
+
+        this.bindActions(item);
+
+    }
+
+
+    bindActions(item) {
+
+        const openBtn = document.querySelector('[data-open]');
+
+        const copyBtn = document.querySelector('[data-copy]');
+
+        openBtn.onclick = () => {window.open(item.url, '_blank');};
+
+        copyBtn.onclick = async () => {
+            await navigator.clipboard.writeText(item.url);
+            copyBtn.textContent = '✓';
+
+            setTimeout(() => {
+                copyBtn.textContent = '📋';
+            }, 1000);
+
+        };
+    }
+
+    formatSize(bytes) {
+
+        if (!bytes) return '0 B';
+        const units = ['B', 'KB', 'MB', 'GB'];
+
+        let i = 0;
+        while (bytes >= 1024 && i < units.length - 1) {
+            bytes /= 1024;
+            i++;
+        }
+        return `${bytes.toFixed(1)} ${units[i]}`;
     }
 
 }

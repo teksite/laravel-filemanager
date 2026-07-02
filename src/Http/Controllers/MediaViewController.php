@@ -23,21 +23,12 @@ class MediaViewController
 
     private function chosenDisks(): array
     {
-        $selectedDisks = config('filemanager.disk_list', ['*']);
-        $systemDisks = array_keys(config('filesystems.disks', []));
+        return config('filemanager.disk_list', []);
 
-        return in_array('*', (array)$selectedDisks)
-            ? [null, ...$systemDisks]
-            : array_intersect($selectedDisks, $systemDisks);
     }
 
     private function chosenMimes(): array
     {
-        $selectedMimes = config('filemanager.type_list', ['*']);
-        $systemMimes = [
-            'image', 'video', 'audio', 'document', 'archive', 'link', 'file', 'text',
-        ];
-
-        return $selectedMimes;
+        return config('filemanager.type_list', []);
     }
 }

@@ -38,9 +38,15 @@ return [
      */
     'hiddenFiles' => true,                           // Hide system and hidden files from listings
 
-    'disk_list' => [null ,'s3' ,'public'],                 // Allowed filesystem disks ,[] means all disks without filter ,set it [null , public , ...] to have all and filter
+    'disk_list' => [null,
+        'local',
+        'public',
+        's3',
+        's3-arvan_private',
+        's3-arvan_public',
+    ],                 // Allowed filesystem disks ,[] means all disks without filter ,set it [null , public , ...] to have all and filter
 
-    'type_list' => [null ,'image' , 'text'],               // Allowed mime types ,[] means all mimes without filter ,set it [null , image , video/mp4 ...] to have all and filter
+    'type_list' => [null, 'image', 'text'],               // Allowed mime types ,[] means all mimes without filter ,set it [null , image , video/mp4 ...] to have all and filter
 
     'per_page' => 5,                                // Default pagination size
 
@@ -136,9 +142,9 @@ return [
 
         'upload' => \Teksite\FileManager\Http\Requests\Authorization\CanUpload::class,
 
-        'get_one' =>\Teksite\FileManager\Http\Requests\Authorization\CanGetOne::class,
+        'get_one' => \Teksite\FileManager\Http\Requests\Authorization\CanGetOne::class,
 
-        'get_all' =>\Teksite\FileManager\Http\Requests\Authorization\CanGetAll::class,
+        'get_all' => \Teksite\FileManager\Http\Requests\Authorization\CanGetAll::class,
 
         'delete' => \Teksite\FileManager\Http\Requests\Authorization\CanDelete::class,
     ],

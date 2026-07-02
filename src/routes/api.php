@@ -3,11 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use Teksite\FileManager\Http\Controllers\GetFilesController;
 use Teksite\FileManager\Http\Controllers\DeleteFileApiController;
-use Teksite\FileManager\Http\Controllers\MediaViewController;
+use Teksite\FileManager\Http\Controllers\DatabaseBrowserController;
 use Teksite\FileManager\Http\Controllers\StoreFileApiController;
 
 Route::middleware([])->group(function () {
-    Route::get('browser', [MediaViewController::class, 'browser'])->name('browser');
+    Route::get('browser', [DatabaseBrowserController::class, 'browser'])->name('browser');
 
     Route::delete("remove", [DeleteFileApiController::class, 'deleteByPath'])->name('destroy.path');
     Route::delete("{file}", [DeleteFileApiController::class, 'delete'])->name('destroy');

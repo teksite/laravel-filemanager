@@ -1,14 +1,20 @@
 <header class="header">
     <select data-mime>
-        <option value="">All mimes</option>
         @foreach($mimes as $mime)
-            <option value="{{ $mime }}">{{ $mime }}</option>
+            @if(is_null($mime))
+                <option value="">All mimes</option>
+            @else
+                <option value="{{ $mime }}">{{ $mime }}</option>
+            @endif
         @endforeach
     </select>
     <select data-disk>
-        <option value="">All disks</option>
         @foreach($disks as $disk)
-            <option value="{{ $disk }}">{{ $disk }}</option>
+            @if(is_null($disk))
+                <option value="">All disks</option>
+            @else
+                <option value="{{ $disk }}">{{ $disk }}</option>
+            @endif
         @endforeach
     </select>
 </header>

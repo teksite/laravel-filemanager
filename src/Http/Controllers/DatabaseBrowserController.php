@@ -11,7 +11,7 @@ use Teksite\FileManager\Http\Resources\PaginateFileCollection;
 use Teksite\FileManager\Models\UploadFile;
 use Teksite\FileManager\Services\GetFileService;
 
-class MediaViewController
+class DatabaseBrowserController
 {
     public function browser(FileIndexRequest $request)
     {

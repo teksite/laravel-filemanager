@@ -140,6 +140,8 @@ class DatabaseFileManager {
         items.forEach(item => {
             const card = document.createElement('div');
 
+            card.dataset.id = item.id;
+
             card.className = 'media-card';
 
             card.innerHTML = `<div class="media-thumb">${this.renderItem(item)}</div> `;
@@ -149,7 +151,6 @@ class DatabaseFileManager {
             });
             fragment.append(card);
         });
-
 
 
         this.elements.grid.append(fragment);
@@ -256,7 +257,9 @@ class DatabaseFileManager {
 
         const copyBtn = document.querySelector('[data-copy]');
 
-        openBtn.onclick = () => {window.open(item.url, '_blank');};
+        openBtn.onclick = () => {
+            window.open(item.url, '_blank');
+        };
 
         copyBtn.onclick = async () => {
             await navigator.clipboard.writeText(item.url);
@@ -266,6 +269,11 @@ class DatabaseFileManager {
                 copyBtn.textContent = '📋';
             }, 1000);
 
+        };
+
+        const deleteBtn = document.querySelector('[data-delete]');
+        deleteBtn.onclick = () => {
+            this.deleteItem(item);
         };
     }
 
@@ -280,6 +288,69 @@ class DatabaseFileManager {
             i++;
         }
         return `${bytes.toFixed(1)} ${units[i]}`;
+    }
+
+    /* delete item */
+    async deleteItem(item) {
+
+        if (!confirm('Delete this file?')) return;
+
+        try {
+            const url = `/api/filemanager/${item.id}`;
+
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            this.removeFromGrid(item.id);
+
+            if (this.selected?.id === item.id) {
+                this.clearPreview();
+            }
+
+        } catch (error) {
+            console.error('[DELETE ERROR]', error);
+        }
+    }
+
+
+    removeFromGrid(id) {
+
+        const cards =
+            this.elements.grid.querySelectorAll('.media-card');
+
+        cards.forEach(card => {
+
+            if (card.dataset.id === id) {
+                card.remove();
+            }
+
+        });
+    }
+
+
+    clearPreview() {
+
+        this.selected = null;
+
+        document.querySelector('[data-preview]').innerHTML = 'Select media';
+
+        const fields = [
+            'id', 'title', 'url', 'size',
+            'mime', 'disk', 'created'
+        ];
+
+        fields.forEach(f => {
+            const el = document.querySelector(`[data-${f}]`);
+            if (el) el.textContent = '-';
+        });
     }
 
 }

@@ -47,5 +47,7 @@
         </div>
 
     </div>
-
+    <button data-delete type="button" class="delete-button">
+        🗑 Delete
+    </button>
 </aside>

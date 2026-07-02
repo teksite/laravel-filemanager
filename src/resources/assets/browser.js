@@ -24,13 +24,12 @@ class DatabaseFileManager {
             loadMore: document.querySelector('[data-load-more]'),
             mime: document.querySelector('[data-mimeList]'),
             disk: document.querySelector('[data-diskList]')
-
         };
 
         this.initialize();
     }
 
-    /* ---------------- INIT ---------------- */
+    /* ================= INIT ================= */
 
     initialize() {
         this.initializeDefaults();
@@ -40,9 +39,9 @@ class DatabaseFileManager {
 
     initializeDefaults() {
 
-        this.state.disk =this.resolveDefault(this.elements.disk, this.options.defaultDisk);
+        this.state.disk = this.resolveDefault(this.elements.disk, this.options.defaultDisk);
 
-        this.state.mimeType =            this.resolveDefault(this.elements.mime, this.options.defaultMime);
+        this.state.mimeType = this.resolveDefault(this.elements.mime, this.options.defaultMime);
 
         if (this.elements.disk?.querySelector(`option[value="${this.state.disk}"]`)) {
             this.elements.disk.value = this.state.disk;
@@ -69,7 +68,7 @@ class DatabaseFileManager {
         return values[0] ?? '';
     }
 
-    /* ---------------- EVENTS ---------------- */
+    /* ================= EVENTS ================= */
 
     bindEvents() {
         this.elements.loadMore?.addEventListener('click', () => this.load());
@@ -85,7 +84,7 @@ class DatabaseFileManager {
         });
     }
 
-    /* ---------------- LOAD ---------------- */
+    /* ================= LOAD ================= */
 
     async load(reset = false) {
 
@@ -97,7 +96,9 @@ class DatabaseFileManager {
 
             if (reset) this.resetGrid();
 
-            const response = await fetch(`/api/filemanager?${this.buildQuery()}`);
+            const response = await fetch(
+                `/api/filemanager?${this.buildQuery()}`
+            );
 
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
@@ -148,7 +149,7 @@ class DatabaseFileManager {
         this.elements.grid.innerHTML = '';
     }
 
-    /* ---------------- GRID ---------------- */
+    /* ================= GRID ================= */
 
     renderGrid(items = []) {
 
@@ -163,12 +164,13 @@ class DatabaseFileManager {
             card.className = 'media-card';
             card.dataset.id = item.id;
 
-            card.innerHTML = `<div class="media-thumb">${this.renderItem(item)} </div>`;
+            card.innerHTML = `<div class="media-thumb">${this.renderItem(item)}</div>`;
 
             card.addEventListener('click', () => this.selectItem(item));
 
             fragment.appendChild(card);
         });
+
         this.elements.grid.appendChild(fragment);
     }
 
@@ -178,17 +180,21 @@ class DatabaseFileManager {
 
         switch (type) {
 
-            case 'image':return `<img src="${item.url}" loading="lazy">`;
+            case 'image':
+                return `<img src="${item.url}" loading="lazy">`;
 
-            case 'video':return `<video src="${item.url}"></video>`;
+            case 'video':
+                return `<video src="${item.url}"></video>`;
 
-            case 'audio':return `<audio src="${item.url}" controls></audio>`;
+            case 'audio':
+                return `<audio src="${item.url}" controls></audio>`;
 
-            default:return `<div>📄</div>`;
+            default:
+                return `<div>📄</div>`;
         }
     }
 
-    /* ---------------- SELECT ---------------- */
+    /* ================= SELECT ================= */
 
     selectItem(item) {
         this.selected = item;
@@ -196,7 +202,7 @@ class DatabaseFileManager {
         this.renderInfo(item);
     }
 
-    /* ---------------- PREVIEW ---------------- */
+    /* ================= PREVIEW ================= */
 
     renderPreview(item) {
 
@@ -205,40 +211,26 @@ class DatabaseFileManager {
 
         const type = item.mime_type?.split('/')[0];
 
-        let html = '';
-
         switch (type) {
 
             case 'image':
-                html = `<img src="${item.url}" />`;
+                box.innerHTML = `<img src="${item.url}" />`;
                 break;
 
             case 'video':
-                html = `<video controls src="${item.url}"></video>`;
+                box.innerHTML = `<video controls src="${item.url}"></video>`;
                 break;
 
             case 'audio':
-                html = `<audio controls src="${item.url}"></audio>`;
+                box.innerHTML = `<audio controls src="${item.url}"></audio>`;
                 break;
 
             default:
-                html = this.renderFallbackIcon(type);
+                box.innerHTML = `<div>📄</div>`;
         }
-
-        box.innerHTML = html;
     }
 
-    renderFallbackIcon(type) {
-
-        const icons = {
-            text: `<svg width="64" height="64" viewBox="0 0 24 24"><path fill="currentColor" d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/></svg>`,
-            file: `<svg width="64" height="64" viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>`
-        };
-
-        return `<div class="fallback-icon">${icons[type] || icons.file}</div>`;
-    }
-
-    /* ---------------- INFO ---------------- */
+    /* ================= INFO ================= */
 
     renderInfo(item) {
 
@@ -258,6 +250,8 @@ class DatabaseFileManager {
         if (urlEl) urlEl.textContent = item.url;
 
         this.bindActions(item);
+
+        this.enableTitleEdit(item);
     }
 
     bindActions(item) {
@@ -275,9 +269,7 @@ class DatabaseFileManager {
                 await navigator.clipboard.writeText(item.url);
                 copyBtn.textContent = '✓';
 
-                setTimeout(() => {
-                    copyBtn.textContent = '📋';
-                }, 1000);
+                setTimeout(() => copyBtn.textContent = '📋', 1000);
             };
         }
 
@@ -286,7 +278,92 @@ class DatabaseFileManager {
         }
     }
 
-    /* ---------------- DELETE ---------------- */
+    /* ================= TITLE EDIT (DOUBLE CLICK) ================= */
+
+    enableTitleEdit(item) {
+
+        const el = document.querySelector('[data-title]');
+        if (!el) return;
+
+        el.ondblclick = () => {
+
+            const oldValue = item.title || item.original_name;
+
+            const input = document.createElement('input');
+            input.value = oldValue;
+            input.className = 'title-edit-input';
+
+            el.replaceWith(input);
+            input.focus();
+            input.select();
+
+            const save = async () => {
+
+                const newValue = input.value.trim();
+
+                const finalValue = newValue || oldValue;
+
+                await this.updateTitle(item, finalValue);
+
+                const span = document.createElement('span');
+                span.setAttribute('data-title', '');
+                span.textContent = finalValue;
+
+                input.replaceWith(span);
+
+                this.enableTitleEdit({
+                    ...item,
+                    title: finalValue
+                });
+            };
+
+            input.addEventListener('keydown', (e) => {
+
+                if (e.key === 'Enter') input.blur();
+
+                if (e.key === 'Escape') {
+                    input.value = oldValue;
+                    input.blur();
+                }
+            });
+
+            input.addEventListener('blur', save);
+        };
+    }
+
+    async updateTitle(item, newTitle) {
+
+        if (!newTitle || newTitle === item.title) return;
+
+        try {
+
+            const res = await fetch(
+                `/api/filemanager/${item.id}/rename`,
+                {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: newTitle
+                    })
+                }
+            );
+
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}`);
+            }
+
+            if (this.selected?.id === item.id) {
+                this.selected.title = newTitle;
+            }
+
+        } catch (err) {
+            console.error('[RENAME ERROR]', err);
+        }
+    }
+
+    /* ================= DELETE ================= */
 
     async deleteItem(item) {
 
@@ -294,14 +371,12 @@ class DatabaseFileManager {
 
         try {
 
-            const response = await fetch(
+            const res = await fetch(
                 `/api/filemanager/${item.id}`,
                 { method: 'DELETE' }
             );
 
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
             this.removeFromGrid(item.id);
 
@@ -309,13 +384,12 @@ class DatabaseFileManager {
                 this.clearPreview();
             }
 
-        } catch (error) {
-            console.error('[DELETE ERROR]', error);
+        } catch (err) {
+            console.error('[DELETE ERROR]', err);
         }
     }
 
     removeFromGrid(id) {
-
         const card = this.elements.grid.querySelector(`[data-id="${id}"]`);
         if (card) card.remove();
     }
@@ -328,13 +402,13 @@ class DatabaseFileManager {
         if (box) box.innerHTML = 'Select media';
 
         ['id','title','url','size','mime','disk','created']
-            .forEach(key => {
-                const el = document.querySelector(`[data-${key}]`);
+            .forEach(k => {
+                const el = document.querySelector(`[data-${k}]`);
                 if (el) el.textContent = '-';
             });
     }
 
-    /* ---------------- UTIL ---------------- */
+    /* ================= UTIL ================= */
 
     formatSize(bytes) {
 

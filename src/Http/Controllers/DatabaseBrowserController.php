@@ -18,6 +18,8 @@ class DatabaseBrowserController
         $disks = $this->chosenDisks();
         $mimes = $this->chosenMimes();
 
+        $diskForUploads = $this->chosenMimes();
+
         return view('filemanager::browser', compact('disks', 'mimes'));
     }
 
@@ -30,5 +32,11 @@ class DatabaseBrowserController
     private function chosenMimes(): array
     {
         return config('filemanager.type_list', []);
+    }
+
+    private function allowedDisk(): array
+    {
+        return config('filemanager.disk_list', []);
+
     }
 }

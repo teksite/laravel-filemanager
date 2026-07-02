@@ -46,7 +46,7 @@ return [
         's3-arvan_public',
     ],                 // Allowed filesystem disks ,[] means all disks without filter ,set it [null , public , ...] to have all and filter
 
-    'type_list' => [null, 'image', 'text' ,'video' ,'audio'],               // Allowed mime types ,[] means all mimes without filter ,set it [null , image , video/mp4 ...] to have all and filter
+    'type_list' => [null, 'image', 'text', 'video', 'audio'],               // Allowed mime types ,[] means all mimes without filter ,set it [null , image , video/mp4 ...] to have all and filter
 
     'per_page' => 5,                                // Default pagination size
 
@@ -67,6 +67,7 @@ return [
 
     'min_file_size' => null,                      // in KB, (null means no restrictions)
 
+
     /*
     |--------------------------------------------------------------------------
     | Storage Configuration
@@ -77,6 +78,9 @@ return [
     */
 
     'default_store_disk' => 'public',            // Default storage disk
+
+    'allow_upload_disks' =>
+        ['local', 'public', 's3', 's3-arvan_private', 's3-arvan_public',], //allowed disk to be upload to
 
     'slugify_name' => true,                      // Convert original file names into URL-friendly slugs
 

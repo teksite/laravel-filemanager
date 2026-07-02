@@ -19,11 +19,13 @@ class ApiUploadFileRequest  extends BaseApiRequest
 
     public function rules(): array
     {
+        $disks =config('filemanager.allow_upload_disks') ?? (array)config('filemanager.default_store_disk');
+
         return [
             'user_id' => 'nullable|exists:users,id',
 
             'file'  => ['required', 'file',],
-            'disk'  => ['nullable', 'string', Rule::in(array_keys(config('filesystems.disks', [])))],
+            'disk'  => ['nullable', 'string', Rule::in($disks)],
             'title' => ['nullable', 'string', 'max:255'],
             'path'  => ['nullable', 'string', 'max:190'],
 

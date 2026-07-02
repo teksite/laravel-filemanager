@@ -16,7 +16,7 @@
 <script>
     document.addEventListener(
         'DOMContentLoaded',
-        () => new FileManager({defaultDisk: null, defaultMime: null}));
+        () => new DatabaseFileManager({defaultDisk: null, defaultMime: null}));
 </script>
 
 

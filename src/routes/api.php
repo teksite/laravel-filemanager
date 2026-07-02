@@ -7,7 +7,7 @@ use Teksite\FileManager\Http\Controllers\MediaViewController;
 use Teksite\FileManager\Http\Controllers\StoreFileApiController;
 
 Route::middleware([])->group(function () {
-    Route::get('selector', [MediaViewController::class, 'getView'])->name('view.get');
+    Route::get('browser', [MediaViewController::class, 'browser'])->name('browser');
 
     Route::delete("remove", [DeleteFileApiController::class, 'deleteByPath'])->name('destroy.path');
     Route::delete("{file}", [DeleteFileApiController::class, 'delete'])->name('destroy');

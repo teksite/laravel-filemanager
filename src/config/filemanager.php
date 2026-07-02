@@ -38,9 +38,9 @@ return [
      */
     'hiddenFiles' => true,                           // Hide system and hidden files from listings
 
-    'disk_list' => [],                               // Allowed filesystem disks ,[] means show all disk
+    'disk_list' => ['s3' ,'public'],                 // Allowed filesystem disks ,['*'] means all disks
 
-    'type_list' => ['image' , 'text'],                               // Allowed mime types ,[] means show all file type (image, video , text, audio)
+    'type_list' => ['image' , 'text'],               // Allowed mime types ,[] means show all file type (image, video , text, audio)
 
     'per_page' => 5,                                // Default pagination size
 

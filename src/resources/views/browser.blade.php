@@ -1,5 +1,5 @@
 <link  crossorigin="anonymous" media="all" rel="stylesheet" href="/assets/app.css">
-<div class="filemanager overlay" id="fileManagerRoot">
+<div class="filemanager" id="fileManagerRoot">
 
     <section class="media-container" data-fm>
 

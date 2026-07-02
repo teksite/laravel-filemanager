@@ -1,10 +1,13 @@
 class DatabaseFileManager {
+
     constructor(options = {}) {
+
         this.options = {
             defaultDisk: null,
             defaultMime: null,
             ...options
         };
+
         this.state = {
             cursor: null,
             loading: false,
@@ -12,16 +15,22 @@ class DatabaseFileManager {
             disk: '',
             mimeType: ''
         };
+
+        this.selected = null;
+
         this.elements = {
             grid: document.querySelector('[data-grid]'),
             loader: document.querySelector('[data-loader]'),
             loadMore: document.querySelector('[data-load-more]'),
-            mime: document.querySelector('[data-mime]'),
-            disk: document.querySelector('[data-disk]')
+            mime: document.querySelector('[data-mimeList]'),
+            disk: document.querySelector('[data-diskList]')
+
         };
+
         this.initialize();
-        this.selected = null;
     }
+
+    /* ---------------- INIT ---------------- */
 
     initialize() {
         this.initializeDefaults();
@@ -30,19 +39,26 @@ class DatabaseFileManager {
     }
 
     initializeDefaults() {
-        this.state.disk = this.resolveDefault(this.elements.disk, this.options.defaultDisk);
-        this.state.mimeType = this.resolveDefault(this.elements.mime, this.options.defaultMime);
 
-        this.elements.disk.value = this.state.disk;
-        this.elements.mime.value = this.state.mimeType;
+        this.state.disk =this.resolveDefault(this.elements.disk, this.options.defaultDisk);
 
+        this.state.mimeType =            this.resolveDefault(this.elements.mime, this.options.defaultMime);
+
+        if (this.elements.disk?.querySelector(`option[value="${this.state.disk}"]`)) {
+            this.elements.disk.value = this.state.disk;
+        }
+
+        if (this.elements.mime?.querySelector(`option[value="${this.state.mimeType}"]`)) {
+            this.elements.mime.value = this.state.mimeType;
+        }
     }
 
     resolveDefault(select, preferred) {
-        if (!select) return '';
-        const options = Array.from(select.options ?? []);
-        const values = options.map(option => option.value);
 
+        if (!select) return '';
+
+        const options = Array.from(select.options ?? []);
+        const values = options.map(o => o.value);
 
         if (preferred !== null) {
             return values.includes(preferred) ? preferred : values[0] ?? '';
@@ -53,23 +69,28 @@ class DatabaseFileManager {
         return values[0] ?? '';
     }
 
+    /* ---------------- EVENTS ---------------- */
+
     bindEvents() {
         this.elements.loadMore?.addEventListener('click', () => this.load());
 
-        this.elements.mime?.addEventListener('change', ({target}) => {
+        this.elements.mime?.addEventListener('change', ({ target }) => {
             this.state.mimeType = target.value;
             this.load(true);
         });
-        this.elements.disk?.addEventListener('change', ({target}) => {
+
+        this.elements.disk?.addEventListener('change', ({ target }) => {
             this.state.disk = target.value;
             this.load(true);
         });
-
     }
+
+    /* ---------------- LOAD ---------------- */
 
     async load(reset = false) {
 
         if (this.state.loading || (!reset && !this.state.hasMore)) return;
+
         try {
             this.state.loading = true;
             this.toggleLoader(true);
@@ -78,41 +99,37 @@ class DatabaseFileManager {
 
             const response = await fetch(`/api/filemanager?${this.buildQuery()}`);
 
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
 
             const data = await response.json();
 
             this.updateState(data);
-
             this.renderGrid(data.files ?? []);
 
         } catch (error) {
-
             console.error('[FileManager]', error);
         } finally {
             this.state.loading = false;
             this.toggleLoader(false);
         }
-
     }
 
     buildQuery() {
+
         const query = new URLSearchParams();
+
         query.append('type', 'cursor');
 
         if (this.state.cursor) {
             query.append('cursor', this.state.cursor);
         }
 
-        if (this.state.disk) {
-            query.append('disk', this.state.disk);
-        }
+        query.append('disk', this.state.disk ?? '');
+        query.append('mime_type', this.state.mimeType ?? '');
 
-        if (this.state.mimeType) {
-            query.append('mime_type', this.state.mimeType);
-        }
         return query;
-
     }
 
     updateState(data) {
@@ -120,16 +137,18 @@ class DatabaseFileManager {
         this.state.cursor = data?.meta?.next_cursor ?? null;
         this.state.hasMore = data?.meta?.has_more ?? false;
 
-        this.elements.loadMore.style.display = this.state.hasMore ? '' : 'none';
+        if (this.elements.loadMore) {
+            this.elements.loadMore.style.display = this.state.hasMore ? '' : 'none';
+        }
     }
 
     resetGrid() {
-
         this.state.cursor = null;
         this.state.hasMore = true;
         this.elements.grid.innerHTML = '';
-
     }
+
+    /* ---------------- GRID ---------------- */
 
     renderGrid(items = []) {
 
@@ -138,23 +157,19 @@ class DatabaseFileManager {
         const fragment = document.createDocumentFragment();
 
         items.forEach(item => {
+
             const card = document.createElement('div');
 
+            card.className = 'media-card';
             card.dataset.id = item.id;
 
-            card.className = 'media-card';
+            card.innerHTML = `<div class="media-thumb">${this.renderItem(item)} </div>`;
 
-            card.innerHTML = `<div class="media-thumb">${this.renderItem(item)}</div> `;
+            card.addEventListener('click', () => this.selectItem(item));
 
-            card.addEventListener('click', () => {
-                this.selectItem(item);
-            });
-            fragment.append(card);
+            fragment.appendChild(card);
         });
-
-
-        this.elements.grid.append(fragment);
-
+        this.elements.grid.appendChild(fragment);
     }
 
     renderItem(item) {
@@ -162,45 +177,38 @@ class DatabaseFileManager {
         const type = item?.mime_type?.split('/')?.[0]?.toLowerCase();
 
         switch (type) {
-            case 'image':
-                return `<img src="${item.url}"loading="lazy">`;
-            case 'video':
-                return `<video src="${item.url}"></video>`;
-            case 'audio':
-                return ` <audiosrc="${item.url}"></audio>`;
-            default:
-                return `<div>📄</div>`;
-        }
 
+            case 'image':return `<img src="${item.url}" loading="lazy">`;
+
+            case 'video':return `<video src="${item.url}"></video>`;
+
+            case 'audio':return `<audio src="${item.url}" controls></audio>`;
+
+            default:return `<div>📄</div>`;
+        }
     }
 
+    /* ---------------- SELECT ---------------- */
 
     selectItem(item) {
         this.selected = item;
         this.renderPreview(item);
         this.renderInfo(item);
-
     }
 
-    toggleLoader(show) {
-        if (!this.elements.loader) return;
-        this.elements.loader.style.display = show ? 'flex' : 'none';
-    }
+    /* ---------------- PREVIEW ---------------- */
 
-    // sidebar info
     renderPreview(item) {
 
-        const box =
-            document.querySelector('[data-preview]');
-
+        const box = document.querySelector('[data-preview]');
         if (!box) return;
 
-        const type =
-            item.mime_type?.split('/')[0];
+        const type = item.mime_type?.split('/')[0];
 
         let html = '';
 
         switch (type) {
+
             case 'image':
                 html = `<img src="${item.url}" />`;
                 break;
@@ -216,25 +224,29 @@ class DatabaseFileManager {
             default:
                 html = this.renderFallbackIcon(type);
         }
+
         box.innerHTML = html;
     }
 
     renderFallbackIcon(type) {
 
         const icons = {
-
-            text: `<svg width="64" height="64" viewBox="0 0 24 24"><path fill="currentColor" d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6 a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/></svg>`,
-            file: ` <svg width="64" height="64" viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16 a2 2 0 0 0 2 2h12 a2 2 0 0 0 2-2V8z"/></svg>`
+            text: `<svg width="64" height="64" viewBox="0 0 24 24"><path fill="currentColor" d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/></svg>`,
+            file: `<svg width="64" height="64" viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>`
         };
+
         return `<div class="fallback-icon">${icons[type] || icons.file}</div>`;
     }
 
+    /* ---------------- INFO ---------------- */
 
     renderInfo(item) {
+
         const set = (key, value) => {
             const el = document.querySelector(`[data-${key}]`);
             if (el) el.textContent = value ?? '-';
         };
+
         set('id', item.id);
         set('title', item.title || item.original_name);
         set('size', this.formatSize(item.size));
@@ -243,68 +255,50 @@ class DatabaseFileManager {
         set('created', new Date(item.created_at).toLocaleString());
 
         const urlEl = document.querySelector('[data-url]');
-
         if (urlEl) urlEl.textContent = item.url;
 
         this.bindActions(item);
-
     }
-
 
     bindActions(item) {
 
         const openBtn = document.querySelector('[data-open]');
-
         const copyBtn = document.querySelector('[data-copy]');
-
-        openBtn.onclick = () => {
-            window.open(item.url, '_blank');
-        };
-
-        copyBtn.onclick = async () => {
-            await navigator.clipboard.writeText(item.url);
-            copyBtn.textContent = '✓';
-
-            setTimeout(() => {
-                copyBtn.textContent = '📋';
-            }, 1000);
-
-        };
-
         const deleteBtn = document.querySelector('[data-delete]');
-        deleteBtn.onclick = () => {
-            this.deleteItem(item);
-        };
-    }
 
-    formatSize(bytes) {
-
-        if (!bytes) return '0 B';
-        const units = ['B', 'KB', 'MB', 'GB'];
-
-        let i = 0;
-        while (bytes >= 1024 && i < units.length - 1) {
-            bytes /= 1024;
-            i++;
+        if (openBtn) {
+            openBtn.onclick = () => window.open(item.url, '_blank');
         }
-        return `${bytes.toFixed(1)} ${units[i]}`;
+
+        if (copyBtn) {
+            copyBtn.onclick = async () => {
+                await navigator.clipboard.writeText(item.url);
+                copyBtn.textContent = '✓';
+
+                setTimeout(() => {
+                    copyBtn.textContent = '📋';
+                }, 1000);
+            };
+        }
+
+        if (deleteBtn) {
+            deleteBtn.onclick = () => this.deleteItem(item);
+        }
     }
 
-    /* delete item */
+    /* ---------------- DELETE ---------------- */
+
     async deleteItem(item) {
 
         if (!confirm('Delete this file?')) return;
 
         try {
-            const url = `/api/filemanager/${item.id}`;
 
-            const response = await fetch(url, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
+            const response = await fetch(
+                `/api/filemanager/${item.id}`,
+                { method: 'DELETE' }
+            );
+
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
@@ -320,37 +314,49 @@ class DatabaseFileManager {
         }
     }
 
-
     removeFromGrid(id) {
 
-        const cards =
-            this.elements.grid.querySelectorAll('.media-card');
-
-        cards.forEach(card => {
-
-            if (card.dataset.id === id) {
-                card.remove();
-            }
-
-        });
+        const card = this.elements.grid.querySelector(`[data-id="${id}"]`);
+        if (card) card.remove();
     }
-
 
     clearPreview() {
 
         this.selected = null;
 
-        document.querySelector('[data-preview]').innerHTML = 'Select media';
+        const box = document.querySelector('[data-preview]');
+        if (box) box.innerHTML = 'Select media';
 
-        const fields = [
-            'id', 'title', 'url', 'size',
-            'mime', 'disk', 'created'
-        ];
-
-        fields.forEach(f => {
-            const el = document.querySelector(`[data-${f}]`);
-            if (el) el.textContent = '-';
-        });
+        ['id','title','url','size','mime','disk','created']
+            .forEach(key => {
+                const el = document.querySelector(`[data-${key}]`);
+                if (el) el.textContent = '-';
+            });
     }
 
+    /* ---------------- UTIL ---------------- */
+
+    formatSize(bytes) {
+
+        if (!bytes) return '0 B';
+
+        const units = ['B','KB','MB','GB'];
+
+        let i = 0;
+
+        while (bytes >= 1024 && i < units.length - 1) {
+            bytes /= 1024;
+            i++;
+        }
+
+        return `${bytes.toFixed(1)} ${units[i]}`;
+    }
+
+    toggleLoader(show) {
+
+        if (!this.elements.loader) return;
+
+        this.elements.loader.style.display =
+            show ? 'flex' : 'none';
+    }
 }

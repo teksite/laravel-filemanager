@@ -4,6 +4,4 @@
     </div>
 </footer>
 
-<div class="loader" data-loader style="display:none">
-    Loading...
-</div>
+

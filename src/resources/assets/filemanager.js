@@ -535,19 +535,35 @@ class DatabaseFileManager {
 
     async upload() {
 
-        if (!this.uploadFiles.length) return;
+        this.clearUploadMessages();
 
-
-        const disk = this.elements.uploadDisk.value;
-
-
-        for (const file of this.uploadFiles) {
-            const form = new FormData();
-            form.append('file', file);
-            form.append('disk', disk);
-            await this.uploadSingle(file, form);
+        if (!this.uploadFiles.length) {
+            this.showUploadMessage('Please select files first.', 'warning');
+            return;
         }
 
+        const disk = this.elements.uploadDisk?.value;
+
+        try {
+            for (const file of this.uploadFiles) {
+                const form = new FormData();
+                form.append('file', file);
+
+                form.append('disk', disk);
+
+                await this.uploadSingle(file, form);
+            }
+
+            this.resetUploader();
+
+        }
+        catch(error){
+
+            console.error(
+                '[UPLOAD]',
+                error
+            );
+        }
     }
 
     uploadSingle(file, form) {
@@ -558,22 +574,19 @@ class DatabaseFileManager {
 
                 xhr.open('POST', '/api/filemanager');
 
-                xhr.upload.addEventListener(
-                    'progress',
-                    e => {
+                xhr.upload.addEventListener( 'progress', e=>{
+                        if(!e.lengthComputable) return;
 
-                        if (!e.lengthComputable()) return;
+                        const percent= Math.round((e.loaded/e.total)*100);
 
-                        const percent = Math.round(e.loaded / e.total * 100);
+                        const bar= document.querySelector(`[data-progress="${file.name}"]`);
 
-                        const bar = document.querySelector(`[data-progress="${file.name}"]`);
-
-                        if (bar) {
-                            bar.style.width = `${percent}%`;
+                        if(bar){
+                            bar.style.width= `${percent}%`;
                         }
+
                     }
                 );
-
 
                 xhr.onload = () => {
                     let response = {};
@@ -666,8 +679,18 @@ class DatabaseFileManager {
         );
 
     }
+    resetUploader(){
 
+        this.uploadFiles=[];
 
+        if(this.elements.fileInput){
+            this.elements.fileInput.value='';
+        }
+        if(this.elements.uploadPreview){
+            this.elements.uploadPreview.innerHTML='';
+        }
+
+    }
     clearUploadMessages() {
         this.elements.uploadMessages?.replaceChildren();
 

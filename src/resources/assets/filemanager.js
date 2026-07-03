@@ -1,10 +1,12 @@
 class DatabaseFileManager {
 
+
     constructor(options = {}) {
 
         this.options = {
             defaultDisk: null,
             defaultMime: null,
+            debounceTime: 300,
             ...options
         };
 
@@ -13,40 +15,44 @@ class DatabaseFileManager {
             loading: false,
             hasMore: true,
             disk: '',
-            mimeType: ''
+            mimeType: '',
+            requestId: 0
         };
+
+        this.uploadQueue = [];
+        this.uploadActive = 0;
+        this.uploadConcurrency = 3;
 
         this.selected = null;
-
-        this.elements = {
-            grid: document.querySelector('[data-grid]'),
-            loader: document.querySelector('[data-loader]'),
-            loadMore: document.querySelector('[data-load-more]'),
-            mime: document.querySelector('[data-mimeList]'),
-            disk: document.querySelector('[data-diskList]')
-        };
-
+        this.abortController = null;
 
         this.uploadFiles = [];
-
-        this.elements.dropzone = document.querySelector('[data-dropzone]');
-
-        this.elements.fileInput = document.querySelector('[data-file-input]');
-
-        this.elements.uploadDisk = document.querySelector('[data-upload-disk]');
-
-        this.elements.uploadPreview = document.querySelector('[data-upload-preview]');
-
-        this.elements.uploadForm = document.querySelector('[data-upload-form]');
-
-        this.elements.uploadMessages = document.querySelector('[data-upload-messages]');
-
 
         this.selection = {
             enabled: false,
             mode: 'single',
             type: 'id',
             items: []
+        };
+
+        this.elements = {
+            grid: document.querySelector('[data-grid]'),
+            loader: document.querySelector('[data-loader]'),
+            loadMore: document.querySelector('[data-load-more]'),
+            mime: document.querySelector('[data-mimeList]'),
+            disk: document.querySelector('[data-diskList]'),
+
+            dropzone: document.querySelector('[data-dropzone]'),
+            fileInput: document.querySelector('[data-file-input]'),
+            uploadDisk: document.querySelector('[data-upload-disk]'),
+            uploadPreview: document.querySelector('[data-upload-preview]'),
+            uploadForm: document.querySelector('[data-upload-form]'),
+            uploadMessages: document.querySelector('[data-upload-messages]')
+        };
+
+        // debounce timers
+        this.debounceTimers = {
+            filter: null
         };
 
         this.initialize();
@@ -61,9 +67,7 @@ class DatabaseFileManager {
     }
 
     initializeDefaults() {
-
         this.state.disk = this.resolveDefault(this.elements.disk, this.options.defaultDisk);
-
         this.state.mimeType = this.resolveDefault(this.elements.mime, this.options.defaultMime);
 
         if (this.elements.disk?.querySelector(`option[value="${this.state.disk}"]`)) {
@@ -76,34 +80,50 @@ class DatabaseFileManager {
     }
 
     resolveDefault(select, preferred) {
-
         if (!select) return '';
 
-        const options = Array.from(select.options ?? []);
-        const values = options.map(o => o.value);
+        const values = Array.from(select.options ?? []).map(o => o.value);
 
-        if (preferred !== null) {
-            return values.includes(preferred) ? preferred : values[0] ?? '';
-        }
-
+        if (preferred !== null) return values.includes(preferred) ? preferred : values[0] ?? '';
         if (values.includes('')) return '';
 
         return values[0] ?? '';
     }
 
+    /* ================= DEBOUNCE ================= */
+
+    debounce(fn, key, delay = this.options.debounceTime) {
+        clearTimeout(this.debounceTimers[key]);
+        this.debounceTimers[key] = setTimeout(fn, delay);
+    }
+
     /* ================= EVENTS ================= */
 
     bindEvents() {
-        this.elements.loadMore?.addEventListener('click', () => this.load());
 
-        this.elements.mime?.addEventListener('change', ({target}) => {
-            this.state.mimeType = target.value;
-            this.load(true);
+        // LOAD MORE (anti spam click)
+        this.elements.loadMore?.addEventListener('click', (e) => {
+            if (this.state.loading) return;
+
+            this.elements.loadMore.disabled = true;
+
+            this.load().finally(() => {
+                this.elements.loadMore.disabled = false;
+            });
         });
 
-        this.elements.disk?.addEventListener('change', ({target}) => {
+        // MIME (debounced)
+        this.elements.mime?.addEventListener('change', ({ target }) => {
+            this.state.mimeType = target.value;
+
+            this.debounce(() => this.load(true), 'filter');
+        });
+
+        // DISK (debounced)
+        this.elements.disk?.addEventListener('change', ({ target }) => {
             this.state.disk = target.value;
-            this.load(true);
+
+            this.debounce(() => this.load(true), 'filter');
         });
 
         this.bindUploader();
@@ -115,6 +135,15 @@ class DatabaseFileManager {
 
         if (this.state.loading || (!reset && !this.state.hasMore)) return;
 
+        // cancel previous request (VERY IMPORTANT)
+        if (this.abortController) {
+            this.abortController.abort();
+        }
+
+        this.abortController = new AbortController();
+
+        const requestId = ++this.state.requestId;
+
         try {
             this.state.loading = true;
             this.toggleLoader(true);
@@ -122,20 +151,26 @@ class DatabaseFileManager {
             if (reset) this.resetGrid();
 
             const response = await fetch(
-                `/api/filemanager?${this.buildQuery()}`
+                `/api/filemanager?${this.buildQuery()}`,
+                { signal: this.abortController.signal }
             );
 
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
             const data = await response.json();
+
+            // prevent race condition rendering old response
+            if (requestId !== this.state.requestId) return;
 
             this.updateState(data);
             this.renderGrid(data.files ?? []);
 
         } catch (error) {
-            console.error('[FileManager]', error);
+
+            if (error.name !== 'AbortError') {
+                console.error('[FileManager]', error);
+            }
+
         } finally {
             this.state.loading = false;
             this.toggleLoader(false);
@@ -143,14 +178,11 @@ class DatabaseFileManager {
     }
 
     buildQuery() {
-
         const query = new URLSearchParams();
 
         query.append('type', 'cursor');
 
-        if (this.state.cursor) {
-            query.append('cursor', this.state.cursor);
-        }
+        if (this.state.cursor) query.append('cursor', this.state.cursor);
 
         query.append('disk', this.state.disk ?? '');
         query.append('mime_type', this.state.mimeType ?? '');
@@ -159,7 +191,6 @@ class DatabaseFileManager {
     }
 
     updateState(data) {
-
         this.state.cursor = data?.meta?.next_cursor ?? null;
         this.state.hasMore = data?.meta?.has_more ?? false;
 
@@ -182,49 +213,124 @@ class DatabaseFileManager {
 
         const fragment = document.createDocumentFragment();
 
-        items.forEach(item => {
+        for (const item of items) {
 
             const card = document.createElement('div');
-
             card.className = 'media-card';
-
             card.dataset.id = item.id;
 
             card.innerHTML = `<div class="media-thumb">${this.renderItem(item)}</div>`;
 
+            card.onclick = () => {
+                this.selectItem(item);
 
-            card.addEventListener('click', () => {
-                    this.selectItem(item);
-                    if (this.selection.enabled) {
-                        this.toggleSelection(item, card);
-                    }
+                if (this.selection.enabled) {
+                    this.toggleSelection(item, card);
                 }
-            );
-            fragment.append(card);
-        });
+            };
 
-        this.elements.grid.append(fragment);
+            fragment.appendChild(card);
+        }
+
+        this.elements.grid.appendChild(fragment);
     }
 
     renderItem(item) {
-
         const type = item?.mime_type?.split('/')?.[0]?.toLowerCase();
 
         switch (type) {
-
-            case 'image':
-                return `<img src="${item.url}" loading="lazy">`;
-
-            case 'video':
-                return `<video src="${item.url}"></video>`;
-
-            case 'audio':
-                return `<audio src="${item.url}" controls></audio>`;
-
-            default:
-                return `<div>📄</div>`;
+            case 'image': return `<img src="${item.url}" loading="lazy">`;
+            case 'video': return `<video src="${item.url}"></video>`;
+            case 'audio': return `<audio src="${item.url}" controls></audio>`;
+            default: return `<div>📄</div>`;
         }
     }
+
+    /* ================= UTIL ================= */
+
+    toggleLoader(show) {
+        if (!this.elements.loader) return;
+        this.elements.loader.style.display = show ? 'flex' : 'none';
+    }
+
+    formatSize(bytes) {
+        if (!bytes) return '0 B';
+
+        const units = ['B', 'KB', 'MB', 'GB'];
+        let i = 0;
+
+        while (bytes >= 1024 && i < units.length - 1) {
+            bytes /= 1024;
+            i++;
+        }
+
+        return `${bytes.toFixed(1)} ${units[i]}`;
+    }
+
+    /* ================= UPLOAD ================= */
+
+    bindUploader() {
+        const zone = this.elements.dropzone;
+        const input = this.elements.fileInput;
+
+        if (!zone || !input) return;
+
+        zone.onclick = () => input.click();
+
+        input.onchange = e => this.setFiles([...e.target.files]);
+
+        ['dragenter', 'dragover'].forEach(ev =>
+            zone.addEventListener(ev, e => {
+                e.preventDefault();
+                zone.classList.add('dragging');
+            })
+        );
+
+        ['dragleave', 'drop'].forEach(ev =>
+            zone.addEventListener(ev, () => zone.classList.remove('dragging'))
+        );
+
+        zone.addEventListener('drop', e => {
+            e.preventDefault();
+            this.setFiles([...e.dataTransfer.files]);
+        });
+
+        this.elements.uploadForm?.addEventListener('submit', e => {
+            e.preventDefault();
+            this.upload();
+        });
+    }
+
+    setFiles(files = []) {
+        this.uploadFiles = files;
+        this.renderUploadPreview();
+    }
+
+    renderUploadPreview() {
+        const container = this.elements.uploadPreview;
+        container.innerHTML = '';
+
+        for (const file of this.uploadFiles) {
+            container.insertAdjacentHTML('beforeend', `
+                <div class="upload-item">
+                    <div>
+                        ${file.name}
+                        <div class="upload-progress">
+                            <span data-progress="${file.name}"></span>
+                        </div>
+                    </div>
+                    <small>${this.formatSize(file.size)}</small>
+                </div>
+            `);
+        }
+    }
+
+    /* ================= LOAD MORE GUARD ================= */
+
+    canLoadMore() {
+        return !this.state.loading && this.state.hasMore;
+    }
+
 
     /* ================= SELECT ================= */
 
@@ -440,113 +546,6 @@ class DatabaseFileManager {
             });
     }
 
-    /* ================= UTIL ================= */
-
-    formatSize(bytes) {
-
-        if (!bytes) return '0 B';
-
-        const units = ['B', 'KB', 'MB', 'GB'];
-
-        let i = 0;
-
-        while (bytes >= 1024 && i < units.length - 1) {
-            bytes /= 1024;
-            i++;
-        }
-
-        return `${bytes.toFixed(1)} ${units[i]}`;
-    }
-
-    toggleLoader(show) {
-
-        if (!this.elements.loader) return;
-
-        this.elements.loader.style.display =
-            show ? 'flex' : 'none';
-    }
-
-
-    /* uploader */
-    bindUploader() {
-
-        const zone = this.elements.dropzone;
-
-        const input = this.elements.fileInput;
-
-        if (!zone || !input) return;
-
-
-        zone.addEventListener('click', () => input.click());
-
-
-        input.addEventListener('change', e => {
-            this.setFiles([...e.target.files]);
-        });
-
-
-        ['dragenter', 'dragover'].forEach(event => {
-            zone.addEventListener(event,
-                e => {
-                    e.preventDefault();
-                    zone.classList.add('dragging');
-                }
-            );
-
-        });
-
-        ['dragleave', 'drop'].forEach(event => {
-            zone.addEventListener(event, () => {
-                    zone.classList.remove('dragging');
-                }
-            );
-
-        });
-
-
-        zone.addEventListener('drop', e => {
-                e.preventDefault();
-                this.setFiles([...e.dataTransfer.files]);
-            }
-        );
-
-
-        this.elements.uploadForm?.addEventListener('submit', e => {
-                e.preventDefault();
-                this.upload();
-
-            }
-        );
-
-    }
-
-
-    setFiles(files = []) {
-        this.uploadFiles = files;
-        this.renderUploadPreview();
-    }
-
-
-    renderUploadPreview() {
-
-        const container = this.elements.uploadPreview;
-
-        container.innerHTML = '';
-
-        this.uploadFiles.forEach(file => {
-            container.insertAdjacentHTML('beforeend',
-                `<div class="upload-item">
-                            <div>
-                                ${file.name}
-                                <div class="upload-progress"><span data-progress="${file.name}"></span></div>
-                            </div>
-                            <small> ${this.formatSize(file.size)} </small>
-                       </div>
-                `
-            );
-        });
-    }
-
 
     async upload() {
 
@@ -559,113 +558,155 @@ class DatabaseFileManager {
 
         const disk = this.elements.uploadDisk?.value;
 
-        try {
-            for (const file of this.uploadFiles) {
-                const form = new FormData();
-                form.append('file', file);
+        this.uploadQueue = [...this.uploadFiles];
+        this.uploadActive = 0;
 
-                form.append('disk', disk);
+        this.uploadSummary = {
+            success: 0,
+            failed: 0
+        };
 
-                await this.uploadSingle(file, form);
-            }
+        return new Promise((resolve) => {
 
-            this.resetUploader();
+            const next = () => {
 
-        } catch (error) {
+                if (this.uploadQueue.length === 0 && this.uploadActive === 0) {
 
-            console.error(
-                '[UPLOAD]',
-                error
-            );
-        }
+                    // FINAL SYNC (only once)
+                    this.load(true);
+
+                    this.showUploadMessage(
+                        `Upload done: ${this.uploadSummary.success} success`,
+                        'success'
+                    );
+
+                    this.resetUploader();
+                    resolve();
+                    return;
+                }
+
+                while (
+                    this.uploadActive < this.uploadConcurrency &&
+                    this.uploadQueue.length > 0
+                    ) {
+
+                    const file = this.uploadQueue.shift();
+                    this.uploadActive++;
+
+                    const form = new FormData();
+                    form.append('file', file);
+                    form.append('disk', disk);
+
+                    this.uploadSingle(file, form)
+                        .then((serverItem) => {
+
+                            this.uploadSummary.success++;
+
+                            // 🔥 HYBRID UI UPDATE (NO FULL LOAD)
+                            if (this.isUploadVisible(serverItem, disk, this.state.mimeType)) {
+                                this.prependFiles([serverItem]);
+                            }
+
+                        })
+                        .catch(() => {
+                            this.uploadSummary.failed++;
+                        })
+                        .finally(() => {
+                            this.uploadActive--;
+                            next();
+                        });
+                }
+            };
+
+            next();
+        });
+    }
+
+
+    isUploadVisible(item, disk, mimeType) {
+
+        const currentDisk = this.state.disk;
+        const currentMime = this.state.mimeType;
+
+        const itemMimeGroup = item.mime_type?.split('/')?.[0];
+
+        // ALL mode checks
+        const diskAll = !currentDisk;
+        const mimeAll = !currentMime;
+
+        const diskMatch = diskAll || item.disk === currentDisk;
+        const mimeMatch = mimeAll || itemMimeGroup === mimeType;
+
+        return diskMatch && mimeMatch;
     }
 
     uploadSingle(file, form) {
 
         return new Promise((resolve, reject) => {
-                this.clearUploadMessages();
-                const xhr = new XMLHttpRequest();
 
-                xhr.open('POST', '/api/filemanager');
+            const xhr = new XMLHttpRequest();
 
-                xhr.upload.addEventListener('progress', e => {
-                        if (!e.lengthComputable) return;
+            xhr.open('POST', '/api/filemanager');
 
-                        const percent = Math.round((e.loaded / e.total) * 100);
+            xhr.upload.addEventListener('progress', e => {
+                if (!e.lengthComputable) return;
 
-                        const bar = document.querySelector(`[data-progress="${file.name}"]`);
+                const percent = Math.round((e.loaded / e.total) * 100);
 
-                        if (bar) {
-                            bar.style.width = `${percent}%`;
-                        }
-
-                    }
+                const bar = document.querySelector(
+                    `[data-progress="${file.name}"]`
                 );
 
-                xhr.onload = () => {
-                    let response = {};
-                    try {
-                        response = JSON.parse(xhr.responseText);
-                    } catch (e) {
+                if (bar) bar.style.width = `${percent}%`;
+            });
 
-                    }
+            xhr.onload = () => {
 
-                    // success
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        this.showUploadMessage(`${file.name} uploaded`, 'success');
-                        this.load(true);
-                        resolve();
-                        return;
-                    }
+                let response = {};
 
-                    // validation
-                    if (xhr.status === 422) {
-                        const errors = response.errors ?? {};
-                        Object.values(errors)
-                            .flat()
-                            .forEach(error => {
-                                this.showUploadMessage(error, 'warning');
-                            });
-                        reject();
-                        return;
-                    }
+                try {
+                    response = JSON.parse(xhr.responseText);
+                } catch {}
 
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    this.showUploadMessage(`${file.name} uploaded`, 'success');
 
-                    // permission
-                    if (xhr.status === 401 || xhr.status === 403) {
-                        this.showUploadMessage('You do not have permission to upload this file.', 'error');
-                        reject();
-                        return;
-                    }
+                    // 🔥 IMPORTANT: return file object
+                    resolve(response.data ?? response);
+                    return;
+                }
 
-                    // payload
-                    if (xhr.status === 413) {
-                        this.showUploadMessage('File size exceeds server limit.', 'warning');
-                        reject();
-                        return;
-                    }
+                reject();
+            };
 
-                    // server
-                    if (xhr.status >= 500) {
-                        this.showUploadMessage('Upload failed because of a server error.', 'error');
-                        reject();
-                        return;
-                    }
+            xhr.onerror = () => reject();
 
+            xhr.send(form);
+        });
+    }
 
-                    // fallback
-                    this.showUploadMessage(`Upload failed (${xhr.status})`, 'error');
-                    reject();
-                };
+    prependFiles(items = []) {
 
+        const fragment = document.createDocumentFragment();
 
-                xhr.onerror = () => {
-                    this.showUploadMessage('Network error occurred.', 'error');
-                    reject();
-                };
-                xhr.send(form);
-            }
-        );
+        for (const item of items) {
+
+            const card = document.createElement('div');
+            card.className = 'media-card';
+            card.dataset.id = item.id;
+
+            card.innerHTML = `
+            <div class="media-thumb">
+                ${this.renderItem(item)}
+            </div>
+        `;
+
+            card.onclick = () => this.selectItem(item);
+
+            fragment.appendChild(card);
+        }
+
+        this.elements.grid.prepend(fragment);
     }
 
 

@@ -215,6 +215,9 @@ class DatabaseFileManager {
         this.state.cursor = null;
         this.state.hasMore = true;
         this.elements.grid.innerHTML = '';
+
+        this.selection.items = [];
+        this.renderSelectedList?.();
     }
 
     /* ================= GRID ================= */
@@ -328,7 +331,7 @@ class DatabaseFileManager {
                     <div>
                         ${file.name}
                         <div class="upload-progress">
-                            <span data-progress="${file.name}"></span>
+                           <span data-progress="${file.name}-${file.lastModified}"></span>
                         </div>
                     </div>
                     <small>${this.formatSize(file.size)}</small>
@@ -712,7 +715,7 @@ class DatabaseFileManager {
 
                     reject(error);
                     return;
-                }else if (xhr.status > 500) {
+                }else if (xhr.status >= 500) {
                     const error = new Error(`Upload Server Ffailed: ${xhr.status}`);
 
                     this.emitError(error, {
@@ -758,7 +761,14 @@ class DatabaseFileManager {
             </div>
         `;
 
-            card.onclick = () => this.selectItem(item);
+            card.onclick = () => {
+
+                this.selectItem(item);
+
+                if (this.selection.enabled) {
+                    this.toggleSelection(item, card);
+                }
+            }
 
             fragment.appendChild(card);
         }

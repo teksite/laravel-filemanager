@@ -2,7 +2,6 @@
 <div class="filemanager" id="fileManagerRoot" >
     <section class="media-container" data-fm>
         @include('filemanager::partials.uploader')
-
         @include('filemanager::partials.sidebar')
         @include('filemanager::partials.header')
         @include('filemanager::partials.grid')
@@ -15,11 +14,15 @@
 
 <script>
     document.addEventListener( 'DOMContentLoaded',function (){
-        new DatabaseFileManager({defaultDisk: null, defaultMime: null}).select({
-            mode:'multi' ,
-            type : 'url'
-        });
+        // new DatabaseFileManager({defaultDisk: null, defaultMime: null}).select({
+        //     mode:'single' ,
+        //     type : 'id'
+        // });
+
+        new DatabaseFileManager({defaultDisk: null, defaultMime: null});
     });
+
+
 </script>
 
 

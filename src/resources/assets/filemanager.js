@@ -1,6 +1,14 @@
 class DatabaseFileManager {
 
-
+    static EVENTS = {
+        FILE_SELECTED: 'file:selected',
+        FILE_DELETED: 'file:deleted',
+        FILE_RENAMED: 'file:renamed',
+        FILE_UPLOADED: 'file:uploaded',
+        FILE_CHOOSE: 'file:choose',
+        GRID_UPDATED: 'grid:updated',
+        PREVIEW_CLEARED: 'preview:cleared'
+    };
     constructor(options = {}) {
 
         this.options = {
@@ -22,7 +30,7 @@ class DatabaseFileManager {
         this.uploadQueue = [];
         this.uploadActive = 0;
         this.uploadConcurrency = 3;
-
+        this.events = {};
         this.selected = null;
         this.abortController = null;
 
@@ -338,6 +346,9 @@ class DatabaseFileManager {
         this.selected = item;
         this.renderPreview(item);
         this.renderInfo(item);
+
+        this.emit(DatabaseFileManager.EVENTS.FILE_SELECTED, item);
+
     }
 
     /* ================= PREVIEW ================= */
@@ -474,27 +485,24 @@ class DatabaseFileManager {
         if (!newTitle || newTitle === item.title) return;
 
         try {
+            const res = await fetch(`/api/filemanager/${item.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title: newTitle })
+            });
 
-            const res = await fetch(
-                `/api/filemanager/${item.id}`,
-                {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        title: newTitle
-                    })
-                }
-            );
-
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status}`);
-            }
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
             if (this.selected?.id === item.id) {
                 this.selected.title = newTitle;
             }
+
+            this.emit(DatabaseFileManager.EVENTS.FILE_RENAMED, {
+                ...item,
+                title: newTitle
+            });
 
         } catch (err) {
             console.error('[RENAME ERROR]', err);
@@ -522,6 +530,9 @@ class DatabaseFileManager {
                 this.clearPreview();
             }
 
+            this.emit(DatabaseFileManager.EVENTS.FILE_DELETED, item);
+
+
         } catch (err) {
             console.error('[DELETE ERROR]', err);
         }
@@ -544,6 +555,9 @@ class DatabaseFileManager {
                 const el = document.querySelector(`[data-${k}]`);
                 if (el) el.textContent = '-';
             });
+
+        this.emit(DatabaseFileManager.EVENTS.PREVIEW_CLEARED);
+
     }
 
 
@@ -671,8 +685,10 @@ class DatabaseFileManager {
                 if (xhr.status >= 200 && xhr.status < 300) {
                     this.showUploadMessage(`${file.name} uploaded`, 'success');
 
-                    // 🔥 IMPORTANT: return file object
                     resolve(response.data ?? response);
+
+                    this.emit(DatabaseFileManager.EVENTS.FILE_UPLOADED, response.data ?? response);
+
                     return;
                 }
 
@@ -787,7 +803,10 @@ class DatabaseFileManager {
                 this.selection.callback(result);
             }
 
+            this.emit(DatabaseFileManager.EVENTS.FILE_CHOOSE, result);
+
             console.log(result);
+            return result
 
         };
 
@@ -885,5 +904,31 @@ class DatabaseFileManager {
 
         this.renderSelectedList();
 
+    }
+
+    /*------------EVENT SYSTEM-------------*/
+
+    on(event, callback) {
+        if (!this.events[event]) {
+            this.events[event] = [];
+        }
+        this.events[event].push(callback);
+    }
+
+    off(event, callback) {
+        if (!this.events[event]) return;
+
+        this.events[event] = this.events[event].filter(cb => cb !== callback);
+    }
+
+    emit(event, payload = null) {
+        if (!this.events[event]) return;
+        this.events[event].forEach(cb => {
+            try {
+                cb(payload);
+            } catch (e) {
+                console.error(`[Event Error: ${event}]`, e);
+            }
+        });
     }
 }

@@ -1,28 +1,30 @@
+
 :root{
     --bg-overlay:#00000080;
-    --bg-container:#f5f5f7;
+    --bg-container:#f6f7fb;
     --bg-card:#ffffff;
 
-    --border:#d7d7e2;
+    --border:#e5e7eb;
     --border-active:#6e6ba8;
 
     --accent:#6b67b0;
     --danger:#ef4444;
 
-    --text:#333;
-    --text-light:#777;
+    --text:#1f2937;
+    --text-light:#6b7280;
 
-    --radius-lg:24px;
+    --radius-lg:18px;
     --radius-md:14px;
     --radius-sm:10px;
 
-    --transition:.25s ease;
+    --shadow:0 10px 30px rgba(0,0,0,.08);
+
+    --transition:.2s ease;
 }
 
-
-/* ======================
-    Overlay
-====================== */
+/* =========================
+   OVERLAY
+========================= */
 
 .filemanager.overlay{
     position:fixed;
@@ -30,237 +32,405 @@
     z-index:9999;
 
     display:flex;
-    justify-content:center;
     align-items:center;
+    justify-content:center;
 
     padding:20px;
 
     background:var(--bg-overlay);
-    backdrop-filter:blur(4px);
+    backdrop-filter:blur(6px);
+
+    height:100vh;
 }
 
-
-/* ======================
-    Main Container
-====================== */
+/* =========================
+   MAIN CONTAINER
+========================= */
 
 .filemanager .media-container{
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
     width:min(1400px,100%);
-    height:min(850px,90vh);
-
-    overflow:hidden;
-
-    border-radius:var(--radius-lg);
-
-    background:var(--bg-container);
-
     display:grid;
 
     grid-template-columns:280px 1fr;
-    grid-template-rows:80px 1fr 80px;
+    grid-template-rows:70px 1fr 70px;
 
     grid-template-areas:
         "aside header"
         "aside content"
         "aside footer";
+
+    overflow:hidden;
 }
 
+/* important fix for grid children */
+.filemanager .media-container > *{
+    min-height:0;
+    min-width:0;
+}
 
-/* ======================
-    Sidebar
-====================== */
+/* =========================
+   SIDEBAR
+========================= */
 
 .filemanager .aside{
     grid-area:aside;
+    overflow-y: auto;
+    background:#fff;
+    border-right:1px solid var(--border);
+
+    padding:18px;
 
     display:flex;
     flex-direction:column;
-
-    gap:30px;
-
-    padding:25px;
-
-    border-right:1px solid var(--border);
+    gap:16px;
 }
 
-
-/* Preview */
-
+/* preview */
 .filemanager .preview-box{
-    height:180px;
-
+    height:170px;
+    background:#f3f4f6;
     border-radius:var(--radius-md);
-
-    overflow:hidden;
-
-    background:#ececec;
-
     display:flex;
     align-items:center;
     justify-content:center;
-
-    color:var(--text-light);
-
-    text-align:center;
 }
 
 .filemanager .preview-box img,
-.filemanager .preview-box video,
-.filemanager .preview-box svg{
+.filemanager .preview-box video{
     width:100%;
     height:100%;
     object-fit:cover;
 }
 
-
-/* File info */
-
+/* info */
 .filemanager .file-info{
     display:flex;
     flex-direction:column;
-    gap:20px;
+    gap:10px;
 }
 
 .filemanager .file-info h3{
+    font-size:16px;
     margin:0;
-
-    font-size:18px;
-    color:var(--text);
 }
 
 .filemanager .file-info div{
     display:flex;
     flex-direction:column;
-    gap:5px;
-
-    font-size:14px;
+    font-size:13px;
+    gap:3px;
 }
 
 .filemanager .file-info b{
-    color:var(--text);
+    font-weight:600;
 }
 
 .filemanager .file-info span{
     color:var(--text-light);
-
     overflow:hidden;
     white-space:nowrap;
     text-overflow:ellipsis;
 }
 
-
-/* ======================
-    Header
-====================== */
+/* =========================
+   HEADER
+========================= */
 
 .filemanager .header{
     grid-area:header;
 
     display:flex;
     align-items:center;
-    gap:15px;
+    justify-content:space-between;
 
-    padding:20px;
+    gap:12px;
 
+    padding:12px 18px;
+
+    background:#fff;
     border-bottom:1px solid var(--border);
 }
 
-.filemanager .header select{
-    height:45px;
+/* filters */
+.filemanager .header [data-filter-section]{
+    display:flex;
+    align-items:center;
+    gap:10px;
 
     flex:1;
-    min-width:150px;
+    min-width:0;
+}
 
-    border:none;
-    outline:none;
+/* upload */
+.filemanager .upload-dropzone{
 
-    border-radius:var(--radius-sm);
+    position:relative;
 
-    padding:0 15px;
+    border:2px dashed #d0d5dd;
+
+    border-radius:14px;
+
+    padding:30px;
+
+    background:#fafafa;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    min-height:170px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+}
+
+
+.filemanager .upload-dropzone:hover{
+
+    border-color:#4f46e5;
+
+    background:#f5f3ff;
+
+}
+
+
+.filemanager .upload-dropzone.dragging{
+
+    border-color:#4f46e5;
+
+    background:#eef2ff;
+
+    transform:scale(1.01);
+
+}
+
+
+.filemanager .upload-content{
+
+    text-align:center;
+
+}
+
+
+.filemanager .upload-icon{
+
+    color:#6366f1;
+
+    margin-bottom:10px;
+
+}
+
+
+.filemanager .upload-title{
+
+    font-weight:600;
+
+    font-size:16px;
+
+}
+
+
+.filemanager .upload-subtitle{
+
+    margin-top:6px;
+
+    color:#777;
+
+    font-size:13px;
+
+}
+
+
+.filemanager .upload-footer{
+
+    margin-top:15px;
+
+    display:flex;
+
+    gap:10px;
+
+}
+
+
+.filemanager .upload-footer select{
+
+    flex:1;
+
+    padding:10px;
+
+    border-radius:10px;
+
+}
+
+
+.filemanager .upload-btn{
+
+    border:0;
+
+    padding:10px 20px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+}
+
+
+.filemanager .upload-files{
+
+    margin-top:15px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:8px;
+}
+
+
+.filemanager .upload-item{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:10px;
+
+    background:#f5f5f5;
+
+    border-radius:10px;
+}
+
+
+.filemanager .upload-progress{
+
+    width:100%;
+
+    height:6px;
+
+    background:#ddd;
+
+    border-radius:10px;
+
+    overflow:hidden;
+
+    margin-top:5px;
+}
+
+
+.filemanager .upload-progress span{
+
+    display:block;
+
+    width:0;
+
+    height:100%;
+
+    background:#4f46e5;
+
+    transition:.2s;
+}
+
+/* inputs */
+.filemanager .header select,
+.filemanager .header input[type="file"]{
+    height:40px;
+
+    border:1px solid var(--border);
+    border-radius:10px;
+
+    padding:0 10px;
+
+    font-size:13px;
 
     background:#fff;
 
-    font-size:14px;
+    outline:none;
 
-    transition:var(--transition);
+    min-width:140px;
 }
 
 .filemanager .header select:focus{
-    box-shadow:
-        0 0 0 2px var(--border-active);
+    border-color:var(--border-active);
+    box-shadow:0 0 0 2px rgba(110,107,168,.15);
 }
 
-
-/* ======================
-    Media Grid
-====================== */
+/* =========================
+   GRID (FIXED SCROLL CORE)
+========================= */
 
 .filemanager .media-grid{
     grid-area:content;
 
-    overflow:auto;
+    overflow-y:auto;
+    overflow-x:hidden;
 
-    padding:20px;
+    min-height:0;
+
+    padding:18px;
 
     display:grid;
 
-    grid-template-columns:
-        repeat(
-            auto-fill,
-            minmax(200px,1fr)
-        );
+    grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
+    gap:14px;
 
-    gap:20px;
+    align-content:start;
 }
 
+/* scrollbar */
+.filemanager .media-grid::-webkit-scrollbar{
+    width:8px;
+}
 
+.filemanager .media-grid::-webkit-scrollbar-thumb{
+    background:#cbd5e1;
+    border-radius:10px;
+}
+
+/* card */
 .filemanager .media-card{
+    aspect-ratio:1 / 1;
+
+    border-radius:var(--radius-md);
+
     overflow:hidden;
+
+    background:#fff;
+
+    border:1px solid var(--border);
 
     cursor:pointer;
 
-    background:var(--bg-card);
-
-    border:2px solid transparent;
-    border-radius:var(--radius-md);
-
-    aspect-ratio:4/3;
-
     transition:var(--transition);
+
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
 }
 
 .filemanager .media-card:hover{
-    transform:translateY(-2px);
-
-    border-color:#c9c9d8;
+    transform:translateY(-3px);
+    box-shadow:0 12px 25px rgba(0,0,0,.1);
 }
 
 .filemanager .media-card.selected{
-    border-color:var(--border-active);
-}
-
-
-.filemanager .media-thumb{
-    width:100%;
-    height:100%;
+    border:2px solid var(--border-active);
 }
 
 .filemanager .media-thumb img,
-.filemanager .media-thumb video,
-.filemanager .media-thumb svg{
+.filemanager .media-thumb video{
     width:100%;
     height:100%;
     object-fit:cover;
 }
 
-.filemanager .media-name{
-    display:none;
-}
-
-
-/* ======================
-    Footer
-====================== */
+/* =========================
+   FOOTER
+========================= */
 
 .filemanager .footer{
     grid-area:footer;
@@ -269,91 +439,58 @@
     justify-content:space-between;
     align-items:center;
 
-    padding:20px;
+    padding:12px 18px;
 
+    background:#fff;
     border-top:1px solid var(--border);
 }
 
-.filemanager .footer > div{
-    display:flex;
-    gap:10px;
-}
 
 
-/* ======================
-    Buttons
-====================== */
+/* =========================
+   BUTTONS
+========================= */
 
 .filemanager button{
+    border:none;
     cursor:pointer;
 
-    border:none;
-    outline:none;
+    padding:10px 14px;
 
-    padding:12px 24px;
+    border-radius:10px;
 
-    border-radius:var(--radius-sm);
+    font-size:13px;
+
+    background:#f3f4f6;
 
     transition:var(--transition);
-
-    font-size:14px;
 }
 
 .filemanager button:hover{
+    background:#e5e7eb;
     transform:translateY(-1px);
 }
 
-
-.filemanager .close-btn{
-    color:var(--danger);
-
-    background:white;
-
-    border:1px solid var(--danger);
+.filemanager .delete-button{
+    background:var(--danger);
+    color:#fff;
 }
 
-.filemanager .load-more-btn{
-    background:#fff;
-}
-
-.filemanager .select-btn{
-    color:white;
-
-    background:var(--accent);
+.filemanager .delete-button:hover{
+    background:#dc2626;
 }
 
 
-/* ======================
-    Loader
-====================== */
-
-.filemanager #loader{
-    position:absolute;
-    inset:0;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    background:#ffffff80;
-}
 
 
-/* ======================
-    Tablet
-====================== */
+/* =========================
+   TABLET
+========================= */
 
-@media (max-width:992px){
+@media (max-width: 992px){
 
     .filemanager .media-container{
-
         grid-template-columns:1fr;
-
-        grid-template-rows:
-            auto
-            1fr
-            auto;
-
         grid-template-areas:
             "header"
             "content"
@@ -363,35 +500,54 @@
     .filemanager .aside{
         display:none;
     }
-
 }
 
+/* =========================
+   MOBILE FIX (IMPORTANT)
+========================= */
 
-/* ======================
-    Mobile
-====================== */
+@media (max-width: 768px){
 
-@media (max-width:600px){
+    .filemanager .media-container{
+        display:flex;
+        flex-direction:column;
+
+        height:100vh;
+    }
 
     .filemanager .header{
         flex-direction:column;
+        align-items:stretch;
+        gap:10px;
+    }
+
+    /* upload top */
+    .filemanager .header [data-uploader-section]{
+        order:1;
+        width:100%;
+    }
+
+    .filemanager .header [data-uploader-section] input{
+        width:100%;
+    }
+
+    /* filters bottom */
+    .filemanager .header [data-filter-section]{
+        order:2;
+        flex-wrap:wrap;
+        width:100%;
     }
 
     .filemanager .header select{
-        width:100%;
+        flex:1;
+        min-width:120px;
     }
 
-    .filemanager .footer{
-        flex-direction:column;
-        gap:15px;
-    }
+    .filemanager .media-grid{
+        flex:1;
+        overflow-y:auto;
 
-    .filemanager .footer > div{
-        width:100%;
+        grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));
+        gap:12px;
     }
-
-    .filemanager button{
-        width:100%;
-    }
-
 }

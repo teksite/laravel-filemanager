@@ -55,14 +55,14 @@ class DatabaseFileManager {
             uploadDisk: document.querySelector('[data-upload-disk]'),
             uploadPreview: document.querySelector('[data-upload-preview]'),
             uploadForm: document.querySelector('[data-upload-form]'),
-            uploadMessages: document.querySelector('[data-upload-messages]')
+            uploadMessages: document.querySelector('[data-messages]')
         };
 
         // debounce timers
         this.debounceTimers = {
             filter: null
         };
-
+        this.errorHandlers = [];
         this.initialize();
     }
 
@@ -174,6 +174,10 @@ class DatabaseFileManager {
             this.renderGrid(data.files ?? []);
 
         } catch (error) {
+            this.emitError(error, {
+                context: 'load',
+                cursor: this.state.cursor
+            });
 
             if (error.name !== 'AbortError') {
                 console.error('[FileManager]', error);
@@ -505,7 +509,10 @@ class DatabaseFileManager {
             });
 
         } catch (err) {
-            console.error('[RENAME ERROR]', err);
+            this.emitError(err, {
+                context: 'rename',
+                file: item.id
+            });
         }
     }
 
@@ -534,7 +541,10 @@ class DatabaseFileManager {
 
 
         } catch (err) {
-            console.error('[DELETE ERROR]', err);
+            this.emitError(err, {
+                context: 'delete',
+                file: item.id
+            });
         }
     }
 
@@ -690,12 +700,43 @@ class DatabaseFileManager {
                     this.emit(DatabaseFileManager.EVENTS.FILE_UPLOADED, response.data ?? response);
 
                     return;
+                }else if (xhr.status >= 400  && xhr.status < 500) {
+
+                    const error = new Error(`Upload forbidden: ${xhr.status}`);
+
+                    this.emitError(error, {
+                        context: 'upload',
+                        file: file.name,
+                        response: response
+                    });
+
+                    reject(error);
+                    return;
+                }else if (xhr.status > 500) {
+                    const error = new Error(`Upload Server Ffailed: ${xhr.status}`);
+
+                    this.emitError(error, {
+                        context: 'upload',
+                        file: file.name,
+                        response: response
+                    });
+
+                    reject(error);
+                    return;
                 }
 
                 reject();
             };
 
-            xhr.onerror = () => reject();
+            xhr.onerror = () => {
+                const error = new Error('Network error during upload');
+                this.emitError(error, {
+                    context: 'upload',
+                    file: file.name
+                });
+
+                reject(error);
+            };
 
             xhr.send(form);
         });
@@ -930,5 +971,68 @@ class DatabaseFileManager {
                 console.error(`[Event Error: ${event}]`, e);
             }
         });
+    }
+
+    /*----------ERROR-----------*/
+    onError(handler) {
+        this.errorHandlers.push(handler);
+    }
+
+    emitError(error, context = {}) {
+
+        const normalized = {
+            message: error?.message || 'Unknown error',
+            stack: error?.stack || null,
+            context,
+            time: new Date().toISOString()
+        };
+
+        console.error('[FileManager Error]', normalized);
+
+        this.errorHandlers.forEach(fn => {
+            try {
+                fn(normalized);
+            } catch (e) {
+                console.error('Error handler failed', e);
+            }
+        });
+
+        this.showErrorToUser(normalized.message);
+
+    }
+
+    showErrorToUser(message) {
+
+        const container = this.getEl('[data-messages]');
+        if (!container) return;
+
+        const el = document.createElement('div');
+
+        el.className = 'upload-message error';
+        el.innerHTML = `<span>✕</span><span>${message}</span>`;
+
+        container.prepend(el);
+
+        setTimeout(() => el.remove(), 5000);
+    }
+
+    async safeFetch(url, options = {}, context = {}) {
+
+        try {
+            const res = await fetch(url, options);
+
+            if (!res.ok) {
+                const error = new Error(`HTTP ${res.status}`);
+                this.emitError(error, { ...context, url, status: res.status });
+                throw error;
+            }
+
+            return await res.json();
+
+        } catch (error) {
+
+            this.emitError(error, { ...context, url });
+            throw error;
+        }
     }
 }

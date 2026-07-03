@@ -14,12 +14,9 @@
 
 <script>
     document.addEventListener( 'DOMContentLoaded',function (){
-        // new DatabaseFileManager({defaultDisk: null, defaultMime: null}).select({
-        //     mode:'single' ,
-        //     type : 'id'
-        // });
+        new DatabaseFileManager({defaultDisk: null, defaultMime: null}).select({mode:'multi' , type : 'id'});
 
-        new DatabaseFileManager({defaultDisk: null, defaultMime: null});
+        // new DatabaseFileManager({defaultDisk: null, defaultMime: null});
     });
 
 

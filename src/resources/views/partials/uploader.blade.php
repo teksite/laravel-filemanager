@@ -1,4 +1,4 @@
-<div data-uploader-section>
+<div data-uploader-section class="uploader-section">
 
     @if(count($allowedDisks))
         <span>Upload</span>

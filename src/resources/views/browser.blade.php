@@ -1,7 +1,7 @@
 <link crossorigin="anonymous" media="all" rel="stylesheet" href="/assets/app.css">
 <div class="filemanager" id="fileManagerRoot" >
-    @include('filemanager::partials.uploader')
     <section class="media-container" data-fm>
+        @include('filemanager::partials.uploader')
 
         @include('filemanager::partials.sidebar')
         @include('filemanager::partials.header')

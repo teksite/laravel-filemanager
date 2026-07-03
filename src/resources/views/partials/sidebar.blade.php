@@ -22,8 +22,10 @@
             <b>URL</b>
 
             <span data-url>-</span>
-            <button data-open title="open">🔗</button>
-            <button data-copy title="copy">📋</button>
+            <div class="url-btns">
+                <button data-open title="open">🔗</button>
+                <button data-copy title="copy">📋</button>
+            </div>
         </div>
 
         <div>

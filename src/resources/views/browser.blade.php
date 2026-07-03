@@ -14,9 +14,12 @@
 <script src="/assets/app.js"></script>
 
 <script>
-    document.addEventListener(
-        'DOMContentLoaded',
-        () => new DatabaseFileManager({defaultDisk: null, defaultMime: null}));
+    document.addEventListener( 'DOMContentLoaded',function (){
+        new DatabaseFileManager({defaultDisk: null, defaultMime: null}).select({
+            mode:'multi' ,
+            type : 'url'
+        });
+    });
 </script>
 
 

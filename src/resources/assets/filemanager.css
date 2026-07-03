@@ -5,6 +5,8 @@
     --border: #e5e7eb;
     --border-active: #6e6ba8;
     --accent: #6b67b0;
+    --primary: #0900b8;
+    --primary-darker: #08035e;
     --danger: #ef4444;
     --text: #1f2937;
     --text-light: #6b7280;
@@ -326,7 +328,7 @@
     aspect-ratio: 1/1;
     background: #fff;
     border-radius: var(--radius-md);
-    border: 1px solid var(--border);
+    border: 3px solid var(--border);
     overflow: hidden;
     cursor: pointer;
     transition: var(--transition);
@@ -336,7 +338,7 @@
     box-shadow: 0 12px 25px rgba(0, 0, 0, .1);
 }
 .filemanager .media-card.selected {
-    border: 2px solid var(--border-active);
+    border: 3px solid var(--border-active);
 }
 .filemanager .media-thumb {
     width: 100%;
@@ -382,6 +384,59 @@
     color: #fff;
     margin: auto 0 0 0;
 }
+
+
+
+
+
+/* =========================
+   SELECT
+========================= */
+.filemanager .media-card.selected{
+    border:2px solid #2563eb;
+    transform:scale(.98);
+}
+.filemanager .selected-list{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+.filemanager .selected-item{
+    position:relative;
+    width:60px;
+    height:60px;
+    border-radius:8px;
+    overflow:hidden;
+    border:1px solid #ddd;
+}
+.filemanager .selected-thumb{
+    width:100%;
+    height:100%;
+}
+.filemanager .selected-thumb img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+.filemanager .selected-item button{
+    position:absolute;
+    top:2px;
+    right:2px;
+    width:20px;
+    height:20px;
+    border:none;
+    border-radius:50%;
+    cursor:pointer;
+}
+.filemanager .choose-btn{
+    background-color: var(--primary);
+    color: #fffbeb;
+    font-weight: bold;
+}
+.filemanager .choose-btn:hover{
+    background-color: var(--primary-darker);
+}
+
 /* =========================
    TABLET
 ========================= */
@@ -414,3 +469,5 @@
             repeat(auto-fill, minmax(130px, 1fr));
     }
 }
+
+

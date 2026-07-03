@@ -41,6 +41,14 @@ class DatabaseFileManager {
 
         this.elements.uploadMessages = document.querySelector('[data-upload-messages]');
 
+
+        this.selection = {
+            enabled: false,
+            mode: 'single',
+            type: 'id',
+            items: []
+        };
+
         this.initialize();
     }
 
@@ -179,16 +187,23 @@ class DatabaseFileManager {
             const card = document.createElement('div');
 
             card.className = 'media-card';
+
             card.dataset.id = item.id;
 
             card.innerHTML = `<div class="media-thumb">${this.renderItem(item)}</div>`;
 
-            card.addEventListener('click', () => this.selectItem(item));
 
-            fragment.appendChild(card);
+            card.addEventListener('click', () => {
+                    this.selectItem(item);
+                    if (this.selection.enabled) {
+                        this.toggleSelection(item, card);
+                    }
+                }
+            );
+            fragment.append(card);
         });
 
-        this.elements.grid.appendChild(fragment);
+        this.elements.grid.append(fragment);
     }
 
     renderItem(item) {
@@ -556,8 +571,7 @@ class DatabaseFileManager {
 
             this.resetUploader();
 
-        }
-        catch(error){
+        } catch (error) {
 
             console.error(
                 '[UPLOAD]',
@@ -574,15 +588,15 @@ class DatabaseFileManager {
 
                 xhr.open('POST', '/api/filemanager');
 
-                xhr.upload.addEventListener( 'progress', e=>{
-                        if(!e.lengthComputable) return;
+                xhr.upload.addEventListener('progress', e => {
+                        if (!e.lengthComputable) return;
 
-                        const percent= Math.round((e.loaded/e.total)*100);
+                        const percent = Math.round((e.loaded / e.total) * 100);
 
-                        const bar= document.querySelector(`[data-progress="${file.name}"]`);
+                        const bar = document.querySelector(`[data-progress="${file.name}"]`);
 
-                        if(bar){
-                            bar.style.width= `${percent}%`;
+                        if (bar) {
+                            bar.style.width = `${percent}%`;
                         }
 
                     }
@@ -679,20 +693,156 @@ class DatabaseFileManager {
         );
 
     }
-    resetUploader(){
 
-        this.uploadFiles=[];
+    resetUploader() {
 
-        if(this.elements.fileInput){
-            this.elements.fileInput.value='';
+        this.uploadFiles = [];
+
+        if (this.elements.fileInput) {
+            this.elements.fileInput.value = '';
         }
-        if(this.elements.uploadPreview){
-            this.elements.uploadPreview.innerHTML='';
+        if (this.elements.uploadPreview) {
+            this.elements.uploadPreview.innerHTML = '';
         }
 
     }
+
     clearUploadMessages() {
         this.elements.uploadMessages?.replaceChildren();
+
+    }
+
+    /* ================= SELECT ================= */
+
+    select(config = {}) {
+
+        this.selection.enabled = true;
+
+        this.selection.mode = ['single', 'multi'].includes(config.mode) ? config.mode : 'single';
+
+        this.selection.type = ['id', 'url'].includes(config.type) ? config.type : 'id';
+
+        this.selection.callback = config.onChoose || null;
+
+        this.renderChooseButton();
+
+        return this;
+    }
+
+    renderChooseButton() {
+
+        const container = document.querySelector('.action-btns');
+        if (!container) return;
+
+        container.innerHTML = `<button type="button" class="choose-btn" data-choose> CHOOSE</button>`;
+
+        container.querySelector('[data-choose]').onclick = () => {
+
+            const data = this.selection.items.map(item =>
+                this.selection.type === 'url' ? item.url : item.id);
+            const result = this.selection.mode === 'single' ? (data[0] || null) : data;
+
+            if (typeof this.selection.callback === 'function') {
+                this.selection.callback(result);
+            }
+
+            console.log(result);
+
+        };
+
+    }
+
+
+    toggleSelection(item, card) {
+
+        const exists = this.selection.items.find(x => x.id === item.id);
+
+        // remove
+        if (exists) {
+            this.selection.items = this.selection.items.filter(x => x.id !== item.id);
+
+            card.classList.remove('selected');
+            this.renderSelectedList();
+            return;
+        }
+
+
+        // single
+
+        if (this.selection.mode === 'single') {
+
+            this.selection.items = [];
+
+            document.querySelectorAll('.media-card.selected')
+                .forEach(x => x.classList.remove('selected'));
+        }
+
+        this.selection.items.push(item);
+
+        card.classList.add('selected');
+
+        this.renderSelectedList();
+
+    }
+
+    renderSelectedList() {
+
+        const container = document.querySelector('.selected-list');
+
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        this.selection.items.forEach(item => {
+
+            const div = document.createElement('div');
+            div.className = 'selected-item';
+            div.innerHTML = `
+                <div class="selected-thumb">
+                    ${this.renderSmallPreview(item)}
+                </div>
+                <button data-remove="${item.id}" > × </button>`;
+
+
+            div.querySelector('button').onclick = () => {
+                this.removeSelection(item.id);
+            }
+
+            container.append(div);
+
+        });
+
+    }
+
+
+    renderSmallPreview(item) {
+
+        const type = item.mime_type?.split('/')?.[0];
+
+        switch (type) {
+
+            case 'image':
+                return `<img src="${item.url}">`;
+
+            case 'video':
+                return `🎬`;
+
+            case 'audio':
+                return `🎵`;
+
+            default:
+                return `📄`;
+        }
+    }
+
+    removeSelection(id) {
+        this.selection.items = this.selection.items.filter(x => x.id !== id);
+
+        const card = this.elements.grid.querySelector(`[data-id="${id}"]`);
+
+        card?.classList.remove('selected');
+
+        this.renderSelectedList();
 
     }
 }

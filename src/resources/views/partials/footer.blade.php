@@ -2,6 +2,11 @@
     <div>
         <button role="button" type="button" data-load-more>Load More</button>
     </div>
+    <div class="selected-list">
+    </div>
+    <div class="action-btns">
+
+    </div>
 </footer>
 
 

@@ -1,5 +1,5 @@
 <link crossorigin="anonymous" media="all" rel="stylesheet" href="/assets/app.css">
-<div class="filemanager" id="fileManagerRoot" >
+<div class="filemanager" id="fileManagerRoot">
     <section class="media-container" data-fm>
         @include('filemanager::partials.uploader')
         @include('filemanager::partials.sidebar')
@@ -10,27 +10,34 @@
     </section>
 
 </div>
-<script type="module">
-    import { initFileManager } from '/assets/browser/index.js';
+{{--<script type="module">--}}
+{{--    import { initFileManager } from '/assets/browser/index.js';--}}
+{{--    document.addEventListener('DOMContentLoaded', () => {--}}
+{{--        const fm = initFileManager({--}}
+{{--            api: {--}}
+{{--                baseUrl: '/api/filemanager'--}}
+{{--            },--}}
+{{--            upload: {--}}
+{{--                concurrency: 3--}}
+{{--            },--}}
+{{--            selection: {--}}
+{{--                mode: 'multi',--}}
+{{--                type: 'id'--}}
+{{--            }--}}
+{{--        });--}}
+
+{{--        window.fm = fm; // optional debug access--}}
+
+{{--    });--}}
+{{--</script>--}}
+
+<script src="/assets/app.js"> </script>
+<script>
     document.addEventListener('DOMContentLoaded', () => {
-        const fm = initFileManager({
-            api: {
-                baseUrl: '/api/filemanager'
-            },
-            upload: {
-                concurrency: 3
-            },
-            selection: {
-                mode: 'multi',
-                type: 'id'
-            }
+        new DatabaseFileManager().select({
+            mode: 'multi'
         });
-
-        window.fm = fm; // optional debug access
-
-
-
-    });
+    })
 </script>
 
 

@@ -1,10 +1,11 @@
 import Config from "./core/Config.js";
 import EventEmitter from "./core/EventEmitter.js";
 import StateManager from "./core/StateManager.js";
+import FileManager from "./core/Filemanager.js";
 
-function createDatabaseFileManager(config = {}) {
+function createDatabaseFileManager(configs = {}) {
 
-    const config = new Config(config);
+    const config = new Config(configs);
 
     const eventBus = new EventEmitter();
 

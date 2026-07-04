@@ -1,6 +1,6 @@
 export default class StateManager {
 
-    constructor({eventBus = null, initialState = {}} = {}) {
+    constructor({eventBus, initialState = {}} = {}) {
         this.eventBus = eventBus;
 
         this.initialState = {
@@ -144,6 +144,7 @@ export default class StateManager {
      */
 
     emit(event, ...args) {
+
 
         if (!this.eventBus?.emit) return;
 

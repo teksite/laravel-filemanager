@@ -1,8 +1,8 @@
-import FileManager from './core/FileManager.js';
+import FileManager from './DatabaseFileManager.js';
 
 export function initFileManager(config = {}) {
 
-    const fm = new FileManager(config);
+    const fm = new DatabaseFileManager(config);
 }
 
 export default initFileManager;

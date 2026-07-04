@@ -10,16 +10,27 @@
     </section>
 
 </div>
-<script src="/assets/app.js"></script>
+<script type="module">
+    import { initFileManager } from '/assets/browser/index.js';
+    document.addEventListener('DOMContentLoaded', () => {
+        const fm = initFileManager({
+            api: {
+                baseUrl: '/api/filemanager'
+            },
+            upload: {
+                concurrency: 3
+            },
+            selection: {
+                mode: 'multi',
+                type: 'id'
+            }
+        });
 
-<script>
-    document.addEventListener( 'DOMContentLoaded',function (){
-        new DatabaseFileManager({defaultDisk: null, defaultMime: null}).select({mode:'multi' , type : 'id'});
+        window.fm = fm; // optional debug access
 
-        // new DatabaseFileManager({defaultDisk: null, defaultMime: null});
+
+
     });
-
-
 </script>
 
 

@@ -4,7 +4,7 @@
         <span>Upload</span>
         <form data-upload-form>
             <div class="upload-dropzone" data-dropzone>
-                <input type="file" hidden multiple data-file-input>
+                <input name="file" type="file" hidden multiple data-file-input>
                 <div class="upload-content">
                     <div class="upload-icon">
                         <svg width="56" height="56" viewBox="0 0 24 24">
@@ -20,7 +20,7 @@
                 </div>
             </div>
             <div class="upload-footer">
-                <select data-upload-disk>
+                <select data-upload-disk name="disk">
                     @foreach($allowedDisks as $disk)
                         <option value="{{$disk}}">
                             {{$disk}}

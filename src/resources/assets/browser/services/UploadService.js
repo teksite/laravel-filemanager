@@ -97,9 +97,11 @@ export default class UploadService {
 
     async start(onProgress = null) {
 
+        const selectedFiles = this.state.uploadFiles ?? []
+
         const selectedDisk = this.diskSelectorEl?.value ?? null;
 
-        if (!this.files.length) {
+        if (!selectedFiles.length) {
             this.errorService?.emit(new Error('Please select files first'),
                 {
                     context: 'upload_empty'
@@ -123,7 +125,7 @@ export default class UploadService {
 
         this.queue = [];
 
-        for (const file of this.files) {
+        for (const file of selectedFiles) {
             if (!this.validatingMime(file)) {
 
                 this.results.failed++;
@@ -170,7 +172,7 @@ export default class UploadService {
                     this.uploadFile(file, selectedDisk, onProgress)
                         .then(res => {
                             this.results.success++;
-                            this.eventBus?.emit(Events.UPLOAD_SUCCESS, res);
+                            this.eventBus?.emit(Events.UPLOAD_SUCCESS, {response: res , file});
                         })
                         .catch(err => {
                             this.results.failed++;
@@ -214,10 +216,7 @@ export default class UploadService {
 
                     const percent = Math.round((e.loaded / e.total) * 100);
 
-                    const payload = {
-                        file,
-                        percent
-                    };
+                    const payload = {file, percent};
 
                     onProgress?.(payload);
 

@@ -32,7 +32,7 @@ export default class DatabaseFileManager {
 
                 diskSelectorEl: this.configs.get('ui.uploadDiskSelector'),
             },
-            option: this.configs.section('upload'),
+            options: this.configs.section('upload'),
         }, this.eventBus, this.states, this.errorBus);
 
         new UploaderPreviewUi({

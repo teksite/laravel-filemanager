@@ -13,6 +13,7 @@ export default class UploadService {
             allowedDisks: [],
             ...options
         };
+        console.log(options ,  this.options)
 
         this.eventBus = eventBus;
         this.state = state;
@@ -282,6 +283,8 @@ export default class UploadService {
 
     validatingDisk(disk) {
 
+        console.log(this.options)
+        console.log('sdfsfsdfsdfdsfsf' , this.options.allowedDisks)
         const disks = this.options.allowedDisks;
 
         if (!disks.length) return true;

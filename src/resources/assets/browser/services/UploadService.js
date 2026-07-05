@@ -95,7 +95,7 @@ export default class UploadService {
     /*===== Upload Process ======*/
 
     async start(onProgress = null) {
-        if (!this.formActivationStatus()) {
+        if (this.isUploading()) {
             return;
         }
 
@@ -312,12 +312,12 @@ export default class UploadService {
 
 
     toggleFormActivation(status = true) {
-        this.state.set('upload.activeForm' ,status);
+        this.state.set('upload.uploading' ,status);
     }
 
 
-    formActivationStatus() {
-        return this.state.get('upload.activeForm') ?? true;
+    isUploading() {
+        return this.state.get('upload.uploading') ?? false;
     }
 
     reset(){

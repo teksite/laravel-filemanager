@@ -1,4 +1,4 @@
-import {$} from "../helpers/dom.js";
+import {$, escapeHtml} from "../helpers/dom.js";
 import Events from "../constants/events.js";
 import formatSize from "../helpers/formatSize.js";
 import {getMimeIcon} from "../helpers/mime.js";
@@ -62,11 +62,12 @@ export default class UploaderPreviewUi {
     renderPreviewItem(file) {
 
         const id = this.fileId(file);
+        const fileName = escapeHtml(file.name);
         return `
             <div class="upload-item" data-file="${id}">
                 <div>
                     ${getMimeIcon(file.type)}
-                    ${file.name}
+                    ${fileName}
                     <div class="upload-progress">
                         <div class="progress-bar" data-progress="${id}"></div>
                     </div>
@@ -103,7 +104,10 @@ export default class UploaderPreviewUi {
     }
 
     fileId(file) {
-        return `${file.name}-${file.size}-${file.lastModified}`;
+        if(!file.__id){
+            file.__id= crypto.randomUUID();
+        }
+        return file.__id;
     }
 
     updatePreview(file, percent) {

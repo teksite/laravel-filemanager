@@ -19,7 +19,7 @@ export function $all(selector, root = document) {
 /**
  * Create element with optional class and html
  */
-export function create(tag, { className = '', html = '' } = {}) {
+export function create(tag, {className = '', html = ''} = {}) {
     const el = document.createElement(tag);
 
     if (className) el.className = className;
@@ -96,4 +96,11 @@ export function prependMany(parent, nodes = []) {
  */
 export function exists(el) {
     return !!(el && el.nodeType === 1);
+}
+
+
+export function escapeHtml(str) {
+
+    return str.replace(/[&<>"']/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[m]));
+
 }

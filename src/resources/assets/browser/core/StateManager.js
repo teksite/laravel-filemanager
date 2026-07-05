@@ -25,7 +25,7 @@ export default class StateManager {
                 queue: 0,
                 progress: 0,
                 files: [],
-                activeForm: true
+                uploading: false
             }
         };
     }

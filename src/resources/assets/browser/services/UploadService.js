@@ -13,7 +13,7 @@ export default class UploadService {
             allowedDisks: [],
             ...options
         };
-        console.log(options ,  this.options)
+        this.handlers = [];
 
         this.eventBus = eventBus;
         this.state = state;
@@ -56,34 +56,35 @@ export default class UploadService {
             this.inputEl.click();
         };
 
-        this.inputEl.addEventListener('change', e => this.setFiles([...e.target.files]));
+        this.handlers = {
 
-        ['dragenter', 'dragover'].forEach(event => {
-            this.dropzoneEl.addEventListener(event, e => {
-                    e.preventDefault();
-                    this.dropzoneEl.classList.add('dragging');
-                }
-            );
+            click: () => {
+                this.inputEl.click();
+            },
 
-        });
+            change: (e) => {
+                this.setFiles([...e.target.files]);
+            },
 
-        ['dragleave', 'drop'].forEach(event => {
-            this.dropzoneEl.addEventListener(event, () => {
-                    this.dropzoneEl.classList.remove('dragging');
-                }
-            );
-        });
-
-        this.dropzoneEl.addEventListener('drop', e => {
-            e.preventDefault();
-            this.setFiles([...e.dataTransfer.files]);
-        });
-
-        this.formEl.addEventListener('submit', async e => {
+            submit: (e) => {
                 e.preventDefault();
                 this.start();
+            },
+
+            drop: (e) => {
+                e.preventDefault();
+                this.setFiles([...e.dataTransfer.files]);
             }
-        );
+
+        };
+
+        this.dropzoneEl.addEventListener('click', this.handlers.click);
+
+        this.inputEl.addEventListener('change', this.handlers.change);
+
+        this.formEl.addEventListener('submit', this.handlers.submit);
+
+        this.dropzoneEl.addEventListener('drop', this.handlers.drop);
     }
 
     setFiles(files = []) {
@@ -283,13 +284,10 @@ export default class UploadService {
 
     validatingDisk(disk) {
 
-        console.log(this.options)
-        console.log('sdfsfsdfsdfdsfsf' , this.options.allowedDisks)
         const disks = this.options.allowedDisks;
 
         if (!disks.length) return true;
 
-        console.log(disks.includes(disk))
         return disks.includes(disk);
     }
 
@@ -319,4 +317,18 @@ export default class UploadService {
         this.state.set('upload.files', [])
     }
 
+
+    destroy() {
+
+        this.stop();
+
+        this.dropzoneEl?.removeEventListener('click', this.handlers.click);
+
+        this.inputEl?.removeEventListener('change', this.handlers.change);
+
+        this.formEl?.removeEventListener('submit', this.handlers.submit);
+
+        this.dropzoneEl?.removeEventListener('drop', this.handlers.drop);
+
+    }
 }

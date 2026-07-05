@@ -22,7 +22,8 @@ export default class DatabaseFileManager {
     }
 
     uploader() {
-        new UploadService({
+
+        this.uploadService = new UploadService({
             url: this.configs.get('api.uploadUrl'),
             elements: {
                 formEl: this.configs.get('ui.uploadFormSelector'),
@@ -35,9 +36,16 @@ export default class DatabaseFileManager {
             options: this.configs.section('upload'),
         }, this.eventBus, this.states, this.errorBus);
 
-        new UploaderPreviewUi({
+        this.previewUi = new UploaderPreviewUi({
             uploadPreviewSelector: this.configs.get('ui.uploadPreviewSelector')
         }, this.eventBus, this.states);
+    }
+
+
+    destroy(){
+        this.uploadService?.destroy();
+
+        this.previewUi?.destroy();
     }
 
 

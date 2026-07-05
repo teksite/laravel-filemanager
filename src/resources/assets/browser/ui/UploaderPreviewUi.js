@@ -12,6 +12,8 @@ export default class UploaderPreviewUi {
         this.eventBus = eventBus;
         this.state = stateManager;
 
+        this.listeners = [];
+
         const selector = uploadPreviewSelector ?? '[data-upload-preview]';
 
         this.uploadPreviewEl = $(selector);
@@ -24,26 +26,42 @@ export default class UploaderPreviewUi {
 
     bindBusEvents() {
 
-        this.eventBus.on(Events.UPLOAD_SELECTED, ({files}) => {
-            this.files = files;
-            this.render();
-        });
 
-        this.eventBus.on(Events.UPLOAD_PROGRESS, ({file, percent}) => {
-            this.updatePreview(file, percent);
-        });
+        this.listeners = {
 
-        this.eventBus.on(Events.UPLOAD_SUCCESS, ({file}) => {
-            this.finishPreview(file, true);
-        });
+            selected: ({files}) => {
+                this.files = files;
+                this.render();
+            },
 
-        this.eventBus.on(Events.UPLOAD_FAILED, ({file}) => {
-            this.finishPreview(file, false);
-        });
+            progress: ({file, percent}) => {
+                this.updatePreview(file, percent);
+            },
 
-        this.eventBus.on(Events.UPLOAD_COMPLETE, ({success, failed}) => {
-            this.competeUpload(success, failed);
-        });
+            success: ({file}) => {
+                this.finishPreview(file, true);
+            },
+
+            failed: ({file}) => {
+                this.finishPreview(file, false);
+            },
+
+            complete: ({success, failed}) => {
+                this.competeUpload(success, failed);
+            }
+
+        };
+
+        this.eventBus.on(Events.UPLOAD_SELECTED, this.listeners.selected);
+
+        this.eventBus.on(Events.UPLOAD_PROGRESS, this.listeners.progress);
+
+        this.eventBus.on(Events.UPLOAD_SUCCESS, this.listeners.success);
+
+        this.eventBus.on(Events.UPLOAD_FAILED, this.listeners.failed);
+
+        this.eventBus.on(Events.UPLOAD_COMPLETE, this.listeners.complete);
+
     }
 
     render() {
@@ -177,6 +195,21 @@ export default class UploaderPreviewUi {
         summary.innerHTML = `Upload complete<br>Success: ${success}<br>Failed: ${failed}`;
 
         this.uploadPreviewEl.prepend(summary);
+
+    }
+
+
+    destroy() {
+
+        this.eventBus.off(Events.UPLOAD_SELECTED, this.listeners.selected);
+
+        this.eventBus.off(Events.UPLOAD_PROGRESS, this.listeners.progress);
+
+        this.eventBus.off(Events.UPLOAD_SUCCESS, this.listeners.success);
+
+        this.eventBus.off(Events.UPLOAD_FAILED, this.listeners.failed);
+
+        this.eventBus.off(Events.UPLOAD_COMPLETE, this.listeners.complete);
 
     }
 

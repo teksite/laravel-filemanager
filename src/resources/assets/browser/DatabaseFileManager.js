@@ -23,11 +23,10 @@ export default class DatabaseFileManager {
                 previewEl: this.configs.get('ui.uploadPreviewSelector'),
 
             }
-        }, this.eventBus);
-
+        }, this.eventBus , this.states);
         new UploaderPreviewUi({
             uploadPreviewSelector: this.configs.get('ui.uploadPreviewSelector')
-        }, this.eventBus);
+        }, this.eventBus , this.states).render();
 
     }
 

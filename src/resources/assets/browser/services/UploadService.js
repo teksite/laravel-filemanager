@@ -1,13 +1,13 @@
 import {$} from "../helpers/dom.js";
-import EventEmitter from "../core/EventEmitter.js";
 import Events from "../constants/events.js";
 
 export default class UploadService {
     files = []
 
-    constructor({url, els = {}}, eventBus = null) {
+    constructor({url, els = {}}, eventBus = null ,stateManager) {
 
-        this.eventBus = eventBus ?? new EventEmitter();
+        this.eventBus = eventBus;
+        this.state = stateManager;
 
         this.loadEl(els)
 
@@ -56,13 +56,16 @@ export default class UploadService {
     dropAction() {
         this.dropzoneEl.addEventListener('drop', e => {
             e.preventDefault();
-            this.setFiles([...e.dataTransfer.files]);
+            const files=  [...e.dataTransfer.files];
+            this.setFiles(files);
+
         });
     }
 
     setFiles(files = []) {
         this.files = files;
-        this.eventBus.emit(Events.UPLOAD_SELECTED, {files : this.files})
+        this.state.uploadFiles = files;
+        this.eventBus.emit(Events.UPLOAD_SELECTED, {files : this.files});
 
     }
 

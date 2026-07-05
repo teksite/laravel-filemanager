@@ -7,8 +7,6 @@ export default class EventEmitter {
      * Subscribe to event
      */
     on(event, callback) {
-        console.log('on on on')
-
         if (typeof callback !== 'function') return this;
 
         if (!this.events[event]) {
@@ -63,7 +61,6 @@ export default class EventEmitter {
      * Emit event
      */
     emit(event, ...args) {
-        console.log(event ,args)
         const listeners = this.events[event];
 
         if (!listeners || listeners.size === 0) return false;

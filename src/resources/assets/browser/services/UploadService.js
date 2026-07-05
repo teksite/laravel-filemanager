@@ -87,8 +87,7 @@ export default class UploadService {
 
     setFiles(files = []) {
         this.files = files;
-        this.state.uploadFiles = files;
-
+        this.state.set('upload.files' , files);
         this.eventBus?.emit(Events.UPLOAD_SELECTED, {files});
     }
 
@@ -96,10 +95,13 @@ export default class UploadService {
     /*===== Upload Process ======*/
 
     async start(onProgress = null) {
+        if (!this.formActivationStatus()) {
+            return;
+        }
 
-        const selectedFiles = this.state.uploadFiles ?? []
+        const selectedFiles = this.state.get('upload.files' ,[])
 
-        const selectedDisk = this.diskSelectorEl?.value ?? null;
+        this.files = selectedFiles;
 
         if (!selectedFiles.length) {
             this.errorService?.emit(new Error('Please select files first'),
@@ -110,6 +112,8 @@ export default class UploadService {
             alert('Please select files first')
             return;
         }
+
+        const selectedDisk = this.diskSelectorEl?.value ?? null;
 
         if (!this.validatingDisk(selectedDisk)) {
             this.errorService?.emit(
@@ -161,8 +165,12 @@ export default class UploadService {
                 if (this.queue.length === 0 && this.active === 0) {
                     this.eventBus?.emit(Events.UPLOAD_COMPLETE, this.results);
                     resolve(this.results);
+                   this.reset();
+
+
                     return;
                 }
+                this.toggleFormActivation(false)
 
                 while (this.active < this.options.concurrency && this.queue.length) {
 
@@ -172,7 +180,7 @@ export default class UploadService {
                     this.uploadFile(file, selectedDisk, onProgress)
                         .then(res => {
                             this.results.success++;
-                            this.eventBus?.emit(Events.UPLOAD_SUCCESS, {response: res , file});
+                            this.eventBus?.emit(Events.UPLOAD_SUCCESS, {response: res, file});
                         })
                         .catch(err => {
                             this.results.failed++;
@@ -271,9 +279,17 @@ export default class UploadService {
         this.requests.forEach(
             xhr => xhr.abort()
         );
-
         this.requests.clear();
+
+        this.active = 0;
+
+        this.results = {
+            success: 0,
+            failed: 0
+        };
+
     }
+
 
     validatingDisk(disk) {
 
@@ -292,6 +308,23 @@ export default class UploadService {
         if (!mimes.length) return true;
 
         return mimes.includes(file.type);
+    }
+
+
+    toggleFormActivation(status = true) {
+        this.state.set('upload.activeForm' ,status);
+    }
+
+
+    formActivationStatus() {
+        return this.state.get('upload.activeForm') ?? true;
+    }
+
+    reset(){
+        this.toggleFormActivation(true)
+        this.results = {success: 0, failed: 0};
+        this.files = [];
+        this.state.set('upload.files',[])
     }
 
 }

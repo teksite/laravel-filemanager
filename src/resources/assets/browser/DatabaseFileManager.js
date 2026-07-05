@@ -13,7 +13,7 @@ export default class DatabaseFileManager {
 
         this.configs = new Config(config);
         this.eventBus = new EventEmitter();
-        console.log(this.configs)
+
         this.states = new StateManager(this.eventBus, defaultState);
         this.errorBus = new ErrorService();
         this.request = new RequestService(this.configs.section('api'), this.configs.section('upload'), this.errorBus)
@@ -23,21 +23,21 @@ export default class DatabaseFileManager {
 
     uploader() {
         new UploadService({
-            url: this.configs.get('api.updateUrl'),
+            url: this.configs.get('api.uploadUrl'),
             elements: {
                 formEl: this.configs.get('ui.uploadFormSelector'),
                 dropzoneEl: this.configs.get('ui.dropzoneSelector'),
                 inputEl: this.configs.get('ui.fileInputSelector'),
                 previewEl: this.configs.get('ui.uploadPreviewSelector'),
 
-                diskSelectorEl: this.configs.get('[data-upload-disk]'),
+                diskSelectorEl: this.configs.get('ui.uploadDiskSelector'),
             },
             option: this.configs.section('upload'),
         }, this.eventBus, this.states, this.errorBus);
 
         new UploaderPreviewUi({
             uploadPreviewSelector: this.configs.get('ui.uploadPreviewSelector')
-        }, this.eventBus, this.states).render();
+        }, this.eventBus, this.states);
     }
 
 

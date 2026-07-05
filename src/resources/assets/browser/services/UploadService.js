@@ -1,21 +1,28 @@
 import {$} from "../helpers/dom.js";
-import UploaderPreviewUi from "../ui/UploaderPreviewUi.js";
+import EventEmitter from "../core/EventEmitter.js";
+import Events from "../constants/events.js";
 
 export default class UploadService {
     files = []
 
-    constructor({url, els = {}}, eventBus) {
+    constructor({url, els = {}}, eventBus = null) {
+
+        this.eventBus = eventBus ?? new EventEmitter();
+
+        this.loadEl(els)
+
+        if (this.bindClickAction(this.dropzoneEl, this.inputEl)) this.init(this.inputEl);
+    }
+
+    loadEl(els) {
         const dropzoneEl = els?.dropzoneEl ?? '[data-dropzone]';
         const inputEl = els?.inputEl ?? '[data-file-input]';
 
+        const previewEl = els?.previewEl ?? '[data-upload-preview]';
 
         this.dropzoneEl = $(dropzoneEl);
         this.inputEl = $(inputEl);
-        this.previewElSelector = els?.previewEl ?? '[data-upload-preview]';
-
-
-        const isBind = this.bindClickAction(this.dropzoneEl, this.inputEl);
-        if (isBind) this.init(this.inputEl);
+        this.previewEl = $(previewEl);
     }
 
     bindClickAction() {
@@ -55,10 +62,8 @@ export default class UploadService {
 
     setFiles(files = []) {
         this.files = files;
-        new UploaderPreviewUi({
-            uploadPreviewEl: this.previewElSelector,
-            files: this.files
-        });
+        this.eventBus.emit(Events.UPLOAD_SELECTED, {files : this.files})
+
     }
 
 

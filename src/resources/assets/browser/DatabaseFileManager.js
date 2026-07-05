@@ -3,6 +3,7 @@ import EventEmitter from "./core/EventEmitter.js";
 import StateManager from "./core/StateManager.js";
 import defaultState from "./constants/defaults.js";
 import UploadService from "./services/UploadService.js";
+import UploaderPreviewUi from "./ui/UploaderPreviewUi.js";
 
 export default class DatabaseFileManager {
     constructor({config = {}}) {
@@ -23,6 +24,11 @@ export default class DatabaseFileManager {
 
             }
         }, this.eventBus);
+
+        new UploaderPreviewUi({
+            uploadPreviewSelector: this.configs.get('ui.uploadPreviewSelector')
+        }, this.eventBus);
+
     }
 
 

@@ -1,13 +1,30 @@
 import {$} from "../helpers/dom.js";
+import Events from "../constants/events.js";
+import formatSize from "../helpers/formatSize.js";
 
 export default class UploaderPreviewUi {
+    constructor({uploadPreviewSelector = null} = {}, eventBus) {
 
-    constructor({uploadPreviewEl = null}) {
-        const uploadPreviewElElector = uploadPreviewEl ??'[data-upload-preview]';
-        console.log(uploadPreviewEl , uploadPreviewElElector)
-        this.uploadPreviewEl = $(uploadPreviewElElector);
+        const selector = uploadPreviewSelector ?? '[data-upload-preview]';
+        this.uploadPreviewEl = $(selector);
+        this.eventBus = eventBus;
 
-        console.log(uploadPreviewEl)
+        this.render();
+    }
+
+    render() {
+        this.eventBus.on(Events.UPLOAD_SELECTED, ({files}) => {
+            this.uploadPreviewEl.innerHTML = this.renderList(files);
+        });
+    }
+
+    renderList(files) {
+        let html = '';
+        if (!files.length) return html;
+        for (const file of files) {
+            html += this.renderItem(file);
+        }
+        return html;
     }
 
     renderItem({name, lastModified = null, size = null}) {
@@ -19,23 +36,11 @@ export default class UploaderPreviewUi {
                     <span data-progress="${name}-${lastModified ?? '-'}"></span>
                 </div>
             </div>
-            <small>${size}</small>
+            <small>${formatSize(size ?? 0)}</small>
         </div>
        `
     }
 
-    renderList(files) {
-        let el = ''
-        if (files?.count() === 0) return el
-        for (const {name, lastModified, size} of files) {
-            el += this.renderItem({name, lastModified, size})
-        }
-        return el;
-    }
 
-    render(files) {
-        const container = this.uploadPreviewEl;
-        container.innerHTML = '';
-        container.innerHTML = this.renderList(files);
-    }
+
 }

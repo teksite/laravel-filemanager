@@ -22,6 +22,7 @@ const EVENTS = Object.freeze({
     PREVIEW_CLEARED: 'preview:cleared',
 
     /* Upload */
+    UPLOAD_SELECTED: 'upload:selected',
     UPLOAD_START: 'upload:start',
     UPLOAD_PROGRESS: 'upload:progress',
     UPLOAD_SUCCESS: 'upload:success',

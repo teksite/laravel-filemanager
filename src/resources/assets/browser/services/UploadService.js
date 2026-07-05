@@ -5,14 +5,13 @@ export default class UploadService {
 
     constructor({url, elements = {}, options = {}}, eventBus, state, errorService) {
 
-
         this.options = {
             endpoint: url ?? '/api/filemanager',
             concurrency: 3,
             requestTimeout: 15000,
             allowedMimes: [],
             allowedDisks: [],
-            ...options,
+            ...options
         };
 
         this.eventBus = eventBus;
@@ -23,102 +22,157 @@ export default class UploadService {
         this.queue = [];
         this.active = 0;
 
-        this.results = {success: 0, failed: 0};
-        this.controllers = new Set();
-        this._abort = false;
+        this.results = {
+            success: 0,
+            failed: 0
+        };
 
+        this.requests = new Set();
+        this._abort = false;
 
         this.loadElements(elements);
         this.bindUI();
     }
 
     loadElements(elements) {
+
         this.formEl = $(elements.formEl ?? '[data-upload-form]');
+
         this.dropzoneEl = $(elements.dropzoneEl ?? '[data-dropzone]');
-        this.dropzoneEl = $(elements.dropzoneEl ?? '[data-dropzone]');
+
         this.inputEl = $(elements.inputEl ?? '[data-file-input]');
+
         this.previewEl = $(elements.previewEl ?? '[data-upload-preview]');
+
+        this.diskSelectorEl = $(elements.diskSelectorEl ?? '[data-upload-disk]');
     }
 
     bindUI() {
 
-        if (!this.dropzoneEl || !this.inputEl || !this.formEl) return;
-        this.dropzoneEl.onclick = () => this.inputEl.click();
+        if (!this.formEl || !this.dropzoneEl || !this.inputEl) return;
 
-        this.inputEl.onchange = e => this.setFiles([...e.target.files]);
+        this.dropzoneEl.onclick = () => {
+            this.inputEl.click();
+        };
 
-        ['dragenter', 'dragover'].forEach(ev =>
-            this.dropzoneEl.addEventListener(ev, e => {
-                e.preventDefault();
-                this.dropzoneEl.classList.add('dragging');
-            })
-        );
+        this.inputEl.addEventListener('change', e => this.setFiles([...e.target.files]));
 
-        ['dragleave', 'drop'].forEach(ev =>
-            this.dropzoneEl.addEventListener(ev, () => {
-                this.dropzoneEl.classList.remove('dragging');
-            })
-        );
+        ['dragenter', 'dragover'].forEach(event => {
+            this.dropzoneEl.addEventListener(event, e => {
+                    e.preventDefault();
+                    this.dropzoneEl.classList.add('dragging');
+                }
+            );
+
+        });
+
+        ['dragleave', 'drop'].forEach(event => {
+            this.dropzoneEl.addEventListener(event, () => {
+                    this.dropzoneEl.classList.remove('dragging');
+                }
+            );
+        });
 
         this.dropzoneEl.addEventListener('drop', e => {
             e.preventDefault();
             this.setFiles([...e.dataTransfer.files]);
         });
 
-        this.formEl.addEventListener('submit', e => {
-            e.preventDefault();
-            this.start()
-        })
+        this.formEl.addEventListener('submit', async e => {
+                e.preventDefault();
+                this.start();
+            }
+        );
     }
 
-    setFiles(files) {
+    setFiles(files = []) {
         this.files = files;
         this.state.uploadFiles = files;
 
-        this.eventBus.emit(Events.UPLOAD_SELECTED, {files});
+        this.eventBus?.emit(Events.UPLOAD_SELECTED, {files});
     }
 
+    async start(onProgress = null) {
 
-    /**
-     * START UPLOAD
-     */
-    async start(disk = null, onProgress = null) {
+        const selectedDisk = this.diskSelectorEl?.value ?? null;
 
-        this.queue = [...this.files];
+        if (!this.files.length) {
+            this.errorService?.emit(new Error('Please select files first'),
+                {
+                    context: 'upload_empty'
+                }
+            );
+            alert('Please select files first')
+            return;
+        }
+
+        if (!this.validatingDisk(selectedDisk)) {
+            this.errorService?.emit(
+                new Error('Invalid disk selected'),
+                {
+                    context: 'upload_disk',
+                    disk: selectedDisk
+                }
+            );
+            alert('Please a correct disk to upload')
+            return;
+        }
+
+        this.queue = [];
+
+        for (const file of this.files) {
+            if (!this.validatingMime(file)) {
+
+                this.results.failed++;
+
+                this.errorService?.emit(new Error(`File type not allowed: ${file.name}`), {
+                        context: 'upload_mime',
+                        file: file.name,
+                        mime: file.type
+                    }
+                );
+                continue;
+            }
+
+            this.queue.push(file);
+        }
+
+        if (!this.queue.length) return;
+
+
+        this.results = {success: 0, failed: this.results.failed};
+
         this._abort = false;
-        this.results = {success: 0, failed: 0};
 
         return new Promise(resolve => {
 
-            const next = async () => {
+            const next = () => {
 
-                if (this._abort) return resolve(this.results);
-
-                if (this.queue.length === 0 && this.active === 0) {
-                    this.eventBus.emit(Events.UPLOAD_COMPLETE, this.results);
-                    return resolve(this.results);
+                if (this._abort) {
+                    resolve(this.results);
+                    return;
                 }
 
-                while (
-                    this.active < this.options.concurrency &&
-                    this.queue.length > 0
-                    ) {
+                if (this.queue.length === 0 && this.active === 0) {
+                    this.eventBus?.emit(Events.UPLOAD_COMPLETE, this.results);
+                    resolve(this.results);
+                    return;
+                }
+
+                while (this.active < this.options.concurrency && this.queue.length) {
+
                     const file = this.queue.shift();
                     this.active++;
 
-                    this.uploadFile(file, disk, onProgress)
+                    this.uploadFile(file, selectedDisk, onProgress)
                         .then(res => {
                             this.results.success++;
-                            this.eventBus.emit(Events.UPLOAD_SUCCESS, res);
+                            this.eventBus?.emit(Events.UPLOAD_SUCCESS, res);
                         })
                         .catch(err => {
                             this.results.failed++;
-                            this.errorService?.emit(err, {
-                                context: 'upload',
-                                file: file.name
-                            });
-
-                            this.eventBus.emit(Events.UPLOAD_FAILED, {file, err});
+                            this.errorService?.emit(err, {context: 'upload', file: file.name});
+                            this.eventBus?.emit(Events.UPLOAD_FAILED, {file, error: err});
                         })
                         .finally(() => {
                             this.active--;
@@ -126,73 +180,172 @@ export default class UploadService {
                         });
                 }
             };
-
             next();
         });
+
     }
 
-    /**
-     * XHR upload
-     */
     uploadFile(file, disk, onProgress) {
 
-        return new Promise((resolve, reject) => {
+        return new Promise(
+            (resolve, reject) => {
 
-            const xhr = new XMLHttpRequest();
-            const form = new FormData();
+                const xhr = new XMLHttpRequest();
 
-            form.append('file', file);
-            if (disk) form.append('disk', disk);
+                const form = new FormData();
 
-            xhr.open('POST', this.options.endpoint);
+                form.append('file', file);
 
-            xhr.upload.onprogress = e => {
-                if (!e.lengthComputable) return;
+                if (disk) {
+                    form.append('disk', disk);
+                }
 
-                const percent = Math.round((e.loaded / e.total) * 100);
+                xhr.open(
+                    'POST',
+                    this.options.endpoint
+                );
 
-                const payload = {file, percent};
+                xhr.timeout =
+                    this.options.requestTimeout;
 
-                onProgress?.(payload);
-                this.eventBus.emit(Events.UPLOAD_PROGRESS, payload);
-            };
+                this.requests.add(xhr);
 
-            xhr.onload = () => {
+                xhr.upload.onprogress =
+                    e => {
 
-                try {
-                    const res = JSON.parse(xhr.responseText);
+                        if (
+                            !e.lengthComputable
+                        ) return;
 
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        resolve(res.data ?? res);
-                    } else {
-                        throw new Error(`HTTP ${xhr.status}`);
+                        const percent =
+                            Math.round(
+                                (e.loaded / e.total) * 100
+                            );
+
+                        const payload = {
+                            file,
+                            percent
+                        };
+
+                        onProgress?.(
+                            payload
+                        );
+
+                        this.eventBus?.emit(
+                            Events.UPLOAD_PROGRESS,
+                            payload
+                        );
+
+                    };
+
+                xhr.onload = () => {
+
+                    this.requests.delete(xhr);
+
+                    try {
+
+                        const res =
+                            JSON.parse(
+                                xhr.responseText
+                            );
+
+                        if (
+                            xhr.status >= 200 &&
+                            xhr.status < 300
+                        ) {
+
+                            resolve(
+                                res.data ?? res
+                            );
+
+                        } else {
+
+                            reject(
+                                new Error(
+                                    `HTTP ${xhr.status}`
+                                )
+                            );
+
+                        }
+
+                    } catch {
+
+                        reject(
+                            new Error(
+                                'Invalid response'
+                            )
+                        );
+
                     }
 
-                } catch (err) {
-                    this.errorService?.emit(err, {
-                        context: 'upload_parse',
-                        file: file.name
-                    });
+                };
 
-                    reject(err);
-                }
-            };
+                xhr.onerror = () => {
+                    this.requests.delete(xhr);
 
-            xhr.onerror = () => reject(new Error('Network error'));
-            xhr.onabort = () => reject(new Error('Aborted'));
+                    reject(
+                        new Error(
+                            'Network error'
+                        )
+                    );
+                };
 
-            const controller = new AbortController();
-            this.controllers.add(controller);
+                xhr.ontimeout = () => {
+                    this.requests.delete(xhr);
 
-            xhr.send(form);
-        });
+                    reject(
+                        new Error(
+                            'Upload timeout'
+                        )
+                    );
+                };
+
+                xhr.onabort = () => {
+                    this.requests.delete(xhr);
+
+                    reject(
+                        new Error(
+                            'Upload aborted'
+                        )
+                    );
+                };
+
+                xhr.send(form);
+
+            }
+        );
     }
 
     stop() {
+
         this._abort = true;
+
         this.queue = [];
 
-        this.controllers.forEach(c => c.abort());
-        this.controllers.clear();
+        this.requests.forEach(
+            xhr => xhr.abort()
+        );
+
+        this.requests.clear();
     }
+
+    validatingDisk(disk) {
+
+        const disks = this.options.allowedDisks;
+
+        if (!disks.length) return true;
+
+
+        return disks.includes(disk);
+    }
+
+    validatingMime(file) {
+
+        const mimes = this.options.allowedMimes;
+
+        if (!mimes.length) return true;
+
+        return mimes.includes(file.type);
+    }
+
 }

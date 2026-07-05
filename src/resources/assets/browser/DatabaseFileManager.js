@@ -6,6 +6,7 @@ import UploadService from "./services/UploadService.js";
 import UploaderPreviewUi from "./ui/UploaderPreviewUi.js";
 import RequestService from "./services/RequestService.js";
 import ErrorService from "./services/ErrorService.js";
+import {$} from "./helpers/dom.js";
 
 export default class DatabaseFileManager {
     constructor({config = {}}) {
@@ -28,6 +29,8 @@ export default class DatabaseFileManager {
                 dropzoneEl: this.configs.get('ui.dropzoneSelector'),
                 inputEl: this.configs.get('ui.fileInputSelector'),
                 previewEl: this.configs.get('ui.uploadPreviewSelector'),
+
+                diskSelectorEl: this.configs.get('[data-upload-disk]'),
             },
             option: this.configs.section('upload'),
         }, this.eventBus, this.states, this.errorBus);

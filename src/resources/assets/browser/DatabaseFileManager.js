@@ -15,16 +15,15 @@ export default class DatabaseFileManager {
 
     uploader() {
         new UploadService({
-           url : this.endPoint.updateUrl,
-            els : {
-               dropzone : this.configs.get('ui.dropzoneSelector'),
-               input : this.configs.get('ui.fileInputSelector'),
+            url: this.endPoint.updateUrl,
+            els: {
+                dropzoneEl: this.configs.get('ui.dropzoneSelector'),
+                inputEl: this.configs.get('ui.fileInputSelector'),
+                previewEl: this.configs.get('ui.uploadPreviewSelector'),
 
             }
-       });
+        }, this.eventBus);
     }
-
-
 
 
 }

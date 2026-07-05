@@ -1,11 +1,16 @@
 export default class StateManager {
 
-    constructor({eventBus, initialState = {}} = {}) {
+    constructor(eventBus, initialState = {}) {
         this.eventBus = eventBus;
 
         this.initialState = {...this.getDefaultState(), ...initialState};
 
         this.state = structuredClone(this.initialState);
+    }
+
+
+    bindEventBus(eventBus){
+        this.eventBus = eventBus;
     }
 
     /**

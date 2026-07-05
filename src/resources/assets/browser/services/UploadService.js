@@ -87,7 +87,7 @@ export default class UploadService {
 
     setFiles(files = []) {
         this.files = files;
-        this.state.set('upload.files' , files);
+        this.state.set('upload.files', files);
         this.eventBus?.emit(Events.UPLOAD_SELECTED, {files});
     }
 
@@ -99,16 +99,12 @@ export default class UploadService {
             return;
         }
 
-        const selectedFiles = this.state.get('upload.files' ,[])
+        const selectedFiles = this.state.get('upload.files', [])
 
         this.files = selectedFiles;
 
         if (!selectedFiles.length) {
-            this.errorService?.emit(new Error('Please select files first'),
-                {
-                    context: 'upload_empty'
-                }
-            );
+            this.errorService?.emit(new Error('Please select files first'), {context: 'upload_empty'});
             alert('Please select files first')
             return;
         }
@@ -116,13 +112,7 @@ export default class UploadService {
         const selectedDisk = this.diskSelectorEl?.value ?? null;
 
         if (!this.validatingDisk(selectedDisk)) {
-            this.errorService?.emit(
-                new Error('Invalid disk selected'),
-                {
-                    context: 'upload_disk',
-                    disk: selectedDisk
-                }
-            );
+            this.errorService?.emit(new Error('Invalid disk selected'), {context: 'upload_disk', disk: selectedDisk});
             alert('Please a correct disk to upload')
             return;
         }
@@ -142,7 +132,6 @@ export default class UploadService {
                 );
                 continue;
             }
-
             this.queue.push(file);
         }
 
@@ -165,12 +154,12 @@ export default class UploadService {
                 if (this.queue.length === 0 && this.active === 0) {
                     this.eventBus?.emit(Events.UPLOAD_COMPLETE, this.results);
                     resolve(this.results);
-                   this.reset();
+                    this.reset();
 
 
                     return;
                 }
-                this.toggleFormActivation(false)
+                this.toggleLoadingStatus(false)
 
                 while (this.active < this.options.concurrency && this.queue.length) {
 
@@ -297,7 +286,7 @@ export default class UploadService {
 
         if (!disks.length) return true;
 
-
+        console.log(disks.includes(disk))
         return disks.includes(disk);
     }
 
@@ -311,8 +300,8 @@ export default class UploadService {
     }
 
 
-    toggleFormActivation(status = true) {
-        this.state.set('upload.uploading' ,status);
+    toggleLoadingStatus(status = false) {
+        this.state.set('upload.uploading', status);
     }
 
 
@@ -320,11 +309,11 @@ export default class UploadService {
         return this.state.get('upload.uploading') ?? false;
     }
 
-    reset(){
-        this.toggleFormActivation(true)
+    reset() {
+        this.toggleLoadingStatus(false)
         this.results = {success: 0, failed: 0};
         this.files = [];
-        this.state.set('upload.files',[])
+        this.state.set('upload.files', [])
     }
 
 }

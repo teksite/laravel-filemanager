@@ -2,6 +2,7 @@ import {$, escapeHtml} from "../helpers/dom.js";
 import Events from "../constants/events.js";
 import formatSize from "../helpers/formatSize.js";
 import {getMimeIcon} from "../helpers/mime.js";
+import {uniqueString} from "../helpers/general.js";
 
 export default class UploaderPreviewUi {
 
@@ -104,10 +105,17 @@ export default class UploaderPreviewUi {
     }
 
     fileId(file) {
-        if(!file.__id){
-            file.__id= crypto.randomUUID();
+        if (!file.__uploadId) {
+            Object.defineProperty(
+                file,
+                '__uploadId',
+                {
+                    value: uniqueString(),
+                    writable: false
+                }
+            );
         }
-        return file.__id;
+        return file.__uploadId;
     }
 
     updatePreview(file, percent) {

@@ -80,7 +80,7 @@ return [
     'default_store_disk' => 'public',            // Default storage disk
 
     'allow_upload_disks' =>
-        ['local', 'public', 's3', 's3-arvan_private', 's3-arvan_public',], //allowed disk to be upload to
+        ['public' ,'local', 's3', 's3-arvan_private', 's3-arvan_public',], //allowed disk to be upload to
 
     'slugify_name' => true,                      // Convert original file names into URL-friendly slugs
 

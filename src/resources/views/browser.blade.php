@@ -11,19 +11,30 @@
 
 </div>
 <script type="module">
-    import initFileManager from "{{ Vite::asset('packages/teksite/laravel-filemanager/src/resources/assets/browser/index.js') }}";
+    import initFileManager
+        from "{{ Vite::asset('packages/teksite/laravel-filemanager/src/resources/assets/browser/index.js') }}";
 
     document.addEventListener('DOMContentLoaded', () => {
-        initFileManager();
+        initFileManager({
+            config:
+                {
+                    upload: {
+                        allowedMimes: @js($allowedTypes),
+                        allowedDisks: @js($allowedDisks)
+                    }
+                }
+
+        });
     });
 </script>
 {{--
 
-      $disks = $this->chosenDisks();
+   {
+        $disks = $this->chosenDisks();
         $mimes = $this->chosenMimes();
 
         $allowedDisks = $this->allowedDisks();
-
+        $allowedTypes = $this->allowedTypes();
 
 
 

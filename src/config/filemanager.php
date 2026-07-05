@@ -59,7 +59,7 @@ return [
     |
     */
 
-    'allow_file_types' => [],                       // Allowed mime types or extensions (empty = allow all)
+    'allow_file_types' => ['image/jpeg','image/jpg',],                       // Allowed mime types or extensions (empty = allow all)
 
     'forbidden_file_types' => [],                   // Forbidden mime types or extensions (empty = allow all)
 

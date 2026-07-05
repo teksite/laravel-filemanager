@@ -3,11 +3,17 @@ import Events from "../constants/events.js";
 
 export default class UploadService {
 
-    constructor({ url, els = {}, options = {} }, eventBus, state, errorService) {
+    constructor({url, elements = {}, options = {}}, eventBus, state, errorService) {
 
-        this.url = url;
 
-        this.options = {endpoint: url, concurrency: 3, ...options};
+        this.options = {
+            endpoint: url ?? '/api/filemanager',
+            concurrency: 3,
+            requestTimeout: 15000,
+            allowedMimes: [],
+            allowedDisks: [],
+            ...options,
+        };
 
         this.eventBus = eventBus;
         this.state = state;
@@ -17,39 +23,38 @@ export default class UploadService {
         this.queue = [];
         this.active = 0;
 
-        this.results = { success: 0, failed: 0 };
+        this.results = {success: 0, failed: 0};
         this.controllers = new Set();
         this._abort = false;
 
 
-
-        this.loadElements(els);
+        this.loadElements(elements);
         this.bindUI();
     }
 
-    loadElements(els) {
-        this.formEl = $(els.formEl ?? '[data-upload-form]');
-        this.dropzoneEl = $(els.dropzoneEl ?? '[data-dropzone]');
-        this.dropzoneEl = $(els.dropzoneEl ?? '[data-dropzone]');
-        this.inputEl = $(els.inputEl ?? '[data-file-input]');
-        this.previewEl = $(els.previewEl ?? '[data-upload-preview]');
+    loadElements(elements) {
+        this.formEl = $(elements.formEl ?? '[data-upload-form]');
+        this.dropzoneEl = $(elements.dropzoneEl ?? '[data-dropzone]');
+        this.dropzoneEl = $(elements.dropzoneEl ?? '[data-dropzone]');
+        this.inputEl = $(elements.inputEl ?? '[data-file-input]');
+        this.previewEl = $(elements.previewEl ?? '[data-upload-preview]');
     }
 
     bindUI() {
-        if (!this.dropzoneEl || !this.inputEl || this.formEl) return;
 
+        if (!this.dropzoneEl || !this.inputEl || !this.formEl) return;
         this.dropzoneEl.onclick = () => this.inputEl.click();
 
         this.inputEl.onchange = e => this.setFiles([...e.target.files]);
 
-        ['dragenter','dragover'].forEach(ev =>
+        ['dragenter', 'dragover'].forEach(ev =>
             this.dropzoneEl.addEventListener(ev, e => {
                 e.preventDefault();
                 this.dropzoneEl.classList.add('dragging');
             })
         );
 
-        ['dragleave','drop'].forEach(ev =>
+        ['dragleave', 'drop'].forEach(ev =>
             this.dropzoneEl.addEventListener(ev, () => {
                 this.dropzoneEl.classList.remove('dragging');
             })
@@ -60,7 +65,7 @@ export default class UploadService {
             this.setFiles([...e.dataTransfer.files]);
         });
 
-        this.formEl.addEventListener('submit', e=>{
+        this.formEl.addEventListener('submit', e => {
             e.preventDefault();
             this.start()
         })
@@ -70,11 +75,8 @@ export default class UploadService {
         this.files = files;
         this.state.uploadFiles = files;
 
-        this.eventBus.emit(Events.UPLOAD_SELECTED, { files });
+        this.eventBus.emit(Events.UPLOAD_SELECTED, {files});
     }
-
-
-
 
 
     /**
@@ -84,7 +86,7 @@ export default class UploadService {
 
         this.queue = [...this.files];
         this._abort = false;
-        this.results = { success: 0, failed: 0 };
+        this.results = {success: 0, failed: 0};
 
         return new Promise(resolve => {
 
@@ -116,7 +118,7 @@ export default class UploadService {
                                 file: file.name
                             });
 
-                            this.eventBus.emit(Events.UPLOAD_FAILED, { file, err });
+                            this.eventBus.emit(Events.UPLOAD_FAILED, {file, err});
                         })
                         .finally(() => {
                             this.active--;
@@ -149,7 +151,7 @@ export default class UploadService {
 
                 const percent = Math.round((e.loaded / e.total) * 100);
 
-                const payload = { file, percent };
+                const payload = {file, percent};
 
                 onProgress?.(payload);
                 this.eventBus.emit(Events.UPLOAD_PROGRESS, payload);

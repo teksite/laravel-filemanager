@@ -1,36 +1,30 @@
 import Config from "./core/Config.js";
 import EventEmitter from "./core/EventEmitter.js";
 import StateManager from "./core/StateManager.js";
-import FileManager from "./core/Filemanager.js";
+import defaultState from "./constants/defaults.js";
+import UploadService from "./services/UploadService.js";
 
-function createDatabaseFileManager(configs = {}) {
+export default class DatabaseFileManager {
+    constructor({config = {}}) {
+        this.configs = new Config(config);
+        this.eventBus = new EventEmitter()
+        this.states = new StateManager({eventBus: this.eventBus, initialState: defaultState})
+        this.endPoint = this.configs?.section('api')
+        this.uploader();
+    }
 
-    const config = new Config(configs);
+    uploader() {
+        new UploadService({
+           url : this.endPoint.updateUrl,
+            els : {
+               dropzone : this.configs.get('ui.dropzoneSelector'),
+               input : this.configs.get('ui.fileInputSelector'),
 
-    const eventBus = new EventEmitter();
+            }
+       });
+    }
 
-    const state = new StateManager({eventBus, initialState: {}});
 
-    return new FileManager({
-        config: config.get(),
-        eventBus,
-        state,
-    });
+
+
 }
-
-/**
- * Auto-init helper (optional for Blade usage)
- */
-export function initDatabaseFileManager(configs = {}) {
-
-    const instance = createDatabaseFileManager(configs);
-
-    instance.init?.();
-
-    return instance;
-}
-
-/**
- * Default export for simple usage
- */
-export default createFileManager;

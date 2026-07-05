@@ -11,17 +11,12 @@
 
 </div>
 <script type="module">
-    import { initFileManager } from "/browser/index.js";
+    import initFileManager from "{{ Vite::asset('packages/teksite/laravel-filemanager/src/resources/assets/browser/index.js') }}";
+
     document.addEventListener('DOMContentLoaded', () => {
-        const fm = initFileManager({
-            selection: {
-                mode: null,
-                type: 'id'
-            }
-        });
+        initFileManager();
     });
 </script>
-
 {{--
 <script src="/assets/app.js"> </script>
 <script>

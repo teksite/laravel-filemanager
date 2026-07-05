@@ -1,4 +1,5 @@
-import FileManager from './DatabaseFileManager.js';
+import DatabaseFileManager from "./DatabaseFileManager.js";
+
 
 export function initFileManager(config = {}) {
 

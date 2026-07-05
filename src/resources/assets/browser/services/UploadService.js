@@ -92,6 +92,9 @@ export default class UploadService {
         this.eventBus?.emit(Events.UPLOAD_SELECTED, {files});
     }
 
+
+    /*===== Upload Process ======*/
+
     async start(onProgress = null) {
 
         const selectedDisk = this.diskSelectorEl?.value ?? null;
@@ -200,114 +203,58 @@ export default class UploadService {
                     form.append('disk', disk);
                 }
 
-                xhr.open(
-                    'POST',
-                    this.options.endpoint
-                );
+                xhr.open('POST', this.options.endpoint);
 
-                xhr.timeout =
-                    this.options.requestTimeout;
+                xhr.timeout = this.options.requestTimeout;
 
                 this.requests.add(xhr);
 
-                xhr.upload.onprogress =
-                    e => {
+                xhr.upload.onprogress = e => {
+                    if (!e.lengthComputable) return;
 
-                        if (
-                            !e.lengthComputable
-                        ) return;
+                    const percent = Math.round((e.loaded / e.total) * 100);
 
-                        const percent =
-                            Math.round(
-                                (e.loaded / e.total) * 100
-                            );
-
-                        const payload = {
-                            file,
-                            percent
-                        };
-
-                        onProgress?.(
-                            payload
-                        );
-
-                        this.eventBus?.emit(
-                            Events.UPLOAD_PROGRESS,
-                            payload
-                        );
-
+                    const payload = {
+                        file,
+                        percent
                     };
+
+                    onProgress?.(payload);
+
+                    this.eventBus?.emit(Events.UPLOAD_PROGRESS, payload);
+                };
 
                 xhr.onload = () => {
 
                     this.requests.delete(xhr);
 
                     try {
-
-                        const res =
-                            JSON.parse(
-                                xhr.responseText
-                            );
-
-                        if (
-                            xhr.status >= 200 &&
-                            xhr.status < 300
-                        ) {
-
-                            resolve(
-                                res.data ?? res
-                            );
-
+                        const res = JSON.parse(xhr.responseText);
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            resolve(res.data ?? res);
                         } else {
-
-                            reject(
-                                new Error(
-                                    `HTTP ${xhr.status}`
-                                )
-                            );
-
+                            //Todo add response 422 403
+                            reject(new Error(`HTTP error | status ${xhr.status}`));
                         }
-
                     } catch {
-
-                        reject(
-                            new Error(
-                                'Invalid response'
-                            )
-                        );
-
+                        reject(new Error('Invalid response'));
                     }
 
                 };
 
                 xhr.onerror = () => {
                     this.requests.delete(xhr);
-
-                    reject(
-                        new Error(
-                            'Network error'
-                        )
-                    );
+                    reject(new Error('Network error'));
                 };
 
                 xhr.ontimeout = () => {
                     this.requests.delete(xhr);
-
-                    reject(
-                        new Error(
-                            'Upload timeout'
-                        )
-                    );
+                    reject(new Error('Upload timeout'));
                 };
 
                 xhr.onabort = () => {
                     this.requests.delete(xhr);
-
-                    reject(
-                        new Error(
-                            'Upload aborted'
-                        )
-                    );
+                    reject(new Error('Upload aborted'));
                 };
 
                 xhr.send(form);

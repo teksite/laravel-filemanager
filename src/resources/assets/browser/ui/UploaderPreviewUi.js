@@ -24,6 +24,11 @@ export default class UploaderPreviewUi {
             this.files = files;
             this.render();
         });
+
+        this.eventBus.on(Events.UPLOAD_SUCCESS, ({ file }) => {
+            this.files = files;
+            this.render();
+        });
     }
 
     render() {
@@ -70,4 +75,8 @@ export default class UploaderPreviewUi {
         console.log(this.state.uploadFiles)
         this.render();
     }
+
+
+
+
 }

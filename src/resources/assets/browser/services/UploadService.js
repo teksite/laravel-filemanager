@@ -3,110 +3,98 @@ import Events from "../constants/events.js";
 
 export default class UploadService {
 
-    constructor({url, els = {}}, eventBus = null, stateManager, request) {
+    constructor({ url, els = {}, options = {} }, eventBus, state, errorService) {
+
+        this.url = url;
+
+        this.options = {endpoint: url, concurrency: 3, ...options};
+
+        this.eventBus = eventBus;
+        this.state = state;
+        this.errorService = errorService;
 
         this.files = [];
         this.queue = [];
         this.active = 0;
-        this.results = {
-            success: 0,
-            failed: 0
-        };
 
+        this.results = { success: 0, failed: 0 };
+        this.controllers = new Set();
         this._abort = false;
 
 
-        this.eventBus = eventBus;
-        this.state = stateManager;
 
-        this.loadElFromSelector(els);
-
-
-        if (this.bindClickAction(this.dropzoneEl, this.inputEl)) this.init(this.inputEl);
+        this.loadElements(els);
+        this.bindUI();
     }
 
-    loadElFromSelector(els) {
-        const dropzoneEl = els?.dropzoneEl ?? '[data-dropzone]';
-        const inputEl = els?.inputEl ?? '[data-file-input]';
-
-        const previewEl = els?.previewEl ?? '[data-upload-preview]';
-
-        this.dropzoneEl = $(dropzoneEl);
-        this.inputEl = $(inputEl);
-        this.previewEl = $(previewEl);
+    loadElements(els) {
+        this.formEl = $(els.formEl ?? '[data-upload-form]');
+        this.dropzoneEl = $(els.dropzoneEl ?? '[data-dropzone]');
+        this.dropzoneEl = $(els.dropzoneEl ?? '[data-dropzone]');
+        this.inputEl = $(els.inputEl ?? '[data-file-input]');
+        this.previewEl = $(els.previewEl ?? '[data-upload-preview]');
     }
 
-    bindClickAction() {
-        if (!this.dropzoneEl || !this.inputEl) return false;
+    bindUI() {
+        if (!this.dropzoneEl || !this.inputEl || this.formEl) return;
+
         this.dropzoneEl.onclick = () => this.inputEl.click();
-        return true;
-    }
 
-    init(inputEl) {
-        inputEl.onchange = e => this.setFiles([...e.target.files]);
-        this.dragInAction();
-        this.dragOutAction();
-        this.dropAction();
-    }
+        this.inputEl.onchange = e => this.setFiles([...e.target.files]);
 
-    dragInAction() {
-        ['dragenter', 'dragover'].forEach(ev =>
+        ['dragenter','dragover'].forEach(ev =>
             this.dropzoneEl.addEventListener(ev, e => {
                 e.preventDefault();
                 this.dropzoneEl.classList.add('dragging');
             })
         );
-    }
 
-    dragOutAction() {
-        ['dragleave', 'drop'].forEach(ev =>
-            this.dropzoneEl.addEventListener(ev, () => this.dropzoneEl.classList.remove('dragging'))
+        ['dragleave','drop'].forEach(ev =>
+            this.dropzoneEl.addEventListener(ev, () => {
+                this.dropzoneEl.classList.remove('dragging');
+            })
         );
-    }
 
-    dropAction() {
         this.dropzoneEl.addEventListener('drop', e => {
             e.preventDefault();
-            const files = [...e.dataTransfer.files];
-            this.setFiles(files);
+            this.setFiles([...e.dataTransfer.files]);
         });
+
+        this.formEl.addEventListener('submit', e=>{
+            e.preventDefault();
+            this.start()
+        })
     }
 
-    setFiles(files = []) {
+    setFiles(files) {
         this.files = files;
         this.state.uploadFiles = files;
-        this.eventBus.emit(Events.UPLOAD_SELECTED, {files: this.files});
+
+        this.eventBus.emit(Events.UPLOAD_SELECTED, { files });
     }
 
 
 
-    /* ======== Upload api ============== */
+
 
     /**
-     * Start upload process
+     * START UPLOAD
      */
     async start(disk = null, onProgress = null) {
 
-        if (!this.queue.length) {
-            throw this.request.err;
-        }
-
+        this.queue = [...this.files];
         this._abort = false;
+        this.results = { success: 0, failed: 0 };
 
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
 
-            const next = () => {
+            const next = async () => {
 
-                if (this._abort) {
-                    resolve(this.results);
-                    return;
-                }
+                if (this._abort) return resolve(this.results);
 
                 if (this.queue.length === 0 && this.active === 0) {
-
-                    this.emit(Events.UPLOAD_COMPLETE, this.results);
-                    resolve(this.results);
-                    return;
+                    this.eventBus.emit(Events.UPLOAD_COMPLETE, this.results);
+                    return resolve(this.results);
                 }
 
                 while (
@@ -117,23 +105,18 @@ export default class UploadService {
                     this.active++;
 
                     this.uploadFile(file, disk, onProgress)
-                        .then((res) => {
-
+                        .then(res => {
                             this.results.success++;
-
-                            this.emit(EVENTS.UPLOAD_SUCCESS, res);
-
+                            this.eventBus.emit(Events.UPLOAD_SUCCESS, res);
                         })
-                        .catch((err) => {
-
+                        .catch(err => {
                             this.results.failed++;
-
                             this.errorService?.emit(err, {
                                 context: 'upload',
                                 file: file.name
                             });
 
-                            this.emit(EVENTS.UPLOAD_FAILED, {file, error: err});
+                            this.eventBus.emit(Events.UPLOAD_FAILED, { file, err });
                         })
                         .finally(() => {
                             this.active--;
@@ -147,9 +130,9 @@ export default class UploadService {
     }
 
     /**
-     * Upload single file (XHR for progress support)
+     * XHR upload
      */
-    uploadFile(file, disk = null, onProgress = null) {
+    uploadFile(file, disk, onProgress) {
 
         return new Promise((resolve, reject) => {
 
@@ -157,204 +140,57 @@ export default class UploadService {
             const form = new FormData();
 
             form.append('file', file);
-
-            if (disk) {
-                form.append('disk', disk);
-            }
+            if (disk) form.append('disk', disk);
 
             xhr.open('POST', this.options.endpoint);
 
-            /**
-             * Progress handler
-             */
-            xhr.upload.onprogress = (e) => {
-
+            xhr.upload.onprogress = e => {
                 if (!e.lengthComputable) return;
 
                 const percent = Math.round((e.loaded / e.total) * 100);
 
-                const payload = {
-                    file,
-                    percent
-                };
+                const payload = { file, percent };
 
-                if (typeof onProgress === 'function') {
-                    onProgress(payload);
-                }
-
-                this.emit(EVENTS.UPLOAD_PROGRESS, payload);
+                onProgress?.(payload);
+                this.eventBus.emit(Events.UPLOAD_PROGRESS, payload);
             };
 
-            /**
-             * Success
-             */
             xhr.onload = () => {
 
-                let response = null;
-
                 try {
-                    response = JSON.parse(xhr.responseText);
-                } catch (e) {
-                    const err = new Error('Invalid JSON response');
+                    const res = JSON.parse(xhr.responseText);
 
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        resolve(res.data ?? res);
+                    } else {
+                        throw new Error(`HTTP ${xhr.status}`);
+                    }
+
+                } catch (err) {
                     this.errorService?.emit(err, {
                         context: 'upload_parse',
                         file: file.name
-                    });
-
-                    return reject(err);
-                }
-
-                if (xhr.status >= 200 && xhr.status < 300) {
-
-                    const data = response?.data ?? response;
-
-                    resolve(data);
-
-                } else {
-
-                    const err = new Error(`Upload failed: ${xhr.status}`);
-
-                    this.errorService?.emit(err, {
-                        context: 'upload',
-                        status: xhr.status,
-                        file: file.name,
-                        response
                     });
 
                     reject(err);
                 }
             };
 
-            /**
-             * Network error
-             */
-            xhr.onerror = () => {
+            xhr.onerror = () => reject(new Error('Network error'));
+            xhr.onabort = () => reject(new Error('Aborted'));
 
-                const err = new Error('Network error during upload');
-
-                this.errorService?.emit(err, {
-                    context: 'upload_network',
-                    file: file.name
-                });
-
-                reject(err);
-            };
-
-            /**
-             * Abort support
-             */
-            xhr.onabort = () => {
-
-                const err = new Error('Upload aborted');
-
-                this.errorService?.emit(err, {
-                    context: 'upload_abort',
-                    file: file.name
-                });
-
-                reject(err);
-            };
+            const controller = new AbortController();
+            this.controllers.add(controller);
 
             xhr.send(form);
         });
     }
 
-    /**
-     * Stop all uploads gracefully
-     */
     stop() {
         this._abort = true;
         this.queue = [];
+
+        this.controllers.forEach(c => c.abort());
+        this.controllers.clear();
     }
-
-    /**
-     * Emit event safely
-     */
-    emit(event, payload) {
-        if (!this.eventBus?.emit) return;
-
-        try {
-            this.eventBus.emit(event, payload);
-        } catch (e) {
-            console.error('[UploadService Event Error]', e);
-        }
-    }
-
-
-    async upload() {
-
-        this.clearUploadMessages();
-
-        if (!this.uploadFiles.length) {
-            this.showUploadMessage('Please select files first.', 'warning');
-            return;
-        }
-
-        const disk = this.elements.uploadDisk?.value;
-
-        this.uploadQueue = [...this.uploadFiles];
-        this.uploadActive = 0;
-
-        this.uploadSummary = {
-            success: 0,
-            failed: 0
-        };
-
-        return new Promise((resolve) => {
-
-            const next = () => {
-
-                if (this.uploadQueue.length === 0 && this.uploadActive === 0) {
-
-                    // FINAL SYNC (only once)
-                    this.load(true);
-
-                    this.showUploadMessage(
-                        `Upload done: ${this.uploadSummary.success} success`,
-                        'success'
-                    );
-
-                    this.resetUploader();
-                    resolve();
-                    return;
-                }
-
-                while (
-                    this.uploadActive < this.uploadConcurrency &&
-                    this.uploadQueue.length > 0
-                    ) {
-
-                    const file = this.uploadQueue.shift();
-                    this.uploadActive++;
-
-                    const form = new FormData();
-                    form.append('file', file);
-                    form.append('disk', disk);
-
-                    this.uploadSingle(file, form)
-                        .then((serverItem) => {
-
-                            this.uploadSummary.success++;
-
-                            // 🔥 HYBRID UI UPDATE (NO FULL LOAD)
-                            if (this.isUploadVisible(serverItem, disk, this.state.mimeType)) {
-                                this.prependFiles([serverItem]);
-                            }
-
-                        })
-                        .catch(() => {
-                            this.uploadSummary.failed++;
-                        })
-                        .finally(() => {
-                            this.uploadActive--;
-                            next();
-                        });
-                }
-            };
-
-            next();
-        });
-    }
-
 }

@@ -15,11 +15,13 @@ const defaultConfig = {
         concurrency: 3,
         chunkSize: 0,
         requestTimeout: 15000,
+        allowedMime: [],
+        allowedDisks: [],
     },
 
     mime: {
         default: '',
-        allowed: []
+
     },
 
     disk: {
@@ -38,16 +40,20 @@ const defaultConfig = {
 
     ui: {
         mainSelector: '.filemanager',
+
         gridSelector: '[data-grid]',
+
         loaderSelector: '[data-loader]',
         loadMoreSelector: '[data-load-more]',
+
         mimeSelector: '[data-mimeList]',
         diskSelector: '[data-diskList]',
+
+        uploadFormSelector: '[data-upload-form]',
         dropzoneSelector: '[data-dropzone]',
         fileInputSelector: '[data-file-input]',
         uploadDiskSelector: '[data-upload-disk]',
         uploadPreviewSelector: '[data-upload-preview]',
-        uploadFormSelector: '[data-upload-form]',
         uploadMessagesSelector: '[data-messages]',
     }
 };

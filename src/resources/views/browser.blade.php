@@ -18,6 +18,15 @@
     });
 </script>
 {{--
+
+      $disks = $this->chosenDisks();
+        $mimes = $this->chosenMimes();
+
+        $allowedDisks = $this->allowedDisks();
+
+
+
+
 <script src="/assets/app.js"> </script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {

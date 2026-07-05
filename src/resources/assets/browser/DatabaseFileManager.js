@@ -13,9 +13,9 @@ export default class DatabaseFileManager {
         this.configs = new Config(config);
         this.eventBus = new EventEmitter()
 
-        this.states = new StateManager( this.eventBus, defaultState)
+        this.states = new StateManager(this.eventBus, defaultState)
         this.errorBus = new ErrorService()
-        this.request = new RequestService(this.configs.section('api'),this.configs.section('upload') , this.errorBus )
+        this.request = new RequestService(this.configs.section('api'), this.configs.section('upload'), this.errorBus)
 
         this.endPoint = this.configs?.section('api')
         this.uploader();
@@ -25,18 +25,20 @@ export default class DatabaseFileManager {
         new UploadService({
             url: this.endPoint.updateUrl,
             els: {
+                formEl: this.configs.get('ui.uploadFormSelector'),
                 dropzoneEl: this.configs.get('ui.dropzoneSelector'),
                 inputEl: this.configs.get('ui.fileInputSelector'),
                 previewEl: this.configs.get('ui.uploadPreviewSelector'),
 
             }
-        }, this.eventBus , this.states , this.request);
-
+        }, this.eventBus, this.states, this.errorBus);
 
 
         new UploaderPreviewUi({
             uploadPreviewSelector: this.configs.get('ui.uploadPreviewSelector')
-        }, this.eventBus , this.states).render();
+        }, this.eventBus, this.states).render();
+
+
 
     }
 

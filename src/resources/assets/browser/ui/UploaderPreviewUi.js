@@ -15,6 +15,8 @@ export default class UploaderPreviewUi {
 
         this.bindDomEvents();
         this.bindBusEvents();
+        this.render();
+
     }
 
     bindBusEvents() {

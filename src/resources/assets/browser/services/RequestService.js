@@ -1,17 +1,15 @@
 
 export default class RequestService {
 
-    constructor(endPoints , configs={} , errorBus = null, config = {}) {
+    constructor(baseConfig = {}, options = {}, errorBus = null) {
 
         this.options = {
-            baseURL: '',
-            timeout: DEFAULTS.requestTimeout,
-            debug: false,
-            ...options
+            baseURL: baseConfig.baseURL ?? '',
+            timeout: options.timeout ?? 10000,
+            debug: options.debug ?? false
         };
 
         this.errorBus = errorBus;
-
         this.controllers = new Set();
     }
 

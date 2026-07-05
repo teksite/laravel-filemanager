@@ -1,3 +1,5 @@
+import EVENTS from "../constants/events.js";
+
 export default class ErrorService {
 
     constructor(options = {} ,eventBus =null) {

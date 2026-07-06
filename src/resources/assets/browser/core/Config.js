@@ -1,6 +1,6 @@
 const defaultConfig = {
     api: {
-        baseUrl: '/',
+        baseUrl: '',
         getUrl: '/api/filemanager',
         uploadUrl: '/api/filemanager',
 

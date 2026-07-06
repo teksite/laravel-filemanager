@@ -19,7 +19,7 @@ export default class DatabaseFileManager {
         this.states = new StateManager(this.eventBus, defaultState);
 
         this.request = new RequestService({
-            api: this.configs.section('api'),
+            url: this.configs.section('api'),
             options: this.configs.section('request')
 
         }, this.errorBus)

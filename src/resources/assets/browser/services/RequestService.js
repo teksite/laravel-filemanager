@@ -9,7 +9,8 @@ export default class RequestService {
 
     async request(url, options = {}) {
 
-        const fullUrl = new URL(url, this.options.baseURL).href;
+        const base = this.options.baseUrl || window.location.origin;
+        const fullUrl = new URL(url, base).href;
 
         const timeoutMs = options.timeout ?? this.options.timeout;
 

@@ -60,9 +60,7 @@ export default class LoadService {
     }
 
     async sendRequest() {
-
         const res = await this.request.getFiles();
-        console.log(res)
 
 
     }

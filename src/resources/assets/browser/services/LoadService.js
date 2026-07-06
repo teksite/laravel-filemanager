@@ -1,5 +1,6 @@
 import {$} from "../helpers/dom.js";
 import Events from "../constants/events.js";
+import events from "../constants/events.js";
 
 export default class LoadService {
 
@@ -18,10 +19,10 @@ export default class LoadService {
 
         this.bindUI();
 
-        this.eventBus= eventBus;
-        this.state= state;
-        this.request= requestService;
-        this.errorBus= errorService;
+        this.eventBus = eventBus;
+        this.state = state;
+        this.request = requestService;
+        this.errorBus = errorService;
 
         if (this.options.getOnInit ?? true) this.sendRequest();
 
@@ -60,14 +61,37 @@ export default class LoadService {
     }
 
     async sendRequest() {
-        const res = await this.request.getFiles();
+        const loading = this.state.get('load.loading');
+        if (loading) return;
+
+        const hasMore = this.state.get('load.hasMore');
+        if (!hasMore) return;
+
+        const cursor = this.state.get('load.hasMore');
+        const disk = this.state.get('load.disk');
+        const mime_type = this.state.get('load.type');
+
+        const {files, meta} = await this.request.getFiles({
+            cursor,
+            mime_type,
+            disk
+        });
+
+        this.eventBus.emit(events.FILES_LOADED, {
+            files,
+            meta
+        });
+
+        this.state.set('load.hasMore', meta.has_more)
+        this.state.set('load.hasMore', meta.cursor);
+        this.setFiles(files);
 
 
     }
 
 
-
     setFiles(files = []) {
+        this.state.set('load.files', files);
 
     }
 

@@ -1,11 +1,22 @@
 const EVENTS = Object.freeze({
 
-    /* File lifecycle */
-    FILE_SELECTED: 'file:selected',
-    FILE_DELETED: 'file:deleted',
-    FILE_RENAMED: 'file:renamed',
-    FILE_UPLOADED: 'file:uploaded',
-    FILE_CHOOSE: 'file:choose',
+
+    /* Upload */
+    UPLOAD_SELECTED_REMOVE: 'upload:selected_remove',
+    UPLOAD_SELECTED: 'upload:selected',
+    UPLOAD_START: 'upload:start',
+    UPLOAD_PROGRESS: 'upload:progress',
+    UPLOAD_SUCCESS: 'upload:success',
+    UPLOAD_FAILED: 'upload:failed',
+    UPLOAD_COMPLETE: 'upload:complete',
+
+    /* load */
+    FILES_LOADED: 'files:loaded',
+    FILES_NO_MORE: 'files:no_more',
+    FILES_NEED_MORE: 'files:need_more',
+
+
+
 
     /* Grid */
     GRID_UPDATED: 'grid:updated',
@@ -21,14 +32,6 @@ const EVENTS = Object.freeze({
     PREVIEW_UPDATED: 'preview:updated',
     PREVIEW_CLEARED: 'preview:cleared',
 
-    /* Upload */
-    UPLOAD_SELECTED_REMOVE: 'upload:selected_remove',
-    UPLOAD_SELECTED: 'upload:selected',
-    UPLOAD_START: 'upload:start',
-    UPLOAD_PROGRESS: 'upload:progress',
-    UPLOAD_SUCCESS: 'upload:success',
-    UPLOAD_FAILED: 'upload:failed',
-    UPLOAD_COMPLETE: 'upload:complete',
 
     /* Filter */
     FILTER_CHANGED: 'filter:changed',

@@ -21,9 +21,10 @@ export default class StateManager {
                 loading: false,
                 hasMore: true,
 
+                cursor: null,
+
                 disk : null,
                 type: null,
-                cursor: null,
             },
 
             upload: {

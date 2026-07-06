@@ -22,7 +22,7 @@ const defaultConfig = {
         cursorName: 'cursor',
         selectedDisk : null,
         selectedType : null,
-        firstRequest :true
+        getOnInit :true
     },
     request: {
 

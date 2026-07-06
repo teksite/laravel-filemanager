@@ -3,7 +3,7 @@ import Events from "../constants/events.js";
 
 export default class LoadService {
 
-    constructor({url, elements = {}, options = {}}, eventBus, state, requestService ,errorService) {
+    constructor({url, elements = {}, options = {}}, eventBus, state, requestService, errorService) {
 
         this.options = {
             endpoint: url ?? '/api/filemanager',
@@ -12,9 +12,19 @@ export default class LoadService {
         this.handlers = [];
 
 
-
         this.loadElements(elements);
+
+        if (!this.gridEl) return;
+
         this.bindUI();
+
+        this.eventBus= eventBus;
+        this.state= state;
+        this.request= requestService;
+        this.errorBus= errorService;
+
+        if (this.options.getOnInit ?? true) this.sendRequest();
+
     }
 
     loadElements(elements) {
@@ -31,11 +41,9 @@ export default class LoadService {
     }
 
     bindUI() {
-        if (!this.gridEl ) return;
-
+        if (!this.gridEl) return;
 
         this.handlers = {
-
             select: (e) => {
                 e.preventDefault();
             },
@@ -51,14 +59,21 @@ export default class LoadService {
 
     }
 
-    sendRequest(){
-        console.log('ddddddddddddd')
+    async sendRequest() {
+
+        const res = await this.request.getFiles();
+        console.log(res)
+
+
     }
+
+
 
     setFiles(files = []) {
 
     }
-    stop(){
+
+    stop() {
 
     }
 

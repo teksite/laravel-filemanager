@@ -1,9 +1,7 @@
 export default class RequestService {
 
     constructor({url, options} = {}, errorBus = null) {
-        this.options = {
-            ...options, ...url
-        }
+        this.options = {...options, ...url}
         this.errorBus = errorBus;
         this.controllers = new Set();
     }
@@ -109,11 +107,12 @@ export default class RequestService {
 
     /* tools */
     buildQuery(params = {}) {
-        const query = new URLSearchParams();
-
-        Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== '')
-
-        return query.toString();
+        return new URLSearchParams(Object.entries(params).filter(([, value]) =>
+                value !== undefined &&
+                value !== null &&
+                value !== ''
+            )
+        ).toString();
     }
 
     sendWithBody(method, url, body, options = {}) {
@@ -145,6 +144,15 @@ export default class RequestService {
             controller.abort();
         }
         this.controllers.clear();
+    }
+
+
+    /* ---- For the App -----  */
+
+    getFiles({cursor = null, disk = null, mime_type = null} = {}) {
+        const endPoint = this.options.getUrl ?? '/api/filemanager';
+
+        return this.get(endPoint, {cursor, disk, mime_type});
     }
 
 }

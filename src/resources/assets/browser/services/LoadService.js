@@ -4,7 +4,7 @@ import events from "../constants/events.js";
 
 export default class LoadService {
 
-    constructor({url, elements = {}, options = {}}, eventBus, state, requestService, errorService) {
+    constructor({url, options = {}}, eventBus, state, requestService, errorService) {
 
         this.options = {
             endpoint: url ?? '/api/filemanager',
@@ -28,37 +28,6 @@ export default class LoadService {
 
     }
 
-    loadElements(elements) {
-
-        this.gridEl = $(elements.gridEl ?? '[data-grid]');
-
-        this.loadingEl = $(elements.loadingEl ?? '[data-loading]');
-
-        this.loadMoreEl = $(elements.loadMoreEl ?? '[data-load-more]');
-
-        this.mimesEl = $(elements.mimesEl ?? '[data-diskList]');
-
-        this.disksEl = $(elements.disksEl ?? '[data-mimeList]');
-    }
-
-    bindUI() {
-        if (!this.gridEl) return;
-
-        this.handlers = {
-            select: (e) => {
-                e.preventDefault();
-            },
-
-            more: (e) => {
-                e.preventDefault();
-                this.sendRequest();
-            },
-        };
-        this.gridEl.addEventListener('click', this.handlers.select);
-
-        this.loadMoreEl?.addEventListener('click', this.handlers.more);
-
-    }
 
     async sendRequest() {
         const loading = this.state.get('load.loading');
@@ -71,6 +40,11 @@ export default class LoadService {
         const disk = this.state.get('load.disk');
         const mime_type = this.state.get('load.type');
 
+        this.eventBus.emit(events.FILES_REQUEST , {
+            cursor,
+            mime_type,
+            disk,
+        });
         const {files, meta} = await this.request.getFiles({
             cursor,
             mime_type,
@@ -80,6 +54,12 @@ export default class LoadService {
         this.eventBus.emit(events.FILES_LOADED, {
             files,
             meta
+        });
+
+
+        this.eventBus.emit(events.FILES_RECEIVE , {
+            files,
+            meta,
         });
 
         this.state.set('load.hasMore', meta.has_more)
@@ -92,6 +72,7 @@ export default class LoadService {
 
     setFiles(files = []) {
         this.state.set('load.files', files);
+        console.log(this.state.get('load.files'));
 
     }
 
@@ -101,8 +82,5 @@ export default class LoadService {
 
     destroy() {
         this.stop();
-        this.gridEl.removeEventListener('click', this.handlers.select);
-        this.loadMoreEl?.removeEventListener('click', this.handlers.more);
-
     }
 }

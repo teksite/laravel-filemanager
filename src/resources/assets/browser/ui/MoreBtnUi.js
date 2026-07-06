@@ -1,25 +1,23 @@
-import {$, escapeHtml} from "../helpers/dom.js";
+import {$} from "../helpers/dom.js";
 import Events from "../constants/events.js";
-import formatSize from "../helpers/formatSize.js";
-import {getMimeIcon} from "../helpers/mime.js";
-import {uniqueString} from "../helpers/general.js";
 import events from "../constants/events.js";
 
-export default class UploaderPreviewUi {
+export default class MoreBtnUi {
 
     constructor({btnEl = null} = {}, eventBus, stateManager) {
+
+        const selector = btnEl ?? '[data-load-more]';
+        this.moreBtn = $(selector);
+        if (!this.moreBtn) return;
+
 
         this.eventBus = eventBus;
         this.state = stateManager;
 
         this.listeners = [];
 
-        const selector = btnEl ?? '[data-load-more]';
-
-        this.moreBtn = $(selector);
 
 
-        if (!this.uploadPreviewEl) return;
 
         this.bindDomEvents();
         this.bindBusEvents();

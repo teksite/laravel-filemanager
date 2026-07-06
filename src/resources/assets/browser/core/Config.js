@@ -85,8 +85,8 @@ export default class Config {
         return this.config;
     }
 
-    get(path) {
-        return this.getPath(path);
+    get(path , alternative =null) {
+        return this.getPath(path) ?? alternative;
     }
 
     section(key) {

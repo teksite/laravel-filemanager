@@ -4,9 +4,10 @@ import StateManager from "./core/StateManager.js";
 import defaultState from "./constants/defaults.js";
 import UploadService from "./services/UploadService.js";
 import UploaderPreviewUi from "./ui/UploaderPreviewUi.js";
-import ErrorService from "./services/ErrorService.js";
+import ErrorService from "./core/ErrorService.js";
 import RequestService from "./services/RequestService.js";
 import LoadService from "./services/LoadService.js";
+import MoreBtnUi from "./ui/MoreBtnUi.js";
 
 export default class DatabaseFileManager {
     constructor({config = {}}) {
@@ -61,6 +62,10 @@ export default class DatabaseFileManager {
             },
             options: this.configs.section('load'),
         }, this.eventBus, this.states, this.request, this.errorBus)
+
+        this.moreBtnUi = new MoreBtnUi({
+            btnEl: this.configs.get('ui.loadMoreSelector' , '[data-load-more]')
+        } , this.eventBus , this.states )
     }
 
 
@@ -70,6 +75,7 @@ export default class DatabaseFileManager {
 
 
         this.loaderService?.destroy();
+        this.moreBtnUi?.destroy();
     }
 
 

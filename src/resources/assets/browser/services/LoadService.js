@@ -12,39 +12,40 @@ export default class LoadService {
         };
         this.handlers = [];
 
-
-        this.loadElements(elements);
-
-        if (!this.gridEl) return;
-
-        this.bindUI();
-
         this.eventBus = eventBus;
         this.state = state;
         this.request = requestService;
         this.errorBus = errorService;
+        this.sendRequest = this.sendRequest.bind(this);
+
 
         if (this.options.getOnInit ?? true) this.sendRequest();
+        this.bindDomEvents();
 
+    }
+
+    bindDomEvents() {
+        this.eventBus.on(events.FILES_NEED_MORE, this.sendRequest)
     }
 
 
     async sendRequest() {
-        const loading = this.state.get('load.loading');
+        const loading = this.state.get('load.loading', false);
         if (loading) return;
 
-        const hasMore = this.state.get('load.hasMore');
+        const hasMore = this.state.get('load.hasMore', true);
         if (!hasMore) return;
 
-        const cursor = this.state.get('load.hasMore');
+        const cursor = this.state.get('load.cursor');
         const disk = this.state.get('load.disk');
         const mime_type = this.state.get('load.type');
 
-        this.eventBus.emit(events.FILES_REQUEST , {
+        this.eventBus.emit(events.FILES_REQUEST, {
             cursor,
             mime_type,
             disk,
         });
+
         const {files, meta} = await this.request.getFiles({
             cursor,
             mime_type,
@@ -56,16 +57,14 @@ export default class LoadService {
             meta
         });
 
-
-        this.eventBus.emit(events.FILES_RECEIVE , {
+        this.eventBus.emit(events.FILES_RECEIVE, {
             files,
             meta,
         });
 
         this.state.set('load.hasMore', meta.has_more)
-        this.state.set('load.hasMore', meta.cursor);
+        this.state.set('load.cursor', meta.next_cursor);
         this.setFiles(files);
-
 
     }
 

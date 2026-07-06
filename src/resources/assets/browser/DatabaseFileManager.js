@@ -53,13 +53,6 @@ export default class DatabaseFileManager {
     loader() {
         this.loaderService = new LoadService({
             url: this.configs.get('api.getUrl'),
-            elements: {
-                gridEl: this.configs.get('ui.gridSelector'),
-                loadingEl: this.configs.get('ui.loadingSelector'),
-                loadMoreEl: this.configs.get('ui.loadMoreSelector'),
-                mimesEl: this.configs.get('ui.mimesSelector'),
-                disksEl: this.configs.get('ui.disksSelector'),
-            },
             options: this.configs.section('load'),
         }, this.eventBus, this.states, this.request, this.errorBus)
 

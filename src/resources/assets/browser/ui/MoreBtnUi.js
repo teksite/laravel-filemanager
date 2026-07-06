@@ -7,7 +7,9 @@ export default class MoreBtnUi {
     constructor({btnEl = null} = {}, eventBus, stateManager) {
 
         const selector = btnEl ?? '[data-load-more]';
+
         this.moreBtn = $(selector);
+
         if (!this.moreBtn) return;
 
 
@@ -45,11 +47,10 @@ export default class MoreBtnUi {
     }
 
     requestMoreEvent() {
-        console.log('ddddddddddddddddd')
         const isLoading = this.state.get('load.loading');
         const hasMore = this.state.get('load.hasMore');
-        if (isLoading === true || hasMore === false) return;
-        this.eventBus.emit(events.FILES_NEED_MORE, {})
+        if (isLoading || !hasMore ) return;
+        this.eventBus.emit(events.FILES_NEED_MORE, {});
     }
 
     removeBtn() {

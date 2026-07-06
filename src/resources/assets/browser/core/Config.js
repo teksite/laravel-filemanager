@@ -1,15 +1,13 @@
 const defaultConfig = {
     api: {
         baseUrl: '/api/filemanager',
+        getUrl: '/api/filemanager',
         uploadUrl: '/api/filemanager',
+
         deleteUrl: '/api/filemanager',
         updateUrl: '/api/filemanager',
     },
 
-    pagination: {
-        perPage: 50,
-        cursorName: 'cursor'
-    },
 
     upload: {
         concurrency: 3,
@@ -19,14 +17,14 @@ const defaultConfig = {
         allowedDisks: [],
     },
 
-    mime: {
-        default: '',
-
+    load: {
+        perPage: 50,
+        cursorName: 'cursor',
+        selectedDisk : null,
+        selectedType : null,
     },
 
-    disk: {
-        default: ''
-    },
+
 
     selection: {
         enable: false,
@@ -41,14 +39,14 @@ const defaultConfig = {
     ui: {
         mainSelector: '.filemanager',
 
+        /* loader ui*/
         gridSelector: '[data-grid]',
-
-        loaderSelector: '[data-loader]',
+        loadingSelector: '[data-loading]',
         loadMoreSelector: '[data-load-more]',
+        mimesSelector: '[data-mimeList]',
+        disksSelector: '[data-diskList]',
 
-        mimeSelector: '[data-mimeList]',
-        diskSelector: '[data-diskList]',
-
+        /* uploader ui*/
         uploadFormSelector: '[data-upload-form]',
         dropzoneSelector: '[data-dropzone]',
         fileInputSelector: '[data-file-input]',

@@ -10,15 +10,21 @@ export default class StateManager {
 
     getDefaultState() {
         return {
-            cursor: null,
-            loading: false,
-            hasMore: true,
 
-            disk: '',
-            mimeType: '',
 
             selected: [],
             currentItem: null,
+
+            load:{
+                files: [],
+
+                loading: false,
+                hasMore: true,
+
+                disk : null,
+                type: null,
+                cursor: null,
+            },
 
             upload: {
                 active: 0,

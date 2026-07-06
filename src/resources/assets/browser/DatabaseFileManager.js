@@ -6,7 +6,7 @@ import UploadService from "./services/UploadService.js";
 import UploaderPreviewUi from "./ui/UploaderPreviewUi.js";
 import RequestService from "./services/RequestService.js";
 import ErrorService from "./services/ErrorService.js";
-import {$} from "./helpers/dom.js";
+import LoadService from "./services/LoadService.js";
 
 export default class DatabaseFileManager {
     constructor({config = {}}) {
@@ -19,6 +19,7 @@ export default class DatabaseFileManager {
         this.request = new RequestService(this.configs.section('api'), this.configs.section('upload'), this.errorBus)
 
         this.uploader();
+        this.loader();
     }
 
     uploader() {
@@ -42,10 +43,27 @@ export default class DatabaseFileManager {
     }
 
 
+    loader(){
+        this.loaderService = new LoadService({
+            url: this.configs.get('api.getUrl'),
+            elements:{
+                gridEl: this.configs.get('ui.gridSelector'),
+                loadingEl: this.configs.get('ui.loadingSelector'),
+                loadMoreEl: this.configs.get('ui.loadMoreSelector'),
+                mimesEl: this.configs.get('ui.mimesSelector'),
+                disksEl: this.configs.get('ui.disksSelector'),
+            },
+            options: this.configs.section('load'),
+        } , this.eventBus, this.states, this.errorBus)
+    }
+
+
     destroy(){
         this.uploadService?.destroy();
-
         this.previewUi?.destroy();
+
+
+        this.loaderService?.destroy();
     }
 
 

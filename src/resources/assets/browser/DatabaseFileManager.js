@@ -4,19 +4,22 @@ import StateManager from "./core/StateManager.js";
 import defaultState from "./constants/defaults.js";
 import UploadService from "./services/UploadService.js";
 import UploaderPreviewUi from "./ui/UploaderPreviewUi.js";
-import RequestService from "./services/RequestService.js";
 import ErrorService from "./services/ErrorService.js";
+import RequestService from "./services/RequestService.js";
 import LoadService from "./services/LoadService.js";
 
 export default class DatabaseFileManager {
     constructor({config = {}}) {
 
         this.configs = new Config(config);
+
         this.eventBus = new EventEmitter();
+        this.errorBus = new ErrorService();
 
         this.states = new StateManager(this.eventBus, defaultState);
-        this.errorBus = new ErrorService();
-        this.request = new RequestService(this.configs.section('api'), this.configs.section('upload'), this.errorBus)
+        this.request = new RequestService({
+            api:this.configs.section('api'), conthis.configs.section('request')
+        }, this.errorBus)
 
         this.uploader();
         this.loader();
@@ -54,7 +57,7 @@ export default class DatabaseFileManager {
                 disksEl: this.configs.get('ui.disksSelector'),
             },
             options: this.configs.section('load'),
-        } , this.eventBus, this.states, this.errorBus)
+        } , this.eventBus, this.states, this.request ,this.errorBus)
     }
 
 

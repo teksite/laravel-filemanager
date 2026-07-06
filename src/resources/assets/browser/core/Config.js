@@ -22,6 +22,14 @@ const defaultConfig = {
         cursorName: 'cursor',
         selectedDisk : null,
         selectedType : null,
+        firstRequest :true
+    },
+    request: {
+
+        timeout: 15000,
+        selectedDisk : null,
+        selectedType : null,
+        firstRequest :true
     },
 
 

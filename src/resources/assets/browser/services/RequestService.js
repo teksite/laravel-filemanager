@@ -1,11 +1,15 @@
 
 export default class RequestService {
 
-    constructor(baseConfig = {}, options = {}, errorBus = null) {
+    constructor({url , options} = {}, errorBus = null) {
+
+        this.options = {
+            ...url , ...option
+        }
 
         this.options = {
             baseURL: baseConfig.baseURL ?? '',
-            timeout: options.timeout ?? 10000,
+            timeout: options.timeout ?? 15000,
             debug: options.debug ?? false
         };
 

@@ -18,6 +18,10 @@
         initFileManager({
             config:
                 {
+                    load:{
+                        disks :@js($disks),
+                        types :@js($mimes),
+                    },
                     upload: {
                         allowedMimes: @js($allowedTypes),
                         allowedDisks: @js($allowedDisks)
@@ -25,7 +29,8 @@
                 }
 
         });
-    });
+    })
+    ;
 </script>
 {{--
 

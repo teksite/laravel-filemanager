@@ -1,6 +1,6 @@
 const defaultConfig = {
     api: {
-        baseUrl: '/api/filemanager',
+        baseUrl: '/',
         getUrl: '/api/filemanager',
         uploadUrl: '/api/filemanager',
 
@@ -30,6 +30,12 @@ const defaultConfig = {
         selectedDisk : null,
         selectedType : null,
         firstRequest :true
+    },
+
+    log:{
+        debug: false,
+        toServer : true,
+        serverUrl : null
     },
 
 

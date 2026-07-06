@@ -17,8 +17,12 @@ export default class DatabaseFileManager {
         this.errorBus = new ErrorService();
 
         this.states = new StateManager(this.eventBus, defaultState);
+
         this.request = new RequestService({
-            api:this.configs.section('api'), conthis.configs.section('request')
+
+            api: this.configs.section('api'),
+            options: this.configs.section('request')
+
         }, this.errorBus)
 
         this.uploader();
@@ -46,10 +50,10 @@ export default class DatabaseFileManager {
     }
 
 
-    loader(){
+    loader() {
         this.loaderService = new LoadService({
             url: this.configs.get('api.getUrl'),
-            elements:{
+            elements: {
                 gridEl: this.configs.get('ui.gridSelector'),
                 loadingEl: this.configs.get('ui.loadingSelector'),
                 loadMoreEl: this.configs.get('ui.loadMoreSelector'),
@@ -57,11 +61,11 @@ export default class DatabaseFileManager {
                 disksEl: this.configs.get('ui.disksSelector'),
             },
             options: this.configs.section('load'),
-        } , this.eventBus, this.states, this.request ,this.errorBus)
+        }, this.eventBus, this.states, this.request, this.errorBus)
     }
 
 
-    destroy(){
+    destroy() {
         this.uploadService?.destroy();
         this.previewUi?.destroy();
 

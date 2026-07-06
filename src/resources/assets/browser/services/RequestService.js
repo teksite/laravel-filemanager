@@ -1,31 +1,131 @@
-
 export default class RequestService {
 
-    constructor({url , options} = {}, errorBus = null) {
-
+    constructor({url, options} = {}, errorBus = null) {
         this.options = {
-            ...url , ...option
+            ...options, ...url
         }
-
-        this.options = {
-            baseURL: baseConfig.baseURL ?? '',
-            timeout: options.timeout ?? 15000,
-            debug: options.debug ?? false
-        };
-
         this.errorBus = errorBus;
         this.controllers = new Set();
     }
 
+
+    async request(url, options = {}) {
+
+        const fullUrl = new URL(url, this.options.baseURL).href;
+
+        const timeoutMs = options.timeout ?? this.options.timeout;
+
+        const controller = new AbortController();
+
+        let timeoutId = null;
+
+        if (timeoutMs > 0) {
+            timeoutId = setTimeout(() => {
+                controller.abort();
+            }, timeoutMs);
+        }
+        this.controllers.add(controller);
+
+        try {
+
+            const response = await fetch(fullUrl, {
+                ...options,
+                signal: controller.signal
+            });
+            if (!response.ok) {
+                const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
+                error.status = response.status;
+
+                this.errorBus?.emit(error, {
+                    url: fullUrl,
+                    status: response.status,
+                    method: options.method ?? 'GET'
+                });
+
+                throw error;
+            }
+
+            if (response.status === 204) {
+                return null;
+            }
+
+            const contentType = response.headers.get('content-type') ?? '';
+
+            if (contentType.includes('application/json')) {
+                return response.json();
+            }
+
+            return response.text();
+
+        } catch (error) {
+
+            if (error.name !== 'AbortError') {
+                this.errorBus?.emit(error, {
+                    url: fullUrl,
+                    method: options.method ?? 'GET'
+                });
+            }
+            throw error;
+        } finally {
+            if (timeoutId) clearTimeout(timeoutId);
+            this.controllers.delete(controller);
+        }
+    }
+
+    get(url, params = {}, options = {}) {
+        const query = this.buildQuery(params);
+        return this.request(query ? `${url}?${query}` : url, {
+                ...options,
+                method: 'GET'
+            }
+        );
+    }
+
+    post(url, body = {}, options = {}) {
+        return this.sendWithBody(
+            'POST',
+            url,
+            body,
+            options
+        );
+    }
+
+    patch(url, body = {}, options = {}) {
+        return this.sendWithBody(
+            'PATCH',
+            url,
+            body,
+            options
+        );
+    }
+
+    delete(url, options = {}) {
+        return this.request(url, {
+            ...options,
+            method: 'DELETE'
+        });
+    }
+
+
+    /* tools */
     buildQuery(params = {}) {
         const query = new URLSearchParams();
 
-        Object.entries(params).forEach(([key, value]) => {
-            if (value === undefined || value === null || value === '') return;
-            query.append(key, value);
-        });
+        Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== '')
 
         return query.toString();
+    }
+
+    sendWithBody(method, url, body, options = {}) {
+        return this.request(url, {
+            ...options,
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            },
+            body: JSON.stringify(body)
+        });
     }
 
     createController(timeoutMs) {
@@ -37,106 +137,14 @@ export default class RequestService {
 
         this.controllers.add(controller);
 
-        return { controller, timeout };
-    }
-
-    async request(url, options = {}) {
-
-        const fullUrl = this.options.baseURL + url;
-        const timeoutMs = options.timeout ?? this.options.timeout;
-
-        const { controller, timeout } = this.createController(timeoutMs);
-
-        try {
-
-            if (this.options.debug) {
-                console.log('[Request]', fullUrl);
-            }
-
-            const res = await fetch(fullUrl, {
-                ...options,
-                signal: controller.signal
-            });
-
-            clearTimeout(timeout);
-            this.controllers.delete(controller);
-
-            if (!res.ok) {
-                const error = new Error(`HTTP ${res.status}`);
-
-                this.errorBus?.emit(error, {
-                    url: fullUrl,
-                    status: res.status,
-                    method: options.method || 'GET'
-                });
-
-                throw error;
-            }
-
-            return await res.json();
-
-        } catch (error) {
-
-            clearTimeout(timeout);
-            this.controllers.delete(controller);
-
-            if (error.name === 'AbortError') {
-                if (this.options.debug) {
-                    console.warn('[Request Aborted]', fullUrl);
-                }
-                return null;
-            }
-
-            this.errorBus?.emit(error, {
-                url: fullUrl,
-                method: options.method || 'GET'
-            });
-
-            throw error;
-        }
-    }
-
-    get(url, params = {}, options = {}) {
-        const query = this.buildQuery(params);
-        return this.request(query ? `${url}?${query}` : url, {
-            ...options,
-            method: 'GET'
-        });
-    }
-
-    post(url, body = {}, options = {}) {
-        return this.request(url, {
-            ...options,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(options.headers || {})
-            },
-            body: JSON.stringify(body)
-        });
-    }
-
-    patch(url, body = {}, options = {}) {
-        return this.request(url, {
-            ...options,
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(options.headers || {})
-            },
-            body: JSON.stringify(body)
-        });
-    }
-
-    delete(url, options = {}) {
-        return this.request(url, {
-            ...options,
-            method: 'DELETE'
-        });
+        return {controller, timeout};
     }
 
     cancelAll() {
-        this.controllers.forEach(c => c.abort());
+        for (const controller of this.controllers) {
+            controller.abort();
+        }
         this.controllers.clear();
     }
+
 }

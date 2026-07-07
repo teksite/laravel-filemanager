@@ -23,7 +23,6 @@ export default class FooterUi {
     bindBusEvents() {
         this.listeners = {
             counting: ({value}) => this.counting(value),
-
         };
         this.eventBus.on('load.files', this.listeners.counting);
     }

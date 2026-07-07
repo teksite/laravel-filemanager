@@ -55,13 +55,7 @@ export default class LoadService {
 
                 const {files = [], meta = {}} = response;
 
-                console.log(
-                    'received:',
-                    files.length,
-                    files.map(f => f.id)
-                );
-
-                this.state.set("load.hasMore", Boolean(meta.has_more));
+                this.state.set("load.hasMore", !!meta.has_more);
                 this.state.set("load.cursor", meta.next_cursor ?? null);
 
                 this.appendFiles(files);

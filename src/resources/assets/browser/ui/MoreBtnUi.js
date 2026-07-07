@@ -19,21 +19,18 @@ export default class MoreBtnUi {
         this.listeners = [];
 
 
-
-
         this.bindDomEvents();
         this.bindBusEvents();
     }
 
     bindBusEvents() {
         this.listeners = {
-            removeBtn: (e) => {
-                e.preventDefault();
-                this.removeBtn()
+            removeBtn: ({value}) => {
+                this.removeBtn(value)
             },
 
         };
-        this.eventBus.on(Events.FILES_NO_MORE, this.listeners.removeBtn);
+        this.eventBus.on('load.hasMore', this.listeners.removeBtn);
 
     }
 
@@ -54,11 +51,11 @@ export default class MoreBtnUi {
         this.eventBus.emit(events.FILES_NEED_MORE, {});
     }
 
-    removeBtn() {
-        this.moreBtn.remove();
-        this.eventBus.off(Events.FILES_NO_MORE, this.listeners.removeBtn);
-
-
+    removeBtn(value) {
+       if (!value){
+           this.moreBtn.remove();
+           this.eventBus.off('load.hasMore', this.listeners.removeBtn);
+       }
     }
 
 

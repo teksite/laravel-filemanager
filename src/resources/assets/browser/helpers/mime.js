@@ -67,10 +67,58 @@ export function getMimeIcon(mime = '') {
     const group = getMimeGroup(mime);
 
     switch (group) {
-        case 'image': return '🖼️';
-        case 'video': return '🎬';
-        case 'audio': return '🎵';
-        case 'application': return '📄';
-        default: return '📁';
+        case 'image':
+            return '🖼️';
+
+        case 'video':
+            return '🎬';
+
+        case 'audio':
+            return '🎵';
+
+        case 'text':
+            return '📄';
+
+        case 'pdf':
+            return '📕';
+
+        case 'word':
+            return '📘';
+
+        case 'excel':
+            return '📗';
+
+        case 'powerpoint':
+            return '📙';
+
+        case 'archive':
+            return '🗜️';
+
+        case 'code':
+            return '💻';
+
+        case 'font':
+            return '🔤';
+
+        case 'ebook':
+            return '📚';
+
+        case 'database':
+            return '🗃️';
+
+        case 'vector':
+            return '🎨';
+
+        case 'certificate':
+            return '🔐';
+
+        case 'application':
+            return '⚙️';
+
+        case 'folder':
+            return '📁';
+
+        default:
+            return '📦';
     }
 }

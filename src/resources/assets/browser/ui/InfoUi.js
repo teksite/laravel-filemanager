@@ -65,13 +65,38 @@ export default class InfoUi {
         this.diskInfoEl.innerText = file?.disk ?? '-';
         this.createdInfoEl.innerText = file?.created_at ?? '-';
 
+        this.renderPreview(file)
+
     }
 
+    renderPreview(item) {
+
+        const box = this.filePreviewEl;
+        if (!box) return;
+
+        const type = getMimeGroup(item.mime_type);
+        switch (type) {
+
+            case 'image':
+                box.innerHTML = `<img src="${item.url}" />`;
+                break;
+
+            case 'video':
+                box.innerHTML = `<video controls src="${item.url}"></video>`;
+                break;
+
+            case 'audio':
+                box.innerHTML = `<audio controls src="${item.url}"></audio>`;
+                break;
+
+            default:
+                box.innerHTML = `<div class="file-placeholder">${getMimeIcon(type)}</div>`;
+        }
+    }
 
     destroy() {
         this.eventBus.off('select.current', this.listeners.showInfo);
 
-        this.eventBus.off('load.loading', this.listeners.toggleLoading);
 
         this.eventBus.off(events.UPLOAD_SUCCESS, this.listeners.prepend);
 

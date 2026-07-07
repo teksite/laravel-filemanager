@@ -48,6 +48,7 @@ export default class LoadService {
             'load.type',
             this.updateFilter
         );
+
     }
 
 
@@ -75,23 +76,17 @@ export default class LoadService {
         }
 
 
-        const disk = this.state.get(
-            "load.disk",
-            null
-        );
+        const disk = this.state.get('load.disk' , null);
 
 
-        const mimeType = this.state.get(
-            "load.type",
-            null
-        );
+        const mimeType = this.state.get('load.type' , null);
+
 
         const params = {
             cursor: cursor,
             disk: disk,
             mime_type: mimeType,
         };
-        console.log(params)
         await handler({
 
             resolve: async () => {
@@ -215,6 +210,7 @@ export default class LoadService {
         this.state.set('load.hasMore', true);
         this.state.set('load.files', files);
         this.state.set('load.addedFiles', {});
+        
     }
 
 

@@ -35,12 +35,17 @@ export default class FilterUi {
 
 
     updateTypeFilter(e) {
-        console.log(e)
-        this.state.set('load.disk',e.target.value);
+        const target = e.target;
+        const value = target.value.length > 0 ? target.value : null;
+
+        this.state.set('load.disk', value);
     }
 
     updateDiskFilter(e) {
-        this.state.set('load.type',e.target.value);
+        const target = e.target;
+        const value = target.value.length > 0 ? target.value : null;
+
+        this.state.set('load.type', value);
     }
 
     destroy() {

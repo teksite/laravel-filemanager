@@ -29,6 +29,7 @@ const EVENTS = Object.freeze({
     FILE_SELECT:'file_selected',
 
     FILE_UPDATE_TITLE : 'file_update_title',
+    FILE_UPDATED_TITLE : 'file_updated_title',
 
 
 

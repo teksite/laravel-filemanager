@@ -1,11 +1,21 @@
 import Events from "../constants/events.js";
+import handler from "../helpers/handler.js";
 
-export default class SelectService {
+export default class UpdateService {
 
-    constructor(eventBus, state) {
+    constructor({url, options = {}}, eventBus, state, requestService, errorService) {
+
+        this.options = {
+            endpoint: url ?? '/api/filemanager',
+            ...options
+        };
+
 
         this.eventBus = eventBus;
         this.state = state;
+        this.request = requestService;
+        this.errorBus = errorService;
+
 
         this.bindEvents();
     }
@@ -13,43 +23,86 @@ export default class SelectService {
 
     bindEvents() {
 
-        this.handleSelect = this.handleSelect.bind(this);
+        this.updateTitle = this.updateTitle.bind(this);
 
         this.eventBus.on(
-            Events.FILE_SELECT,
-            this.handleSelect
+            Events.FILE_UPDATE_TITLE,
+            this.updateTitle
         );
     }
 
 
-    handleSelect({fileId} = {}) {
+    async updateTitle({fileId, title} = {}) {
 
-        if (!fileId) {
+        if (!fileId || title == null) {
             return;
         }
 
+        const {success} = await handler({
 
-        this.state.set(
-            'select.current',
-            fileId
-        );
+            resolve: async () => {
+
+                const file = await this.request.patch(
+                    `${this.options.endpoint}/${fileId}`,
+                    {
+                        title
+                    }
+                );
+
+                this.updateState(fileId, file ?? { title });
+
+                this.eventBus.emit(
+                    Events.FILE_UPDATED_TITLE,
+                    {
+                        fileId,
+                        file
+                    }
+                );
+            },
+
+            reject: async (error) => {
+
+                this.errorBus?.emit?.(error);
+
+                throw error;
+            }
+
+        });
+
+        return success;
     }
 
 
-    clear() {
+    updateState(fileId, file = {}) {
+
+        const files = this.state.get(
+            'load.files',
+            {}
+        );
+
+        if (!files[fileId]) {
+            return;
+        }
 
         this.state.set(
-            'select.current',
-            null
+            'load.files',
+            {
+                ...files,
+                [fileId]: {
+                    ...files[fileId],
+                    ...file
+                }
+            }
         );
     }
+
 
 
     destroy() {
 
         this.eventBus.off(
-            Events.FILE_SELECT,
-            this.handleSelect
+            Events.FILE_UPDATE_TITLE,
+            this.updateTitle
         );
     }
 }

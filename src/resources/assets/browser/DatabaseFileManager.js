@@ -12,6 +12,7 @@ import GridUi from "./ui/GridUi.js";
 import InfoUi from "./ui/InfoUi.js";
 import DeleteService from "./services/DeleteService.js";
 import FooterUi from "./ui/FooterUi.js";
+import UpdateService from "./services/UpdateService.js";
 
 export default class DatabaseFileManager {
     constructor({config = {}}) {
@@ -84,6 +85,12 @@ export default class DatabaseFileManager {
 
 
     informer() {
+
+
+        this.updaterService = new UpdateService({
+            url: this.configs.get('api.updateUrl'),
+            options: {}
+        }, this.eventBus, this.states, this.request, this.errorBus);
 
         this.deleteService = new DeleteService({
             url: this.configs.get('api.deleteUrl'),

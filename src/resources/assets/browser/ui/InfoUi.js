@@ -280,20 +280,22 @@ export default class InfoUi {
             }
 
             submitted = true;
-
             this.editingTitle = false;
 
-            const title = input.value.trim();
+            const oldTitle = this.current.title ?? '';
+            const newTitle = input.value.trim();
 
-            this.renderTitle(false);
-
-            if (title === this.current.title) {
+            if (oldTitle === newTitle) {
+                this.renderTitle();
                 return;
             }
 
+            this.current.title = newTitle;
+            this.renderTitle();
+
             this.eventBus.emit(events.FILE_UPDATE_TITLE, {
                 fileId: this.current.id,
-                title
+                title: newTitle
             });
         };
 
@@ -307,7 +309,7 @@ export default class InfoUi {
             if (e.key === 'Escape') {
                 submitted = true;
                 this.editingTitle = false;
-                this.renderTitle(false);
+                this.renderTitle();
             }
 
         });
@@ -315,11 +317,9 @@ export default class InfoUi {
         input.addEventListener('blur', submit);
     }
 
-
     renderTitle() {
 
-        this.titleInfoEl.textContent =
-            this.current?.title ?? '-';
+        this.titleInfoEl.textContent = this.current?.title ?? '-';
     }
 
 

@@ -31,7 +31,6 @@ export default class GridUi {
 
 
         this.loadPreview = this.loadPreview.bind(this);
-        this.loadAgain = this.loadAgain.bind(this);
 
 
         this.bindBusEvents();
@@ -62,16 +61,19 @@ export default class GridUi {
                 this.removeFile(fileId);
             },
 
-            loadAgain: ({value}) => {
-                this.loadAgain(value);
-            }
+            emptyGrid: () => {
+                this.emptyGrid();
+            },
+
 
         };
 
+
         this.eventBus.on(
-            'load.files',
-            this.listeners.loadAgain
+            events.GRID_RESET,
+            this.listeners.emptyGrid
         );
+
 
         this.eventBus.on(
             'load.addedFiles',
@@ -262,8 +264,8 @@ export default class GridUi {
     }
 
 
-    loadAgain(value) {
-      this.gridEl.innerHTML= '';
+    emptyGrid() {
+        this.gridEl.innerHTML = '';
     }
 
 
@@ -328,6 +330,12 @@ export default class GridUi {
         this.eventBus.off(
             events.UPLOAD_SUCCESS,
             this.listeners.prepend
+        );
+
+
+        this.eventBus.off(
+            events.GRID_RESET,
+            this.listeners.emptyGrid
         );
 
 

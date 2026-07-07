@@ -1,4 +1,5 @@
 import {$} from "../helpers/dom.js";
+import events from "../constants/events.js";
 
 export default class FilterUi {
 
@@ -38,6 +39,8 @@ export default class FilterUi {
         const value = target.value.length > 0 ? target.value : null;
 
         this.state.set('load.disk', value);
+        this.eventBus.emit(events.GRID_RESET, {value})
+
     }
 
     updateTypeFilter(e) {
@@ -45,8 +48,9 @@ export default class FilterUi {
         const value = target.value.length > 0 ? target.value : null;
 
         this.state.set('load.type', value);
-    }
+        this.eventBus.emit(events.GRID_RESET, {value})
 
+    }
 
 
     destroy() {

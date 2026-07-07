@@ -17,6 +17,7 @@ export default class StateManager {
 
             load:{
                 files: [],
+                addedFiles: [],
 
                 loading: false,
                 hasMore: true,
@@ -78,7 +79,7 @@ export default class StateManager {
         return this.getByPath(this.state, path) ?? defaultValue;
     }
 
-    set(path, value, silent = false) {
+    set(path, value ,noEvent = false, silent = false) {
 
         const prev = this.get(path);
 
@@ -87,6 +88,10 @@ export default class StateManager {
         this.setByPath(newState, path, value);
 
         this.state = newState;
+
+        if (noEvent) {
+            this.emit(path, {new: value, prev, pre: this.getState(path)});
+        }
 
         if (!silent) {
             this.emit('state:changed', {key: path, value, prev, state: this.getState()});

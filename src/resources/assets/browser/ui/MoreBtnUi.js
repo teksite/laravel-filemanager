@@ -50,6 +50,7 @@ export default class MoreBtnUi {
         const isLoading = this.state.get('load.loading');
         const hasMore = this.state.get('load.hasMore');
         if (isLoading || !hasMore ) return;
+
         this.eventBus.emit(events.FILES_NEED_MORE, {});
     }
 

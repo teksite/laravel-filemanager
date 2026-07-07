@@ -85,12 +85,12 @@ export default class Config {
         return this.config;
     }
 
-    get(path , alternative =null) {
-        return this.getPath(path) ?? alternative;
+    get(path , defaultValue =null) {
+        return this.getPath(path) ?? defaultValue;
     }
 
-    section(key) {
-        return this.config[key] ?? null;
+    section(key , defaultValue=[]) {
+        return this.config[key] ?? defaultValue;
     }
 
     clone() {

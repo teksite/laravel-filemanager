@@ -1,81 +1,100 @@
-import {$} from "../helpers/dom.js";
 import Events from "../constants/events.js";
-import events from "../constants/events.js";
 
 export default class LoadService {
 
     constructor({url, options = {}}, eventBus, state, requestService, errorService) {
 
         this.options = {
-            endpoint: url ?? '/api/filemanager',
+            endpoint: url ?? "/api/filemanager",
+            getOnInit: true,
             ...options
         };
-        this.handlers = [];
 
         this.eventBus = eventBus;
         this.state = state;
         this.request = requestService;
         this.errorBus = errorService;
+
         this.sendRequest = this.sendRequest.bind(this);
 
+        this.bindEvents();
 
-        if (this.options.getOnInit ?? true) this.sendRequest();
-        this.bindDomEvents();
-
+        if (this.options.getOnInit) {
+            this.sendRequest();
+        }
     }
 
-    bindDomEvents() {
-        this.eventBus.on(events.FILES_NEED_MORE, this.sendRequest)
+    bindEvents() {
+        this.eventBus.on(Events.FILES_NEED_MORE, this.sendRequest);
     }
-
 
     async sendRequest() {
-        const loading = this.state.get('load.loading', false);
-        if (loading) return;
+
+        if (this.state.get('load.loading')) return;
 
         const hasMore = this.state.get('load.hasMore', true);
-        if (!hasMore) return;
+        const cursor = this.state.get('load.cursor', null);
 
-        const cursor = this.state.get('load.cursor');
-        const disk = this.state.get('load.disk');
-        const mime_type = this.state.get('load.type');
+        if (!cursor && !hasMore) return;
 
-        this.eventBus.emit(events.FILES_REQUEST, {
-            cursor,
-            mime_type,
-            disk,
-        });
+        const disk = this.state.get('load.disk', null);
+        const mimeType = this.state.get('load.type', null);
 
-        const {files, meta} = await this.request.getFiles({
-            cursor,
-            mime_type,
-            disk
-        });
+        try {
+            this.state.set('load.loading', true);
 
-        this.eventBus.emit(events.FILES_LOADED, {
-            files,
-            meta
-        });
+            this.eventBus.emit(Events.FILES_REQUEST, {cursor, mime_type: mimeType, disk});
 
-        this.eventBus.emit(events.FILES_RECEIVE, {
-            files,
-            meta,
-        });
+            const {files = [], meta = {}} = await this.request.getFiles({cursor, mime_type: mimeType, disk});
 
-        this.state.set('load.hasMore', meta.has_more)
-        this.state.set('load.cursor', meta.next_cursor);
-        this.setFiles(files);
+            this.state.set('load.hasMore', Boolean(meta.has_more));
 
+            this.state.set('load.cursor', meta.next_cursor ?? null);
+
+            this.appendFiles(files);
+
+            this.eventBus.emit(Events.FILES_RECEIVE, {files, meta});
+
+        } catch (error) {
+
+            console.error(error);
+
+            this.errorBus?.emit?.(error);
+
+            this.eventBus.emit(
+                Events.FILES_REQUEST_FAILED,
+                error
+            );
+
+        } finally {
+
+            this.state.set('load.loading', false);
+        }
     }
 
+    appendFiles(files = []) {
 
-    setFiles(files = []) {
+        const currentFiles = this.state.get('load.files', []);
+
+        const updatedFiles = [...currentFiles, ...files];
+
+        this.state.set('load.addedFiles', files);
+
+        this.state.set('load.files', updatedFiles);
+
+        console.debug(`[LoadService] Added: ${files.length}, Total: ${updatedFiles.length}`);
+    }
+
+    reset(files = []) {
+
+        this.state.set('load.cursor', null);
+        this.state.set('load.hasMore', true);
         this.state.set('load.files', files);
-        console.log(this.state.get('load.files'));
-
+        this.state.set('load.addedFiles', files);
     }
 
     stop() {
+        this.eventBus.off(Events.FILES_NEED_MORE, this.sendRequest);
 
     }
 

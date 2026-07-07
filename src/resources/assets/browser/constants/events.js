@@ -17,6 +17,7 @@ const EVENTS = Object.freeze({
 
     FILES_NO_MORE: 'files:no_more',
     FILES_NEED_MORE: 'files:need_more',
+    FILES_NEW: 'files:need_more',
 
 
 

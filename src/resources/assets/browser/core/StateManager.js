@@ -12,12 +12,12 @@ export default class StateManager {
         return {
 
 
-            select:{
-                current : null,
+            select: {
+                current: null,
                 type: null,
-                files : [],
+                files: [],
             },
-            load:{
+            load: {
                 files: {},
                 addedFiles: {},
 
@@ -26,7 +26,7 @@ export default class StateManager {
 
                 cursor: null,
 
-                disk : null,
+                disk: null,
                 type: null,
             },
 
@@ -38,8 +38,8 @@ export default class StateManager {
                 uploading: false
             },
 
-            edit:{
-              title: false
+            edit: {
+                title: false
             }
         };
     }
@@ -81,11 +81,11 @@ export default class StateManager {
         return structuredClone(this.state);
     }
 
-    get(path , defaultValue = null) {
+    get(path, defaultValue = null) {
         return this.getByPath(this.state, path) ?? defaultValue;
     }
 
-    set(path, value ,dispatchEvent = true, silent = false) {
+    set(path, value, dispatchEvent = true, silent = false) {
 
         const prev = this.get(path);
 
@@ -96,7 +96,7 @@ export default class StateManager {
         this.state = newState;
 
         if (dispatchEvent && !silent) {
-            this.emit(path, {value, prev} ,{action : 'setState'});
+            this.emit(path, {value, prev}, {action: 'setState'});
         }
 
         if (!silent) {

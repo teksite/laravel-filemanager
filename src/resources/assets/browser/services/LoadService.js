@@ -18,6 +18,7 @@ export default class LoadService {
         this.errorBus = errorService;
 
 
+        this.updateFilter = this.updateFilter.bind(this);
         this.sendRequest = this.sendRequest.bind(this);
 
 
@@ -35,6 +36,17 @@ export default class LoadService {
         this.eventBus.on(
             Events.FILES_NEED_MORE,
             this.sendRequest
+        );
+
+        this.eventBus.on(
+            'load.disk',
+            this.updateFilter
+        );
+
+
+        this.eventBus.on(
+            'load.type',
+            this.updateFilter
         );
     }
 
@@ -58,7 +70,7 @@ export default class LoadService {
         );
 
 
-        if (!hasMore && cursor !== null) {
+        if (cursor !== null && !hasMore) {
             return;
         }
 
@@ -74,7 +86,12 @@ export default class LoadService {
             null
         );
 
-
+        const params = {
+            cursor: cursor,
+            disk: disk,
+            mime_type: mimeType,
+        };
+        console.log(params)
         await handler({
 
             resolve: async () => {
@@ -85,23 +102,10 @@ export default class LoadService {
                 );
 
 
-                this.eventBus.emit(
-                    Events.FILES_REQUEST,
-                    {
-                        cursor,
-                        disk,
-                        mime_type: mimeType
-                    }
-                );
+                this.eventBus.emit(Events.FILES_REQUEST, params);
 
 
-                const response =
-                    await this.request.getFiles({
-                        cursor,
-                        disk,
-                        mime_type: mimeType
-                    });
-
+                const response = await this.request.getFiles(params);
 
                 const {
                     files = [],
@@ -192,37 +196,25 @@ export default class LoadService {
     }
 
 
-    reset(files = []) {
+    async updateFilter() {
 
-        const normalizedFiles = Array.isArray(files)
-            ? Object.fromEntries(
-                files.map(file => [file.id, file])
-            )
-            : files;
+        if (this.state.get('load.loading')) {
+            return;
+        }
 
+        this.reset();
 
-        this.state.set(
-            'load.cursor',
-            null
-        );
+        await this.sendRequest();
 
+    }
 
-        this.state.set(
-            'load.hasMore',
-            true
-        );
+    reset(files = {}) {
 
-
-        this.state.set(
-            'load.files',
-            normalizedFiles
-        );
-
-
-        this.state.set(
-            'load.addedFiles',
-            normalizedFiles
-        );
+        this.state.set('load.loading', false);
+        this.state.set('load.cursor', null);
+        this.state.set('load.hasMore', true);
+        this.state.set('load.files', files);
+        this.state.set('load.addedFiles', {});
     }
 
 

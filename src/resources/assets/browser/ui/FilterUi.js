@@ -13,31 +13,39 @@ export default class FilterUi {
         this.eventBus = eventBus;
         this.state = stateManager;
 
-        this.bindBusEvents();
+        this.bindUiEvents();
     }
 
 
     loadElements(elements) {
-        const counterSelector =  elements.counterEl ?? '[data-file-counter]' ;
-        this.counterEl = $(counterSelector)
+        const mimesSelector = elements.counterEl ?? '[data-mimeList]';
+        const disksSelector = elements.counterEl ?? '[data-diskList]';
+        this.mimesEl = $(mimesSelector);
+        this.disksEl = $(disksSelector);
     }
 
-    bindBusEvents() {
-        this.listeners = {
-            counting: ({value}) => this.counting(value),
-        };
-        this.eventBus.on('load.files', this.listeners.counting);
+    bindUiEvents() {
+        this.updateTypeFilter = this.updateTypeFilter.bind(this)
+        this.updateDiskFilter = this.updateDiskFilter.bind(this)
+        this.mimesEl?.addEventListener('change', this.updateTypeFilter)
+        this.disksEl?.addEventListener('change', this.updateDiskFilter)
+
+
     }
 
 
-    counting() {
-        if (!this.counterEl) return;
-        const files = this.state.get('load.files')
-        this.counterEl.innerText = Object.keys(files).length;
+    updateTypeFilter(e) {
+        console.log(e)
+        this.state.set('load.disk',e.target.value);
+    }
 
+    updateDiskFilter(e) {
+        this.state.set('load.type',e.target.value);
     }
 
     destroy() {
+        this.mimesEl?.removeEventListener('change', this.updateTypeFilter)
+        this.disksEl?.removeEventListener('change', this.updateDiskFilter)
         this.eventBus.off('load.files', this.listeners.counting);
     }
 

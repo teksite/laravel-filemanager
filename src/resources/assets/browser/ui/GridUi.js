@@ -1,5 +1,5 @@
-import {$} from "../helpers/dom.js";
-import {getMimeGroup} from "../helpers/mime.js";
+import {$, escapeHtml} from "../helpers/dom.js";
+import {getMimeGroup, getMimeIcon} from "../helpers/mime.js";
 
 export default class GridUi {
 
@@ -11,7 +11,6 @@ export default class GridUi {
 
         if (!this.gridEl) return;
 
-
         this.eventBus = eventBus;
         this.state = stateManager;
 
@@ -22,23 +21,45 @@ export default class GridUi {
 
     bindBusEvents() {
         this.listeners = {
-            append: ({value , prev}) => {
-                this.appendFile({value , prev})
+            append: ({value}) => {
+                this.appendFile({value})
             },
+            prepend :({value})=>{
+                this.prependFile({value})
+
+            }
         };
+        this.eventBus.on('load.addedFiles', this.listeners.append);
         this.eventBus.on('load.addedFiles', this.listeners.append);
 
     }
 
 
-    appendFile({value =[], prev=[]}){
-       const renderedItems = value
-           .map(item=>this.renderCard(item))
-           .join('')
+    appendFile({value: items = []}) {
+
+        const fragment = document.createDocumentFragment();
+
+        [...items].forEach(item => {
+            const card = this.renderCard(item);
+            if (card) fragment.appendChild(card);
+        });
+
+        this.gridEl.appendChild(fragment);
     }
 
+    prependFile({value: items = []}) {
 
-    renderCard(item){
+        const fragment = document.createDocumentFragment();
+
+        [...items].reverse().forEach(item => {
+            const card = this.renderCard(item);
+            if (card) fragment.appendChild(card);
+        });
+
+        this.gridEl.prepend(fragment);
+    }
+
+    renderCard(item) {
 
         if (!item?.id) return null;
 
@@ -69,62 +90,19 @@ export default class GridUi {
 
             case 'image':
                 return `
-                <img
-                    src="${escapeUrl(item.url)}"
-                    loading="lazy"
-                    alt="${escapeHtml(item.title || item.original_name || '')}"
-                >
-            `;
+                <img src="${item.url}" loading="lazy" alt="${escapeHtml(item.title || item.original_name || '')}">`;
 
             case 'video':
-                return `
-                <video
-                    src="${escapeUrl(item.url)}"
-                    preload="metadata"
-                ></video>
-            `;
+                return `<video src="${item.url}" preload="metadata"></video>`;
 
             case 'audio':
                 return `
-                <audio
-                    src="${escapeUrl(item.url)}"
-                    preload="metadata"
-                ></audio>
-            `;
+                <audio src="${item.url}" preload="metadata"></audio>`;
 
             default:
-                return `
-                <div class="media-fallback">
-                    <span class="icon">${getMimeIcon(mime)}</span>
-                </div>
-            `;
+                return `<div class="media-fallback"><span class="icon">${getMimeIcon(mime)}</span></div>`;
         }
     }
-
-    /**
-     * Render small preview (selection sidebar)
-     */
-    renderSmallMedia(item = {}) {
-
-        const mime = item.mime_type || '';
-        const type = getMimeGroup(mime);
-
-        switch (type) {
-
-            case 'image':
-                return `<img src="${escapeUrl(item.url)}" alt="">`;
-
-            case 'video':
-                return `🎬`;
-
-            case 'audio':
-                return `🎵`;
-
-            default:
-                return `📄`;
-        }
-    }
-
 
 
     destroy() {

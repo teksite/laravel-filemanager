@@ -43,14 +43,13 @@ class GetFileService
         return $this->filtering($filters)->paginate($perPage);
     }
 
-    private function resolvePerPage(int|string|null $reqPerPage =null) :int
+    private function resolvePerPage(int|string|null $reqPerPage = null): int
     {
-        $reqPerPage = is_null($reqPerPage) ? config('filemanager.default_per_page' , 50) : (int)$reqPerPage;
-        $perPage = min($reqPerPage, 100);
-        $perPage = max($reqPerPage, 1);
-        return $perPage;
+        $reqPerPage = is_null($reqPerPage)
+            ? config('filemanager.default_per_page', 50)
+            : (int) $reqPerPage;
 
-
+        return max(1, min($reqPerPage, 100));
     }
 
 }

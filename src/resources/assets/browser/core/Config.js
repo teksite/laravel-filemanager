@@ -8,7 +8,13 @@ const defaultConfig = {
         updateUrl: '/api/filemanager',
     },
 
+    request: {
 
+        timeout: 15000,
+        selectedDisk: null,
+        selectedType: null,
+        firstRequest: true
+    },
     upload: {
         concurrency: 3,
         chunkSize: 0,
@@ -16,6 +22,7 @@ const defaultConfig = {
         allowedMimes: [],
         allowedDisks: [],
     },
+
 
     load: {
         perPage: 50,
@@ -25,13 +32,7 @@ const defaultConfig = {
         getOnInit: true,
         loadingStyle: 'block' //overlay | end
     },
-    request: {
 
-        timeout: 15000,
-        selectedDisk: null,
-        selectedType: null,
-        firstRequest: true
-    },
 
     log: {
         debug: false,
@@ -74,6 +75,9 @@ const defaultConfig = {
         copyUrlBtnSelector: '[data-open]',
         openBtnSelector: '[data-copy]',
 
+        /* footer */
+
+        filesCounter : '[data-file-counter]',
 
         /* uploader ui*/
         uploadFormSelector: '[data-upload-form]',

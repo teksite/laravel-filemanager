@@ -1,7 +1,7 @@
 import {$, escapeHtml} from "../helpers/dom.js";
-import {getMimeGroup, getMimeIcon} from "../helpers/mime.js";
 import events from "../constants/events.js";
 import formatSize from "../helpers/formatSize.js";
+import {getMimeGroup, getMimeIcon} from "../helpers/mime.js";
 
 export default class InfoUi {
 
@@ -15,8 +15,6 @@ export default class InfoUi {
 
         this.eventBus = eventBus;
         this.state = stateManager;
-
-        // this.loadPreview = this.loadPreview.bind(this);
 
         this.bindBusEvents();
         this.bindUiEvents();
@@ -56,16 +54,17 @@ export default class InfoUi {
     bindUiEvents() {
         this.copyHandler = this.copyUrl.bind(this);
         this.openHandler = this.openFile.bind(this);
-
+        this.sendDeleteSignal = this.sendDeleteSignal.bind(this);
 
         this.copyBtnEl?.addEventListener('click', this.copyHandler);
         this.openBtnEl?.addEventListener('click', this.openHandler);
+
+        this.deleteBtnEl?.addEventListener('click', this.sendDeleteSignal);
     }
 
     showInfo(fileId) {
         const files = this.state.get('load.files', {});
         const file = files[fileId];
-        if (!file) return;
 
         this.current = file;
 
@@ -82,9 +81,13 @@ export default class InfoUi {
     }
 
     renderPreview(item) {
-
         const box = this.filePreviewEl;
         if (!box) return;
+
+        if (!item) {
+            box.innerHTML = 'Select media';
+            return;
+        }
 
         const type = getMimeGroup(item.mime_type);
         switch (type) {
@@ -127,12 +130,15 @@ export default class InfoUi {
 
 
     openFile() {
-
         if (!this.current?.url) return;
-
         window.open(this.current.url, '_blank', 'noopener,noreferrer');
     }
 
+
+    sendDeleteSignal() {
+        if (!this.deleteBtnEl || this.current ===null) return;
+        this.eventBus.emit(events.FILE_DELETE_SIGNAL, {fileId : this.current.id})
+    }
 
 
     destroy() {

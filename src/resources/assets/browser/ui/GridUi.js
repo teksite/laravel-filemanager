@@ -27,22 +27,19 @@ export default class GridUi {
 
     bindBusEvents() {
         this.listeners = {
-            append: ({value}) => {
-                this.appendFile(value)
-            },
-            prepend: ({file: value}) => {
-                this.prependFile(value)
+            append: ({ value }) => this.appendFile(value),
 
-            },
-            toggleLoading: ({value}) => {
-                this.toggleLoading(value)
+            prepend: ({ file: value }) => this.prependFile(value),
 
-            }
+            toggleLoading: ({ value }) => this.toggleLoading(value),
+
+            remove: ({ fileId }) => this.removeFile(fileId),
         };
+
         this.eventBus.on('load.addedFiles', this.listeners.append);
         this.eventBus.on('load.loading', this.listeners.toggleLoading);
         this.eventBus.on(events.UPLOAD_SUCCESS, this.listeners.prepend);
-
+        this.eventBus.on(events.FILE_DELETED, this.listeners.remove);
     }
 
     bindUiEvents(){
@@ -140,6 +137,14 @@ export default class GridUi {
         this.state.set('select.current' ,fileId);
     }
 
+
+    removeFile(fileId) {
+        const card = this.gridEl.querySelector(`[data-id="${fileId}"]`);
+
+        if (card) {
+            card.remove();
+        }
+    }
 
     destroy() {
         this.eventBus.off('load.addedFiles', this.listeners.append);

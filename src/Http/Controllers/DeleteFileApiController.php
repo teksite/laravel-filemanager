@@ -13,6 +13,7 @@ class DeleteFileApiController
 
     public function delete(UploadFile $file)
     {
+
         try {
             $this->uploader->delete($file);
             return response()->json([

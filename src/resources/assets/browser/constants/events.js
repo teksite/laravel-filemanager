@@ -22,6 +22,10 @@ const EVENTS = Object.freeze({
     FILES_NEW: 'files:need_more',
 
 
+    /* info */
+
+    FILE_DELETE_SIGNAL: 'file:send_delete_signal',
+    FILE_DELETED: 'file:send_deleted',
 
 
     /* Grid */

@@ -5,11 +5,13 @@ import defaultState from "./constants/defaults.js";
 import UploadService from "./services/UploadService.js";
 import UploaderUi from "./ui/UploaderUi.js";
 import ErrorService from "./core/ErrorService.js";
-import RequestService from "./services/RequestService.js";
+import RequestService from "./core/RequestService.js";
 import LoadService from "./services/LoadService.js";
 import MoreBtnUi from "./ui/MoreBtnUi.js";
 import GridUi from "./ui/GridUi.js";
 import InfoUi from "./ui/InfoUi.js";
+import DeleteService from "./services/DeleteService.js";
+import FooterUi from "./ui/FooterUi.js";
 
 export default class DatabaseFileManager {
     constructor({config = {}}) {
@@ -71,10 +73,23 @@ export default class DatabaseFileManager {
         }, {
             loadingStyle: this.configs.get('load.loadingStyle', 'block')
         }, this.eventBus, this.states)
+
+
+        this.footerUi = new FooterUi({
+            elements: {
+                counterEl: this.configs.get('ui.filesCounter', '[data-file-counter]'),
+            },
+        }, {}, this.eventBus, this.states)
     }
 
 
     informer() {
+
+        this.deleteService = new DeleteService({
+            url: this.configs.get('api.deleteUrl'),
+            options: {}
+        }, this.eventBus, this.states, this.request, this.errorBus);
+
         this.infoUi = new InfoUi({
             elements: {
                 baseInfoEl: this.configs.get('baseInfoSelector', '[data-aside]'),
@@ -102,9 +117,11 @@ export default class DatabaseFileManager {
         this.GridUi?.destroy();
         this.moreBtnUi?.destroy();
         this.loaderService?.destroy();
+        this.footerUi?.destroy();
 
 
         this.infoUi?.destroy();
+        this.deleteService?.destroy();
     }
 
 

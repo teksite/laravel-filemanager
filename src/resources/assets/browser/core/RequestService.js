@@ -167,4 +167,33 @@ export default class RequestService {
         return this.get(endPoint, {cursor, disk, mime_type});
     }
 
+    deleteFile(id, options = {}) {
+        if (!id)  throw new Error('File id is required.');
+
+
+        return this.delete(
+            `${this.options.deleteUrl ?? '/api/filemanager'}/${encodeURIComponent(id)}`,
+            options
+        );
+    }
+
+    deleteFileByPath(path, options = {}) {
+        if (!path) {
+            throw new Error('File path is required.');
+        }
+
+        return this.request(
+            `${this.options.deleteUrl ?? '/api/filemanager'}/remove`,
+            {
+                ...options,
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers,
+                },
+                body: JSON.stringify({ path }),
+            }
+        );
+    }
+
 }

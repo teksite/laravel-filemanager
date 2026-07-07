@@ -38,8 +38,8 @@ export default class InfoUi {
 
 
         this.deleteBtnEl = $(elements.deleteBtnEl ?? '[data-delete]');
-        this.copyBtnEl = $(elements.copyBtnEl ?? '[data-open]');
-        this.openBtnEl = $(elements.openBtnEl ?? '[data-copy]');
+        this.copyBtnEl = $(elements.copyBtnEl ?? '[data-copy]');
+        this.openBtnEl = $(elements.openBtnEl ?? '[data-open]');
     }
 
 

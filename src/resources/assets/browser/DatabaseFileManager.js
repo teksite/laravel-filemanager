@@ -103,8 +103,8 @@ export default class DatabaseFileManager {
                 createdInfoEl: this.configs.get('createdInfoSelector', '[data-created]'),
 
                 deleteBtnEl: this.configs.get('deleteBtnSelector', '[data-delete]'),
-                copyBtnEl: this.configs.get('copyUrlBtnSelector', '[data-open]'),
-                openBtnEl: this.configs.get('openBtnSelector', '[data-copy]'),
+                copyBtnEl: this.configs.get('openBtnSelector', '[data-copy]'),
+                openBtnEl: this.configs.get('copyUrlBtnSelector', '[data-open]'),
             }
         }, {}, this.eventBus, this.states);
     }

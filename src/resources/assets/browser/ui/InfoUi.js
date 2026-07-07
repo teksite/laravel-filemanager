@@ -1,6 +1,7 @@
 import {$, escapeHtml} from "../helpers/dom.js";
 import {getMimeGroup, getMimeIcon} from "../helpers/mime.js";
 import events from "../constants/events.js";
+import formatSize from "../helpers/formatSize.js";
 
 export default class InfoUi {
 
@@ -15,7 +16,7 @@ export default class InfoUi {
         this.eventBus = eventBus;
         this.state = stateManager;
 
-        this.loadPreview = this.loadPreview.bind(this);
+        // this.loadPreview = this.loadPreview.bind(this);
 
         this.bindBusEvents();
         this.bindUiEvents();
@@ -40,33 +41,35 @@ export default class InfoUi {
 
     bindBusEvents() {
         this.listeners = {
-            append: ({value}) => {
-                this.appendFile({value})
+            showInfo: ({value}) => {
+                this.showInfo(value)
             },
-            prepend: ({file: value}) => {
-                this.prependFile(value)
-
-            },
-            toggleLoading: ({value}) => {
-                this.toggleLoading(value)
-
-            }
         };
-        this.eventBus.on('load.addedFiles', this.listeners.append);
-        this.eventBus.on('load.loading', this.listeners.toggleLoading);
-        this.eventBus.on(events.UPLOAD_SUCCESS, this.listeners.prepend);
-
+        this.eventBus.on('select.current', this.listeners.showInfo);
     }
 
     bindUiEvents() {
-        this.gridEl.addEventListener('click', this.loadPreview);
+        // this.gridEl.addEventListener('click', this.loadPreview);
+    }
+
+    showInfo(fileId) {
+        const files = this.state.get('load.files', {});
+        const file = files[fileId];
+        if (!file) return;
+
+        this.idInfoEl.innerText = file?.id ?? '-';
+        this.titleInfoEl.innerText = file?.title ?? '-';
+        this.urlInfoEl.innerText = file?.url ?? '-';
+        this.sizeInfoEl.innerText = (formatSize(file?.size ?? 0)) ?? '-';
+        this.mimeInfoEl.innerText = file?.mime_type ?? '-';
+        this.diskInfoEl.innerText = file?.disk ?? '-';
+        this.createdInfoEl.innerText = file?.created_at ?? '-';
+
     }
 
 
-
-
     destroy() {
-        this.eventBus.off('load.addedFiles', this.listeners.append);
+        this.eventBus.off('select.current', this.listeners.showInfo);
 
         this.eventBus.off('load.loading', this.listeners.toggleLoading);
 

@@ -49,7 +49,7 @@ export default class GridUi {
        this.gridEl.addEventListener('click' , this.loadPreview);
     }
     appendFile(items ={}) {
-        console.log(items)
+
         const fragment = document.createDocumentFragment();
         Object.values(items).forEach(item => {
             const card = this.renderCard(item);
@@ -116,7 +116,7 @@ export default class GridUi {
         }
     }
 
-    toggleLoading({value}){
+    toggleLoading(value){
         if (this.option?.loadingStyle === 'overlay'){
             this.loadingEl.style.display = value ? 'flex' : 'none';
             return;
@@ -137,7 +137,7 @@ export default class GridUi {
 
         if (!fileId) return;
 
-        this.state.set('select.current' ,{fileId});
+        this.state.set('select.current' ,fileId);
     }
 
 

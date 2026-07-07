@@ -15,16 +15,13 @@ export default class DatabaseFileManager {
     constructor({config = {}}) {
 
         this.configs = new Config(config);
-
         this.eventBus = new EventEmitter();
         this.errorBus = new ErrorService();
-
         this.states = new StateManager(this.eventBus, defaultState);
 
         this.request = new RequestService({
             url: this.configs.section('api'),
             options: this.configs.section('request')
-
         }, this.errorBus)
 
         this.uploader();
@@ -47,6 +44,7 @@ export default class DatabaseFileManager {
             options: this.configs.section('upload'),
         }, this.eventBus, this.states, this.errorBus);
 
+
         this.previewUi = new UploaderUi({
             uploadPreviewSelector: this.configs.get('ui.uploadPreviewSelector')
         }, this.eventBus, this.states);
@@ -59,12 +57,13 @@ export default class DatabaseFileManager {
             options: this.configs.section('load'),
         }, this.eventBus, this.states, this.request, this.errorBus);
 
+
         this.moreBtnUi = new MoreBtnUi({
             btnEl: this.configs.get('ui.loadMoreSelector', '[data-load-more]')
         }, this.eventBus, this.states);
 
 
-        this.moreBtnUi = new GridUi({
+        this.GridUi = new GridUi({
             elements: {
                 btnEl: this.configs.get('ui.gridSelector', '[data-grid]'),
                 loadingEl: this.configs.get('ui.loadingSelector', '[data-loading]')
@@ -75,35 +74,37 @@ export default class DatabaseFileManager {
     }
 
 
-    informer(){
+    informer() {
         this.infoUi = new InfoUi({
             elements: {
-                baseInfoEl :this.configs.get('baseInfoSelector' , '[data-aside]'),
-                filePreviewEl :this.configs.get('filePreviewSelector' , '[data-preview]'),
-                idInfoEl :this.configs.get('idInfoSelector' , '[data-id]'),
-                titleInfoEl :this.configs.get('titleInfoSelector' , '[data-title]'),
-                urlInfoEl :this.configs.get('urlInfoSelector' , '[data-url]'),
-                sizeInfoEl :this.configs.get('sizeInfoSelector' , '[data-size]'),
-                mimeInfoEl :this.configs.get('mimeInfoSelector' , '[data-mime]'),
-                diskInfoEl :this.configs.get('diskInfoSelector' , '[data-disk]'),
-                createdInfoEl :this.configs.get('createdInfoSelector' , '[data-created]'),
+                baseInfoEl: this.configs.get('baseInfoSelector', '[data-aside]'),
+                filePreviewEl: this.configs.get('filePreviewSelector', '[data-preview]'),
+                idInfoEl: this.configs.get('idInfoSelector', '[data-id]'),
+                titleInfoEl: this.configs.get('titleInfoSelector', '[data-title]'),
+                urlInfoEl: this.configs.get('urlInfoSelector', '[data-url]'),
+                sizeInfoEl: this.configs.get('sizeInfoSelector', '[data-size]'),
+                mimeInfoEl: this.configs.get('mimeInfoSelector', '[data-mime]'),
+                diskInfoEl: this.configs.get('diskInfoSelector', '[data-disk]'),
+                createdInfoEl: this.configs.get('createdInfoSelector', '[data-created]'),
 
-                deleteBtnEl :this.configs.get('deleteBtnSelector' , '[data-created]'),
-                copyBtnEl :this.configs.get('copyUrlBtnSelector' , '[data-open]'),
-                openBtnEl :this.configs.get('openBtnSelector' , '[data-copy]'),
-
-
+                deleteBtnEl: this.configs.get('deleteBtnSelector', '[data-created]'),
+                copyBtnEl: this.configs.get('copyUrlBtnSelector', '[data-open]'),
+                openBtnEl: this.configs.get('openBtnSelector', '[data-copy]'),
             }
-        },{}, this.eventBus, this.states);
+        }, {}, this.eventBus, this.states);
     }
 
     destroy() {
-        this.uploadService?.destroy();
         this.previewUi?.destroy();
+        this.uploadService?.destroy();
 
 
-        this.loaderService?.destroy();
+        this.GridUi?.destroy();
         this.moreBtnUi?.destroy();
+        this.loaderService?.destroy();
+
+
+        this.infoUi?.destroy();
     }
 
 

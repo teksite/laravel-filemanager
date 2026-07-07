@@ -13,9 +13,9 @@ class FileIndexRequest extends BaseApiRequest
     public function rules(): array
     {
         return [
-            'disk'      => ['nullable', 'string', Rule::in(array_keys(config('filesystems.disks', [])))],
-            'search'    => ['nullable', 'string'],
-            'mime_type' => ['nullable', 'string', ],
+            'disk'      => ['nullable', 'string'],
+            'search'    => ['nullable', 'string',],
+            'mime_type' => ['nullable', 'string'],
             'per_page'  => ['nullable', 'integer', 'min:1', 'max:100'],
 
             'user_id' => 'nullable|exists:users,id',
@@ -25,11 +25,55 @@ class FileIndexRequest extends BaseApiRequest
 
     protected function generalFailedValidationMessages(): string
     {
-        return  trans('failed to get files');
+        return trans('failed to get files');
     }
 
     protected function setAction(): string
     {
         return 'get_all';
     }
+
+    public function after()
+    {
+        return [
+            fn(Validator $validator) => fn() => $this->checkType($validator),
+            fn(Validator $validator) => fn() => $this->checkDisk($validator),
+        ];
+    }
+
+
+    private function checkDisk(Validator $validator)
+    {
+        if ($validator->errors()->isNotEmpty()) return;
+
+        $listDisks = config('filemanager.type_list', []);
+        $requestedDisk = $this->input('disk', null);
+
+        if (count($listDisks) === 0 || $requestedDisk === null) {
+            return;
+        }
+        if (!in_array($requestedDisk ,$listDisks )) {
+            $validator->errors()->add('disk', 'the disk is not allowed or not verified');
+
+        }
+
+    }
+
+    private function checkType(Validator $validator)
+    {
+        if ($validator->errors()->isNotEmpty()) return;
+
+        $listTypes = config('filemanager.disk_list', []);
+        $requestedType = $this->input('mime_type', null);
+
+        if (count($listTypes) === 0 || $requestedType === null) {
+            return;
+        }
+        if (!in_array($requestedType ,$listTypes )) {
+            $validator->errors()->add('mime_type', 'the type/mime_type is not allowed or not verified');
+
+        }
+    }
+
+
 }

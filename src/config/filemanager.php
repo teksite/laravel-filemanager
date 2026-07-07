@@ -59,7 +59,10 @@ return [
     |
     */
 
-    'allow_file_types' => [],                       // Allowed mime types or extensions (empty = allow all)
+    'allow_upload_types' => [],                       // Allowed mime types or extensions (empty = allow all)
+
+    'allow_upload_disks' =>
+        ['public' ,'local', 's3', 's3-arvan_private', 's3-arvan_public',], //allowed disk to be upload to
 
     'forbidden_file_types' => [],                   // Forbidden mime types or extensions (empty = allow all)
 
@@ -79,8 +82,7 @@ return [
 
     'default_store_disk' => 'public',            // Default storage disk
 
-    'allow_upload_disks' =>
-        ['public' ,'local', 's3', 's3-arvan_private', 's3-arvan_public',], //allowed disk to be upload to
+
 
     'slugify_name' => true,                      // Convert original file names into URL-friendly slugs
 

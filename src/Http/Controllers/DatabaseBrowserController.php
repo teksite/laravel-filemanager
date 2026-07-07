@@ -15,8 +15,8 @@ class DatabaseBrowserController
 {
     public function browser(FileIndexRequest $request)
     {
-        $disks = $this->chosenDisks();
-        $mimes = $this->chosenMimes();
+        $disks = $this->resolveListDisks();
+        $mimes = $this->resolveListTypes();
 
         $allowedDisks = $this->allowedDisks();
         $allowedTypes = $this->allowedTypes();
@@ -24,13 +24,13 @@ class DatabaseBrowserController
         return view('filemanager::browser', compact('disks', 'mimes' ,'allowedDisks' ,'allowedTypes'));
     }
 
-    private function chosenDisks(): array
+    private function resolveListDisks(): array
     {
         return config('filemanager.disk_list', []);
 
     }
 
-    private function chosenMimes(): array
+    private function resolveListTypes(): array
     {
         return config('filemanager.type_list', []);
     }
@@ -42,7 +42,7 @@ class DatabaseBrowserController
     }
     private function allowedTypes(): array
     {
-        return config('filemanager.allow_file_types', []);
+        return config('filemanager.allow_upload_types', []);
 
     }
 }

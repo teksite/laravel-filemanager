@@ -69,7 +69,7 @@ class ApiUploadFileRequest  extends BaseApiRequest
     protected function checkAllowedMimeTypes(Validator $validator): void
     {
         if ($validator->errors()->isNotEmpty()) return;
-        $allowedTypes = config('filemanager.allow_file_types', []);
+        $allowedTypes = config('filemanager.allow_upload_types', []);
 
         if (count($allowedTypes) === 0) return;
         $file = $this->file('file');

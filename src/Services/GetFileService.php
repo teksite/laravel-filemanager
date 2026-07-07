@@ -26,27 +26,28 @@ class GetFileService
 
         return $this->filter
             ->apply(UploadFile::query(), $filters)
-            ->orderBy($column, $direction);
+            ->orderBy($column, $direction)
+            ->orderBy('id', $direction);
 
     }
 
     public function ByCursor(array $filters) :\Illuminate\Pagination\CursorPaginator
     {
 
-        $perPage =$this->resolvePerPage($filters['per_page']);
+        $perPage =$this->resolvePerPage($filters['per_page'] ?? null);
         return $this->filtering($filters)->cursorPaginate($perPage);
     }
 
     public function ByPagination(array $filters): \Illuminate\Pagination\LengthAwarePaginator
     {
-        $perPage =$this->resolvePerPage($filters['per_page']);
+        $perPage =$this->resolvePerPage($filters['per_page'] ?? null);
         return $this->filtering($filters)->paginate($perPage);
     }
 
     private function resolvePerPage(int|string|null $reqPerPage = null): int
     {
         $reqPerPage = is_null($reqPerPage)
-            ? config('filemanager.default_per_page', 50)
+            ? config('filemanager.per_page', 50)
             : (int) $reqPerPage;
 
         return max(1, min($reqPerPage, 100));

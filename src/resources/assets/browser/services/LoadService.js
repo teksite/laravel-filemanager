@@ -51,18 +51,18 @@ export default class LoadService {
 
                 this.eventBus.emit(Events.FILES_REQUEST, {cursor, disk, mime_type: mimeType});
 
-                console.log('--------------------');
-                console.log("before:cursor: " + cursor)
-
                 const response = await this.request.getFiles({cursor, disk, mime_type: mimeType});
 
                 const {files = [], meta = {}} = response;
+
+                console.log(
+                    'received:',
+                    files.length,
+                    files.map(f => f.id)
+                );
+
                 this.state.set("load.hasMore", Boolean(meta.has_more));
                 this.state.set("load.cursor", meta.next_cursor ?? null);
-
-                console.log(files);
-                console.log("after:cursor: " + meta.next_cursor)
-                console.log('--------------------');
 
                 this.appendFiles(files);
 
@@ -85,6 +85,7 @@ export default class LoadService {
     }
 
     appendFiles(files = []) {
+
         const current = this.state.get("load.files", []);
 
         const map = new Map();

@@ -70,7 +70,7 @@ const defaultConfig = {
         mimeInfoSelector: '[data-mime]',
         diskInfoSelector: '[data-disk]',
         createdInfoSelector: '[data-created]',
-        deleteBtnSelector: '[data-created]',
+        deleteBtnSelector: '[data-delete]',
         copyUrlBtnSelector: '[data-open]',
         openBtnSelector: '[data-copy]',
 

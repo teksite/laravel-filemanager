@@ -9,7 +9,7 @@ export default class InfoUi {
 
         this.loadElements(elements);
         this.option = {...options}
-
+        this.current = null;
 
         this.listeners = [];
 
@@ -33,8 +33,7 @@ export default class InfoUi {
         this.diskInfoEl = $(elements.diskInfoEl ?? '[data-disk]');
         this.createdInfoEl = $(elements.createdInfoEl ?? '[data-created]');
 
-        this.deleteBtnEl = $(elements.deleteBtnEl ?? '[data-created]');
-
+        this.deleteBtnEl = $(elements.deleteBtnEl ?? '[data-delete]');
         this.copyBtnEl = $(elements.copyBtnEl ?? '[data-open]');
         this.openBtnEl = $(elements.openBtnEl ?? '[data-copy]');
     }
@@ -44,18 +43,31 @@ export default class InfoUi {
             showInfo: ({value}) => {
                 this.showInfo(value)
             },
+            activeButtons: ({value}) => {
+                this.activeButtons(value)
+            },
         };
         this.eventBus.on('select.current', this.listeners.showInfo);
+        this.eventBus.on('select.current', this.listeners.activeButtons);
+
+
     }
 
     bindUiEvents() {
-        // this.gridEl.addEventListener('click', this.loadPreview);
+        this.copyHandler = this.copyUrl.bind(this);
+        this.openHandler = this.openFile.bind(this);
+
+
+        this.copyBtnEl?.addEventListener('click', this.copyHandler);
+        this.openBtnEl?.addEventListener('click', this.openHandler);
     }
 
     showInfo(fileId) {
         const files = this.state.get('load.files', {});
         const file = files[fileId];
         if (!file) return;
+
+        this.current = file;
 
         this.idInfoEl.innerText = file?.id ?? '-';
         this.titleInfoEl.innerText = file?.title ?? '-';
@@ -78,7 +90,7 @@ export default class InfoUi {
         switch (type) {
 
             case 'image':
-                box.innerHTML = `<img src="${item.url}" />`;
+                box.innerHTML = `<img src="${item.url}" alt="${item.title}" />`;
                 break;
 
             case 'video':
@@ -94,8 +106,43 @@ export default class InfoUi {
         }
     }
 
+    activeButtons() {
+        this.deleteBtnEl.disabled = false;
+        this.copyBtnEl.disabled = false;
+        this.openBtnEl.disabled = false;
+    }
+
+
+    async copyUrl() {
+
+        if (!this.current?.url) return;
+
+        try {
+            await navigator.clipboard.writeText(this.current.url);
+            console.log('URL copied');
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+
+    openFile() {
+
+        if (!this.current?.url) return;
+
+        window.open(this.current.url, '_blank', 'noopener,noreferrer');
+    }
+
+
+
     destroy() {
+
+        this.copyBtnEl?.removeEventListener('click', this.copyHandler);
+        this.openBtnEl?.removeEventListener('click', this.openHandler);
+
+
         this.eventBus.off('select.current', this.listeners.showInfo);
+        this.eventBus.off('select.current', this.listeners.activeButtons);
 
 
         this.eventBus.off(events.UPLOAD_SUCCESS, this.listeners.prepend);

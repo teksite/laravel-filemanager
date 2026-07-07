@@ -87,7 +87,7 @@ export default class DatabaseFileManager {
                 diskInfoEl: this.configs.get('diskInfoSelector', '[data-disk]'),
                 createdInfoEl: this.configs.get('createdInfoSelector', '[data-created]'),
 
-                deleteBtnEl: this.configs.get('deleteBtnSelector', '[data-created]'),
+                deleteBtnEl: this.configs.get('deleteBtnSelector', '[data-delete]'),
                 copyBtnEl: this.configs.get('copyUrlBtnSelector', '[data-open]'),
                 openBtnEl: this.configs.get('openBtnSelector', '[data-copy]'),
             }

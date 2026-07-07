@@ -23,8 +23,8 @@
 
             <span data-url>-</span>
             <div class="url-btns">
-                <button data-open title="open">🔗</button>
-                <button data-copy title="copy">📋</button>
+                <button data-open title="open" disabled>🔗</button>
+                <button data-copy title="copy" disabled>📋</button>
             </div>
         </div>
 
@@ -49,7 +49,7 @@
         </div>
 
     </div>
-    <button data-delete type="button" class="delete-button">
+    <button data-delete type="button" class="delete-button" disabled>
         🗑 Delete
     </button>
 </aside>

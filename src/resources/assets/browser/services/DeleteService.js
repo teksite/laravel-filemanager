@@ -10,60 +10,81 @@ export default class DeleteService {
             ...options
         };
 
-        this.handlers = [];
-
         this.eventBus = eventBus;
         this.state = state;
         this.errorService = errorService;
         this.request = requestService;
 
-        this._abort = false;
-        this.bindEventBus()
-
-
+        this.bindEventBus();
     }
+
 
     bindEventBus() {
-        this.sendDeleteRequest = this.sendDeleteRequest.bind(this);
-        this.eventBus.on(events.FILE_DELETE_SIGNAL, this.sendDeleteRequest)
+        this.handleDeleteSignal = this.handleDeleteSignal.bind(this);
 
+        this.eventBus.on(
+            events.FILE_DELETE_SIGNAL,
+            this.handleDeleteSignal
+        );
     }
 
-    async sendDeleteRequest({fileId} = {}) {
 
+    async handleDeleteSignal({fileId} = {}) {
 
-        fileId = fileId ?? this.state.get('select.current');
+        const id = fileId ?? this.state.get('select.current');
+        if (!id) return;
 
-        const {success, data, error} = await handler({
-            resolve: () => this.request.deleteFile(fileId)
+        const {success, error} = await handler({
+            resolve: () => this.request.deleteFile(id),
 
+            reject: (error) => {
+                this.errorService?.emit(error);
+                throw error;
+            }
         });
-       if (success){
-           this.state.set('select.current', null);
-           this.eventBus.emit(events.FILE_DELETED, { fileId });
 
-           const files = this.state.get('load.files', {});
 
-           const updatedFiles = { ...files };
+        if (!success) {
+            return;
+        }
 
-           delete updatedFiles[fileId];
 
-           this.state.set('load.files', updatedFiles);
+        this.removeFileFromState(id);
 
-       }
+        this.state.set('select.current', null);
+
+
+        this.eventBus.emit(events.FILE_DELETED, {
+            fileId: id
+        });
     }
 
 
-    stop() {
+    removeFileFromState(fileId) {
+
+        const files = this.state.get('load.files', {});
+
+        if (!files[fileId]) return;
 
 
+        const remainingFiles = {...files};
+
+        delete remainingFiles[fileId];
+
+
+        this.state.set(
+            'load.files',
+            remainingFiles
+        );
     }
+
 
     destroy() {
 
-        this.stop();
-        this.eventBus.off(events.FILE_DELETE_SIGNAL, this.sendDeleteRequest)
-
+        this.eventBus.off(
+            events.FILE_DELETE_SIGNAL,
+            this.handleDeleteSignal
+        );
 
     }
 }

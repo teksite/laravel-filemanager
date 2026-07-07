@@ -4,41 +4,72 @@ export default class FooterUi {
 
     constructor({elements = {}} = {}, options = {}, eventBus, stateManager) {
 
-        this.option = {...options}
+        this.options = {...options};
 
-        this.loadElements(elements)
+        this.loadElements(elements);
 
-        this.listeners = [];
+
+        this.listeners = {};
+
 
         this.eventBus = eventBus;
         this.state = stateManager;
+
 
         this.bindBusEvents();
     }
 
 
     loadElements(elements) {
-        const counterSelector =  elements.counterEl ?? '[data-file-counter]' ;
-        this.counterEl = $(counterSelector)
+
+        this.counterEl = $(
+            elements.counterEl ?? '[data-file-counter]'
+        );
     }
+
 
     bindBusEvents() {
+
         this.listeners = {
-            counting: ({value}) => this.counting(value),
+
+            counting: () => {
+                this.updateCounter();
+            }
+
         };
-        this.eventBus.on('load.files', this.listeners.counting);
+
+
+        this.eventBus.on(
+            'load.files',
+            this.listeners.counting
+        );
     }
 
 
-    counting() {
-        if (!this.counterEl) return;
-        const files = this.state.get('load.files')
-        this.counterEl.innerText = Object.keys(files).length;
+    updateCounter() {
 
+        if (!this.counterEl) {
+            return;
+        }
+
+
+        const files = this.state.get(
+            'load.files',
+            {}
+        );
+
+
+        this.counterEl.innerText =
+            Object.keys(files).length;
     }
+
 
     destroy() {
-        this.eventBus.off('load.files', this.listeners.counting);
+
+        this.eventBus.off(
+            'load.files',
+            this.listeners.counting
+        );
     }
 
 }

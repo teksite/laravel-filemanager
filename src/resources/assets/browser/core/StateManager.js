@@ -79,7 +79,7 @@ export default class StateManager {
         return this.getByPath(this.state, path) ?? defaultValue;
     }
 
-    set(path, value ,noEvent = false, silent = false) {
+    set(path, value ,dispatchEvent = true, silent = false) {
 
         const prev = this.get(path);
 
@@ -89,8 +89,8 @@ export default class StateManager {
 
         this.state = newState;
 
-        if (noEvent) {
-            this.emit(path, {new: value, prev, pre: this.getState(path)});
+        if (dispatchEvent && !silent) {
+            this.emit(path, {value, prev} ,{action : 'setState'});
         }
 
         if (!silent) {
@@ -117,9 +117,7 @@ export default class StateManager {
     }
 
     emit(event, ...args) {
-
         if (!this.eventBus?.emit) return;
-
         try {
             this.eventBus.emit(event, ...args);
         } catch (error) {

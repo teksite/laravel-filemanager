@@ -8,6 +8,7 @@ import ErrorService from "./core/ErrorService.js";
 import RequestService from "./services/RequestService.js";
 import LoadService from "./services/LoadService.js";
 import MoreBtnUi from "./ui/MoreBtnUi.js";
+import GridUi from "./ui/GridUi.js";
 
 export default class DatabaseFileManager {
     constructor({config = {}}) {
@@ -54,10 +55,15 @@ export default class DatabaseFileManager {
         this.loaderService = new LoadService({
             url: this.configs.get('api.getUrl'),
             options: this.configs.section('load'),
-        }, this.eventBus, this.states, this.request, this.errorBus)
+        }, this.eventBus, this.states, this.request, this.errorBus);
 
         this.moreBtnUi = new MoreBtnUi({
             btnEl: this.configs.get('ui.loadMoreSelector' , '[data-load-more]')
+        } , this.eventBus , this.states );
+
+
+        this.moreBtnUi = new GridUi({
+            btnEl: this.configs.get('ui.gridSelector' , '[data-grid]')
         } , this.eventBus , this.states )
     }
 

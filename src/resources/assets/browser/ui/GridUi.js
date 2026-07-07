@@ -1,16 +1,15 @@
 import {$} from "../helpers/dom.js";
-import Events from "../constants/events.js";
-import events from "../constants/events.js";
+import {getMimeGroup} from "../helpers/mime.js";
 
-export default class MoreBtnUi {
+export default class GridUi {
 
     constructor({gridEl = null} = {}, eventBus, stateManager) {
 
-        const selector = gridEl ?? '[data-load-more]';
+        const selector = gridEl ?? '[data-grid]';
 
-        this.moreBtn = $(selector);
+        this.gridEl = $(selector);
 
-        if (!this.moreBtn) return;
+        if (!this.gridEl) return;
 
 
         this.eventBus = eventBus;
@@ -18,55 +17,119 @@ export default class MoreBtnUi {
 
         this.listeners = [];
 
-
-
-
-        this.bindDomEvents();
         this.bindBusEvents();
     }
 
     bindBusEvents() {
         this.listeners = {
-            removeBtn: (e) => {
-                e.preventDefault();
-                this.removeBtn()
+            append: ({value , prev}) => {
+                this.appendFile({value , prev})
             },
-
         };
-        this.eventBus.on(Events.FILES_NO_MORE, this.listeners.removeBtn);
+        this.eventBus.on('load.addedFiles', this.listeners.append);
 
     }
 
 
-    bindDomEvents() {
-
-        this.moreBtn.addEventListener('click', e => {
-            e.preventDefault();
-            this.requestMoreEvent()
-        });
+    appendFile({value =[], prev=[]}){
+       const renderedItems = value
+           .map(item=>this.renderCard(item))
+           .join('')
     }
 
-    requestMoreEvent() {
-        const isLoading = this.state.get('load.loading');
-        const hasMore = this.state.get('load.hasMore');
-        if (isLoading || !hasMore ) return;
 
-        this.eventBus.emit(events.FILES_NEED_MORE, {});
+    renderCard(item){
+
+        if (!item?.id) return null;
+
+        const card = document.createElement('div');
+
+        card.className = 'media-card';
+        card.dataset.id = item.id;
+        card.dataset.disk = item.disk || '';
+        card.dataset.mime = item.mime_type || '';
+
+        const thumb = document.createElement('div');
+        thumb.className = 'media-thumb';
+
+        thumb.innerHTML = this.renderMedia(item);
+
+        card.appendChild(thumb);
+
+
+        return card;
     }
 
-    removeBtn() {
-        this.moreBtn.remove();
-        this.eventBus.off(Events.FILES_NO_MORE, this.listeners.removeBtn);
+    renderMedia(item = {}) {
 
+        const mime = item.mime_type || '';
+        const type = getMimeGroup(mime);
 
+        switch (type) {
+
+            case 'image':
+                return `
+                <img
+                    src="${escapeUrl(item.url)}"
+                    loading="lazy"
+                    alt="${escapeHtml(item.title || item.original_name || '')}"
+                >
+            `;
+
+            case 'video':
+                return `
+                <video
+                    src="${escapeUrl(item.url)}"
+                    preload="metadata"
+                ></video>
+            `;
+
+            case 'audio':
+                return `
+                <audio
+                    src="${escapeUrl(item.url)}"
+                    preload="metadata"
+                ></audio>
+            `;
+
+            default:
+                return `
+                <div class="media-fallback">
+                    <span class="icon">${getMimeIcon(mime)}</span>
+                </div>
+            `;
+        }
     }
+
+    /**
+     * Render small preview (selection sidebar)
+     */
+    renderSmallMedia(item = {}) {
+
+        const mime = item.mime_type || '';
+        const type = getMimeGroup(mime);
+
+        switch (type) {
+
+            case 'image':
+                return `<img src="${escapeUrl(item.url)}" alt="">`;
+
+            case 'video':
+                return `🎬`;
+
+            case 'audio':
+                return `🎵`;
+
+            default:
+                return `📄`;
+        }
+    }
+
 
 
     destroy() {
-        this.eventBus.off(Events.FILES_NO_MORE, this.listeners.removeBtn);
-        this.moreBtn.removeEventListener('click', e => {
-            this.requestMoreEvent()
-        })
+        this.eventBus.off('load.addedFiles', this.listeners.appendFile);
+
     }
 
 }

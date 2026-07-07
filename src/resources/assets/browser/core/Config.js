@@ -22,7 +22,8 @@ const defaultConfig = {
         cursorName: 'cursor',
         selectedDisk : null,
         selectedType : null,
-        getOnInit :true
+        getOnInit :true,
+        loadingStyle :'block' //overlay | end
     },
     request: {
 

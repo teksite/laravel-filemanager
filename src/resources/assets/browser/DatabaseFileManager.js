@@ -63,10 +63,12 @@ export default class DatabaseFileManager {
 
 
         this.moreBtnUi = new GridUi({
-            elements:{
+            elements: {
                 btnEl: this.configs.get('ui.gridSelector', '[data-grid]'),
                 loadingEl: this.configs.get('ui.loadingSelector', '[data-loading]')
             },
+        }, {
+            loadingStyle: this.configs.get('load.loadingStyle', 'block')
         }, this.eventBus, this.states)
     }
 

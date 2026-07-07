@@ -4,8 +4,9 @@ import events from "../constants/events.js";
 
 export default class GridUi {
 
-    constructor({elements = {}} = {}, eventBus, stateManager) {
+    constructor({elements = {}} = {} , options={}, eventBus, stateManager) {
 
+        this.option = {loadingStyle : 'overlay' , ...options}
         const gridSelector = elements.gridEl ?? '[data-grid]';
         const loadingSelector = elements.loadingEl ?? '[data-loading]';
 
@@ -114,7 +115,12 @@ export default class GridUi {
     }
 
     toggleLoading({value}){
-        this.loadingEl.style.display = value ? 'flex' : 'none';
+        if (this.option?.loadingStyle === 'overlay'){
+            this.loadingEl.style.display = value ? 'flex' : 'none';
+            return;
+        }
+        this.loadingEl.style.display = value ? 'block' : 'none';
+        this.loadingEl.style.position = value ? 'static' :'';
     }
     destroy() {
         this.eventBus.off('load.addedFiles', this.listeners.appendFile);

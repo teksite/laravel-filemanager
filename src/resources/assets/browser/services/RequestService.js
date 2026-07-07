@@ -1,3 +1,5 @@
+import handler from "../helpers/handler.js";
+
 export default class RequestService {
 
     constructor({url, options} = {}, errorBus = null) {
@@ -19,58 +21,66 @@ export default class RequestService {
         let timeoutId = null;
 
         if (timeoutMs > 0) {
-            timeoutId = setTimeout(() => {
-                controller.abort();
-            }, timeoutMs);
+            timeoutId = setTimeout(() => controller.abort(), timeoutMs);
         }
+
         this.controllers.add(controller);
 
-        try {
+        const result = await handler({
 
-            const response = await fetch(fullUrl, {
-                ...options,
-                signal: controller.signal
-            });
-            if (!response.ok) {
-                const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
-                error.status = response.status;
+            resolve: async () => {
 
-                this.errorBus?.emit(error, {
-                    url: fullUrl,
-                    status: response.status,
-                    method: options.method ?? 'GET'
+                const response = await fetch(fullUrl, {
+                    ...options,
+                    signal: controller.signal
                 });
+
+                if (!response.ok) {
+                    const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    error.status = response.status;
+
+                    throw error;
+                }
+
+                if (response.status === 204) {
+                    return null;
+                }
+
+                const contentType = response.headers.get("content-type") ?? "";
+
+                if (contentType.includes("application/json")) {
+                    return response.json();
+                }
+
+                return response.text();
+            },
+
+            reject: async (error) => {
+
+                if (error.name !== "AbortError") {
+                    this.errorBus?.emit(error, {
+                        url: fullUrl,
+                        status: error.status,
+                        method: options.method ?? "GET"
+                    });
+                }
 
                 throw error;
+            },
+
+            final: () => {
+                if (timeoutId) clearTimeout(timeoutId);
+                this.controllers.delete(controller);
             }
 
-            if (response.status === 204) {
-                return null;
-            }
+        });
 
-            const contentType = response.headers.get('content-type') ?? '';
-
-            if (contentType.includes('application/json')) {
-                return response.json();
-            }
-
-            return response.text();
-
-        } catch (error) {
-
-            if (error.name !== 'AbortError') {
-                this.errorBus?.emit(error, {
-                    url: fullUrl,
-                    method: options.method ?? 'GET'
-                });
-            }
-            throw error;
-        } finally {
-            if (timeoutId) clearTimeout(timeoutId);
-            this.controllers.delete(controller);
+        if (!result.success) {
+            throw result.error;
         }
-    }
 
+        return result.data;
+    }
     get(url, params = {}, options = {}) {
         const query = this.buildQuery(params);
         return this.request(query ? `${url}?${query}` : url, {

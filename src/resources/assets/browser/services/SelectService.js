@@ -1,7 +1,7 @@
 import Events from "../constants/events.js";
 import handler from "../helpers/handler.js";
 
-export default class LoadService {
+export default class SelectService {
 
     constructor({url, options = {}}, eventBus, state, requestService, errorService) {
 
@@ -78,20 +78,17 @@ export default class LoadService {
 
     }
 
-    appendFiles(files = {}) {
+    appendFiles(files = []) {
 
-        if (Array.isArray(files)) {
-            files = Object.fromEntries(
-                files.map(file => [file.id, file])
-            );
-        }
+        const current = this.state.get("load.files", []);
 
-        const current = this.state.get("load.files", {});
+        const map = new Map();
 
-        const updated = {
-            ...current,
-            ...files
-        };
+        [...current, ...files].forEach(file => {
+            map.set(file.id, file);
+        });
+
+        const updated = [...map.values()];
 
         this.state.set("load.addedFiles", files);
         this.state.set("load.files", updated);

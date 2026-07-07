@@ -171,7 +171,14 @@ export default class UploadService {
                     this.uploadFile(file, selectedDisk, onProgress)
                         .then(res => {
                             this.results.success++;
-                            this.eventBus?.emit(Events.UPLOAD_SUCCESS, {response: res, file:res.file});
+                            const file = res.file;
+                            this.eventBus?.emit(Events.UPLOAD_SUCCESS,
+                                {
+                                    response: res,
+                                    file: {
+                                        [file.id]: file
+                                    }
+                                });
                         })
                         .catch(err => {
                             this.results.failed++;

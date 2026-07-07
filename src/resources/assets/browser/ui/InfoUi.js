@@ -2,7 +2,7 @@ import {$, escapeHtml} from "../helpers/dom.js";
 import {getMimeGroup, getMimeIcon} from "../helpers/mime.js";
 import events from "../constants/events.js";
 
-export default class GridUi {
+export default class InfoUi {
 
     constructor({elements = {}} = {} , options={}, eventBus, stateManager) {
 
@@ -28,7 +28,7 @@ export default class GridUi {
     bindBusEvents() {
         this.listeners = {
             append: ({value}) => {
-                this.appendFile(value)
+                this.appendFile({value})
             },
             prepend: ({file: value}) => {
                 this.prependFile(value)
@@ -49,7 +49,6 @@ export default class GridUi {
        this.gridEl.addEventListener('click' , this.loadPreview);
     }
     appendFile(items ={}) {
-        console.log(items)
         const fragment = document.createDocumentFragment();
         Object.values(items).forEach(item => {
             const card = this.renderCard(item);
@@ -137,9 +136,8 @@ export default class GridUi {
 
         if (!fileId) return;
 
-        this.state.set('select.current' ,{fileId});
 
-        console.log( this.state.get('select.current'));
+        this.state.set('select.current' ,{fileId})
 
     }
 

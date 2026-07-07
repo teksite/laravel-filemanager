@@ -12,12 +12,14 @@ export default class StateManager {
         return {
 
 
-            selected: [],
-            currentItem: null,
-
+            select:{
+                current : null,
+                type: null,
+                files : [],
+            },
             load:{
-                files: [],
-                addedFiles: [],
+                files: {},
+                addedFiles: {},
 
                 loading: false,
                 hasMore: true,

@@ -348,6 +348,7 @@
     overflow: hidden;
 }
 
+
 .filemanager .media-thumb,
 .filemanager .media-thumb img,
 .filemanager .media-thumb video {
@@ -443,6 +444,21 @@
 
 
 /* =========================
+   input
+========================= */
+
+.filemanager input{
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 4px 8px;
+}
+
+.filemanager input:focus{
+    border: 1px solid var(--border-active);
+
+}
+
+/* =========================
    SELECT
 ========================= */
 .filemanager .media-card.selected {
@@ -499,7 +515,7 @@
 
 
 /* =========================
-   Upload Result and Preivw
+   Upload Result and Preview
 ========================= */
 
 .filemanager .upload-progress {

@@ -84,22 +84,17 @@ export default class InfoUi {
         this.copyHandler = this.copyUrl.bind(this);
         this.openHandler = this.openFile.bind(this);
         this.deleteHandler = this.emitDeleteRequest.bind(this);
+        this.enableEditTitleMode = this.enableEditTitleMode.bind(this);
 
 
-        this.copyBtnEl?.addEventListener(
-            'click',
-            this.copyHandler
-        );
+        this.copyBtnEl?.addEventListener('click', this.copyHandler);
 
-        this.openBtnEl?.addEventListener(
-            'click',
-            this.openHandler
-        );
+        this.openBtnEl?.addEventListener('click', this.openHandler);
 
-        this.deleteBtnEl?.addEventListener(
-            'click',
-            this.deleteHandler
-        );
+        this.deleteBtnEl?.addEventListener('click', this.deleteHandler);
+
+        this.titleInfoEl?.addEventListener('dblclick', this.enableEditTitleMode);
+
     }
 
 
@@ -253,6 +248,83 @@ export default class InfoUi {
     }
 
 
+    enableEditTitleMode() {
+        if (!this.current || this.editingTitle) {
+            return;
+        }
+
+        this.editingTitle = true;
+
+        this.renderTitleEditor();
+    }
+
+    renderTitleEditor() {
+
+        const input = document.createElement('input');
+
+        input.type = 'text';
+        input.name = 'title';
+        input.value = this.current.title ?? '';
+
+        this.titleInfoEl.replaceChildren(input);
+
+        input.focus();
+        input.select();
+
+        let submitted = false;
+
+        const submit = () => {
+
+            if (submitted) {
+                return;
+            }
+
+            submitted = true;
+
+            this.editingTitle = false;
+
+            const title = input.value.trim();
+
+            this.renderTitle(false);
+
+            if (title === this.current.title) {
+                return;
+            }
+
+            this.eventBus.emit(events.FILE_UPDATE_TITLE, {
+                fileId: this.current.id,
+                title
+            });
+        };
+
+        input.addEventListener('keydown', e => {
+
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submit();
+            }
+
+            if (e.key === 'Escape') {
+                submitted = true;
+                this.editingTitle = false;
+                this.renderTitle(false);
+            }
+
+        });
+
+        input.addEventListener('blur', submit);
+    }
+
+
+    renderTitle() {
+
+        this.titleInfoEl.textContent =
+            this.current?.title ?? '-';
+    }
+
+
+
+
     destroy() {
 
         this.copyBtnEl?.removeEventListener(
@@ -268,6 +340,11 @@ export default class InfoUi {
         this.deleteBtnEl?.removeEventListener(
             'click',
             this.deleteHandler
+        );
+
+        this.titleInfoEl?.removeEventListener(
+            'dblclick',
+            this.enableEditTitleMode
         );
 
 

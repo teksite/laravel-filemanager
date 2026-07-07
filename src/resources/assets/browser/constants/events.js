@@ -28,6 +28,8 @@ const EVENTS = Object.freeze({
     FILE_DELETED: 'file:send_deleted',
     FILE_SELECT:'file_selected',
 
+    FILE_UPDATE_TITLE : 'file_update_title',
+
 
 
     /* Grid */

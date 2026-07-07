@@ -36,6 +36,10 @@ export default class StateManager {
                 progress: 0,
                 files: [],
                 uploading: false
+            },
+
+            edit:{
+              title: false
             }
         };
     }

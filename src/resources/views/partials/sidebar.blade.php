@@ -1,4 +1,4 @@
-<aside class="aside">
+<aside class="aside" data-aside>
 
     <div class="preview-box" data-preview>
         Select media

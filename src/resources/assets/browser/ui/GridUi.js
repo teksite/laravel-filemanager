@@ -138,9 +138,6 @@ export default class GridUi {
         if (!fileId) return;
 
         this.state.set('select.current' ,{fileId});
-
-        console.log( this.state.get('select.current'));
-
     }
 
 

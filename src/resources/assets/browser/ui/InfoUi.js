@@ -4,16 +4,12 @@ import events from "../constants/events.js";
 
 export default class InfoUi {
 
-    constructor({elements = {}} = {} , options={}, eventBus, stateManager) {
+    constructor({elements = {}} = {}, options = {}, eventBus, stateManager) {
 
-        this.option = {loadingStyle : 'overlay' , ...options}
-        const gridSelector = elements.gridEl ?? '[data-grid]';
-        const loadingSelector = elements.loadingEl ?? '[data-loading]';
+        this.loadElements(elements);
+        this.option = {...options}
 
-        this.gridEl = $(gridSelector);
-        this.loadingEl = $(loadingSelector);
 
-        if (!this.gridEl) return;
         this.listeners = [];
 
         this.eventBus = eventBus;
@@ -23,6 +19,23 @@ export default class InfoUi {
 
         this.bindBusEvents();
         this.bindUiEvents();
+    }
+
+    loadElements(elements) {
+        this.baseInfoEl = $(elements.baseInfoEl ?? '[data-aside]');
+        this.filePreviewEl = $(elements.filePreviewEl ?? '[data-preview]');
+        this.idInfoEl = $(elements.idInfoEl ?? '[data-id]');
+        this.titleInfoEl = $(elements.titleInfoEl ?? '[data-title]');
+        this.urlInfoEl = $(elements.urlInfoEl ?? '[data-url]');
+        this.sizeInfoEl = $(elements.sizeInfoEl ?? '[data-size]');
+        this.mimeInfoEl = $(elements.mimeInfoEl ?? '[data-mime]');
+        this.diskInfoEl = $(elements.diskInfoEl ?? '[data-disk]');
+        this.createdInfoEl = $(elements.createdInfoEl ?? '[data-created]');
+
+        this.deleteBtnEl = $(elements.deleteBtnEl ?? '[data-created]');
+
+        this.copyBtnEl = $(elements.copyBtnEl ?? '[data-open]');
+        this.openBtnEl = $(elements.openBtnEl ?? '[data-copy]');
     }
 
     bindBusEvents() {
@@ -45,101 +58,11 @@ export default class InfoUi {
 
     }
 
-    bindUiEvents(){
-       this.gridEl.addEventListener('click' , this.loadPreview);
-    }
-    appendFile(items ={}) {
-        const fragment = document.createDocumentFragment();
-        Object.values(items).forEach(item => {
-            const card = this.renderCard(item);
-            if (card)  fragment.appendChild(card);
-        });
-
-        this.gridEl.appendChild(fragment);
-    }
-
-    prependFile(items ={} ) {
-        const fragment = document.createDocumentFragment();
-
-        Object.values(items).reverse().forEach(item => {
-                const card = this.renderCard(item);
-                if (card)  fragment.appendChild(card);
-            });
-
-        this.gridEl.prepend(fragment);
-    }
-
-    renderCard(item) {
-
-        if (!item?.id) return null;
-
-        const card = document.createElement('div');
-
-        card.className = 'media-card';
-        card.dataset.mediaCard = '';
-        card.dataset.id = item.id;
-        card.dataset.disk = item.disk || '';
-        card.dataset.mime = item.mime_type || '';
-
-        const thumb = document.createElement('div');
-        thumb.className = 'media-thumb';
-
-        thumb.innerHTML = this.renderMedia(item);
-
-        card.appendChild(thumb);
-
-
-        return card;
-    }
-
-    renderMedia(item = {}) {
-
-        const mime = item.mime_type || '';
-        const type = getMimeGroup(mime);
-
-        switch (type) {
-
-            case 'image':
-                return `
-                <img src="${item.url}" loading="lazy" alt="${escapeHtml(item.title || item.original_name || '')}">`;
-
-            case 'video':
-                return `<video src="${item.url}" preload="metadata"></video>`;
-
-            case 'audio':
-                return `
-                <audio src="${item.url}" preload="metadata"></audio>`;
-
-            default:
-                return `<div class="media-fallback"><span class="icon">${getMimeIcon(mime)}</span></div>`;
-        }
-    }
-
-    toggleLoading({value}){
-        if (this.option?.loadingStyle === 'overlay'){
-            this.loadingEl.style.display = value ? 'flex' : 'none';
-            return;
-        }
-        this.loadingEl.style.display = value ? 'block' : 'none';
-        this.loadingEl.style.position = value ? 'static' :'';
+    bindUiEvents() {
+        this.gridEl.addEventListener('click', this.loadPreview);
     }
 
 
-
-    loadPreview(e){
-        e.preventDefault();
-        const card = e.target.closest('[data-media-card]');
-
-        if (!card) return;
-
-        const fileId= card.dataset.id;
-
-        if (!fileId) return;
-
-
-        this.state.set('select.current' ,{fileId})
-
-    }
 
 
     destroy() {
@@ -149,7 +72,6 @@ export default class InfoUi {
 
         this.eventBus.off(events.UPLOAD_SUCCESS, this.listeners.prepend);
 
-        this.gridEl.removeEventListener('click', this.loadPreview);
 
     }
 

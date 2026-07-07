@@ -9,6 +9,7 @@ import RequestService from "./services/RequestService.js";
 import LoadService from "./services/LoadService.js";
 import MoreBtnUi from "./ui/MoreBtnUi.js";
 import GridUi from "./ui/GridUi.js";
+import InfoUi from "./ui/InfoUi.js";
 
 export default class DatabaseFileManager {
     constructor({config = {}}) {
@@ -28,6 +29,7 @@ export default class DatabaseFileManager {
 
         this.uploader();
         this.loader();
+        this.informer();
     }
 
     uploader() {
@@ -72,6 +74,28 @@ export default class DatabaseFileManager {
         }, this.eventBus, this.states)
     }
 
+
+    informer(){
+        this.infoUi = new InfoUi({
+            elements: {
+                baseInfoEl :this.configs.get('baseInfoSelector' , '[data-aside]'),
+                filePreviewEl :this.configs.get('filePreviewSelector' , '[data-preview]'),
+                idInfoEl :this.configs.get('idInfoSelector' , '[data-id]'),
+                titleInfoEl :this.configs.get('titleInfoSelector' , '[data-title]'),
+                urlInfoEl :this.configs.get('urlInfoSelector' , '[data-url]'),
+                sizeInfoEl :this.configs.get('sizeInfoSelector' , '[data-size]'),
+                mimeInfoEl :this.configs.get('mimeInfoSelector' , '[data-mime]'),
+                diskInfoEl :this.configs.get('diskInfoSelector' , '[data-disk]'),
+                createdInfoEl :this.configs.get('createdInfoSelector' , '[data-created]'),
+
+                deleteBtnEl :this.configs.get('deleteBtnSelector' , '[data-created]'),
+                copyBtnEl :this.configs.get('copyUrlBtnSelector' , '[data-open]'),
+                openBtnEl :this.configs.get('openBtnSelector' , '[data-copy]'),
+
+
+            }
+        },{}, this.eventBus, this.states);
+    }
 
     destroy() {
         this.uploadService?.destroy();

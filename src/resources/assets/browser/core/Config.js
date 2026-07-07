@@ -20,25 +20,24 @@ const defaultConfig = {
     load: {
         perPage: 50,
         cursorName: 'cursor',
-        selectedDisk : null,
-        selectedType : null,
-        getOnInit :true,
-        loadingStyle :'block' //overlay | end
+        selectedDisk: null,
+        selectedType: null,
+        getOnInit: true,
+        loadingStyle: 'block' //overlay | end
     },
     request: {
 
         timeout: 15000,
-        selectedDisk : null,
-        selectedType : null,
-        firstRequest :true
+        selectedDisk: null,
+        selectedType: null,
+        firstRequest: true
     },
 
-    log:{
+    log: {
         debug: false,
-        toServer : true,
-        serverUrl : null
+        toServer: true,
+        serverUrl: null
     },
-
 
 
     selection: {
@@ -60,6 +59,20 @@ const defaultConfig = {
         loadMoreSelector: '[data-load-more]',
         mimesSelector: '[data-mimeList]',
         disksSelector: '[data-diskList]',
+
+        /* aside ui*/
+        baseInfoSelector: '[data-aside]',
+        filePreviewSelector: '[data-preview]',
+        idInfoSelector: '[data-id]',
+        titleInfoSelector: '[data-title]',
+        urlInfoSelector: '[data-url]',
+        sizeInfoSelector: '[data-size]',
+        mimeInfoSelector: '[data-mime]',
+        diskInfoSelector: '[data-disk]',
+        createdInfoSelector: '[data-created]',
+        deleteBtnSelector: '[data-created]',
+        copyUrlBtnSelector: '[data-open]',
+        openBtnSelector: '[data-copy]',
 
 
         /* uploader ui*/
@@ -87,11 +100,11 @@ export default class Config {
         return this.config;
     }
 
-    get(path , defaultValue =null) {
+    get(path, defaultValue = null) {
         return this.getPath(path) ?? defaultValue;
     }
 
-    section(key , defaultValue=[]) {
+    section(key, defaultValue = []) {
         return this.config[key] ?? defaultValue;
     }
 

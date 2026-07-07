@@ -18,8 +18,8 @@ export default class FilterUi {
 
 
     loadElements(elements) {
-        const mimesSelector = elements.counterEl ?? '[data-mimeList]';
-        const disksSelector = elements.counterEl ?? '[data-diskList]';
+        const mimesSelector = elements.mimesEl ?? '[data-mimeList]';
+        const disksSelector = elements.disksEl ?? '[data-diskList]';
         this.mimesEl = $(mimesSelector);
         this.disksEl = $(disksSelector);
     }
@@ -33,20 +33,21 @@ export default class FilterUi {
 
     }
 
-
-    updateTypeFilter(e) {
+    updateDiskFilter(e) {
         const target = e.target;
         const value = target.value.length > 0 ? target.value : null;
 
         this.state.set('load.disk', value);
     }
 
-    updateDiskFilter(e) {
+    updateTypeFilter(e) {
         const target = e.target;
         const value = target.value.length > 0 ? target.value : null;
 
         this.state.set('load.type', value);
     }
+
+
 
     destroy() {
         this.mimesEl?.removeEventListener('change', this.updateTypeFilter)

@@ -210,7 +210,7 @@ export default class LoadService {
         this.state.set('load.hasMore', true);
         this.state.set('load.files', files);
         this.state.set('load.addedFiles', {});
-        
+
     }
 
 

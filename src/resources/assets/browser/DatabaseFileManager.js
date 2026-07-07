@@ -3,7 +3,7 @@ import EventEmitter from "./core/EventEmitter.js";
 import StateManager from "./core/StateManager.js";
 import defaultState from "./constants/defaults.js";
 import UploadService from "./services/UploadService.js";
-import UploaderPreviewUi from "./ui/UploaderPreviewUi.js";
+import UploaderUi from "./ui/UploaderUi.js";
 import ErrorService from "./core/ErrorService.js";
 import RequestService from "./services/RequestService.js";
 import LoadService from "./services/LoadService.js";
@@ -45,7 +45,7 @@ export default class DatabaseFileManager {
             options: this.configs.section('upload'),
         }, this.eventBus, this.states, this.errorBus);
 
-        this.previewUi = new UploaderPreviewUi({
+        this.previewUi = new UploaderUi({
             uploadPreviewSelector: this.configs.get('ui.uploadPreviewSelector')
         }, this.eventBus, this.states);
     }

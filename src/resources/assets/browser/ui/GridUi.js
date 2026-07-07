@@ -1,5 +1,6 @@
 import {$, escapeHtml} from "../helpers/dom.js";
 import {getMimeGroup, getMimeIcon} from "../helpers/mime.js";
+import events from "../constants/events.js";
 
 export default class GridUi {
 
@@ -24,22 +25,23 @@ export default class GridUi {
             append: ({value}) => {
                 this.appendFile({value})
             },
-            prepend :({value})=>{
+            prepend: ({file: value}) => {
                 this.prependFile({value})
 
             }
         };
         this.eventBus.on('load.addedFiles', this.listeners.append);
-        this.eventBus.on('load.addedFiles', this.listeners.append);
+        this.eventBus.on(events.UPLOAD_SUCCESS, this.listeners.prepend);
 
     }
 
 
     appendFile({value: items = []}) {
+        const arrayItem = Array.isArray(items) ? items : [items]
 
         const fragment = document.createDocumentFragment();
 
-        [...items].forEach(item => {
+        arrayItem.forEach(item => {
             const card = this.renderCard(item);
             if (card) fragment.appendChild(card);
         });
@@ -48,10 +50,9 @@ export default class GridUi {
     }
 
     prependFile({value: items = []}) {
-
+        const arrayItem = Array.isArray(items) ? items : [items]
         const fragment = document.createDocumentFragment();
-
-        [...items].reverse().forEach(item => {
+        arrayItem.reverse().forEach(item => {
             const card = this.renderCard(item);
             if (card) fragment.appendChild(card);
         });
@@ -61,6 +62,7 @@ export default class GridUi {
 
     renderCard(item) {
 
+        console.log(item)
         if (!item?.id) return null;
 
         const card = document.createElement('div');

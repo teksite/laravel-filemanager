@@ -4,7 +4,7 @@ import formatSize from "../helpers/formatSize.js";
 import {getMimeIcon} from "../helpers/mime.js";
 import {uniqueString} from "../helpers/general.js";
 
-export default class UploaderPreviewUi {
+export default class UploaderUi {
 
     constructor({uploadPreviewSelector = null} = {}, eventBus, stateManager) {
 

@@ -60,6 +60,7 @@ const defaultConfig = {
         mimesSelector: '[data-mimeList]',
         disksSelector: '[data-diskList]',
 
+
         /* uploader ui*/
         uploadFormSelector: '[data-upload-form]',
         dropzoneSelector: '[data-dropzone]',

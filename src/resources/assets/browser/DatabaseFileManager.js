@@ -58,13 +58,16 @@ export default class DatabaseFileManager {
         }, this.eventBus, this.states, this.request, this.errorBus);
 
         this.moreBtnUi = new MoreBtnUi({
-            btnEl: this.configs.get('ui.loadMoreSelector' , '[data-load-more]')
-        } , this.eventBus , this.states );
+            btnEl: this.configs.get('ui.loadMoreSelector', '[data-load-more]')
+        }, this.eventBus, this.states);
 
 
         this.moreBtnUi = new GridUi({
-            btnEl: this.configs.get('ui.gridSelector' , '[data-grid]')
-        } , this.eventBus , this.states )
+            elements:{
+                btnEl: this.configs.get('ui.gridSelector', '[data-grid]'),
+                loadingEl: this.configs.get('ui.loadingSelector', '[data-loading]')
+            },
+        }, this.eventBus, this.states)
     }
 
 

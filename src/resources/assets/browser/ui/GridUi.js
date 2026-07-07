@@ -4,11 +4,13 @@ import events from "../constants/events.js";
 
 export default class GridUi {
 
-    constructor({gridEl = null} = {}, eventBus, stateManager) {
+    constructor({elements = {}} = {}, eventBus, stateManager) {
 
-        const selector = gridEl ?? '[data-grid]';
+        const gridSelector = elements.gridEl ?? '[data-grid]';
+        const loadingSelector = elements.loadingEl ?? '[data-loading]';
 
-        this.gridEl = $(selector);
+        this.gridEl = $(gridSelector);
+        this.loadingEl = $(loadingSelector);
 
         if (!this.gridEl) return;
 
@@ -28,9 +30,14 @@ export default class GridUi {
             prepend: ({file: value}) => {
                 this.prependFile({value})
 
+            },
+            toggleLoading: ({value}) => {
+                this.toggleLoading({value})
+
             }
         };
         this.eventBus.on('load.addedFiles', this.listeners.append);
+        this.eventBus.on('load.loading', this.listeners.toggleLoading);
         this.eventBus.on(events.UPLOAD_SUCCESS, this.listeners.prepend);
 
     }
@@ -106,9 +113,14 @@ export default class GridUi {
         }
     }
 
-
+    toggleLoading({value}){
+        this.loadingEl.style.display = value ? 'flex' : 'none';
+    }
     destroy() {
         this.eventBus.off('load.addedFiles', this.listeners.appendFile);
+        this.eventBus.off('load.loading', this.listeners.toggleLoading);
+        this.eventBus.off(events.UPLOAD_SUCCESS, this.listeners.prepend);
+
 
     }
 

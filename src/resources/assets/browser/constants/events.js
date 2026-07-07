@@ -13,7 +13,9 @@ const EVENTS = Object.freeze({
     /* load */
     FILES_LOADED: 'files:loaded',
     FILES_REQUEST: 'files:request_send',
+    FILES_REQUEST_FAILED: 'files:request_send_failed',
     FILES_RECEIVE: 'files:response_get',
+    FILES_RECEIVE_FAILED: 'files:response_get_failed',
 
     FILES_NO_MORE: 'files:no_more',
     FILES_NEED_MORE: 'files:need_more',

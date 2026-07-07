@@ -82,6 +82,7 @@ export default class RequestService {
         return result.data;
     }
     get(url, params = {}, options = {}) {
+
         const query = this.buildQuery(params);
         return this.request(query ? `${url}?${query}` : url, {
                 ...options,

@@ -12,6 +12,8 @@ export default class FooterUi {
 
         this.eventBus = eventBus;
         this.state = stateManager;
+
+        this.bindBusEvents();
     }
 
 

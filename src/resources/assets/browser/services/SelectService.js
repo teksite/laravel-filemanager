@@ -15,10 +15,8 @@ export default class SelectService {
     bindEvents() {
 
         this.addToSelections = this.addToSelections.bind(this);
-        this.returnSelections = this.returnSelections.bind(this);
 
         this.eventBus.on(Events.SELECTION_CLICK, this.addToSelections);
-        this.eventBus.on(Events.SELECTION_RETURN, this.returnSelections);
 
     }
 
@@ -41,7 +39,7 @@ export default class SelectService {
             return;
 
         }
-        this.state.set('select.file', {expectedOutput});
+        this.state.set('select.file', expectedOutput);
 
     }
 
@@ -54,6 +52,5 @@ export default class SelectService {
     destroy() {
 
         this.eventBus.off(Events.SELECTION_CLICK, this.addToSelections);
-        this.eventBus.off(Events.SELECTION_RETURN, this.returnSelections);
     }
 }

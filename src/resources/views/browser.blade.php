@@ -32,13 +32,12 @@
                     }
                 }
         });
+        fm.on('choose', files => {
+            console.log(files);
+        });
 
-        document.querySelector('#choose').onclick = () => {
-            console.log(11111111111111111)
-          const coosen= fm.getSelection();
-            console.log(coosen)
-        };
     });
+
 
 
 </script>

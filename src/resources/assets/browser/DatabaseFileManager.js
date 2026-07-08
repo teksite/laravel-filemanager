@@ -20,10 +20,12 @@ import FilterUi from "./ui/FilterUi.js";
 import SelectService from "./services/SelectService.js";
 import SelectionButtonUi from "./ui/SelectionButtonUi.js";
 import SelectionGridUi from "./ui/SelectionGridUi.js";
+import Events from "./constants/events.js";
 
 export default class DatabaseFileManager {
 
     constructor({config = {}} = {}) {
+
 
         this.config = new Config(config);
 
@@ -40,6 +42,9 @@ export default class DatabaseFileManager {
         this.initializeGrid();
         this.initializeInspector();
         this.initializeSelection();
+
+
+        this.bindEvents();
     }
 
 
@@ -200,12 +205,40 @@ export default class DatabaseFileManager {
         ].forEach(instance => instance?.destroy?.());
     }
 
-    getSelection() {
 
-        const output = this.state.get('select.file', []);
-        this.state.set('select.file', null);
-        return output;
+    bindEvents() {
+        this.handleSelection = this.handleSelection.bind(this);
+
+        this.eventBus.on(Events.SELECTION_ON_CHOOSE, this.handleSelection);
     }
 
+    handleSelection() {
+        const files = this.selectionService.returnSelections();
+
+        this.eventBus.emit(Events.CHOOSE, files);
+
+    }
+
+
+    on(event, callback) {
+        this.eventBus.on(event, callback);
+        return this;
+    }
+
+    off(event, callback) {
+        this.eventBus.off(event, callback);
+        return this;
+    }
+
+    once(event, callback) {
+        const wrapper = (...args) => {
+            callback(...args);
+            this.off(event, wrapper);
+        };
+
+        this.on(event, wrapper);
+
+        return this;
+    }
 
 }

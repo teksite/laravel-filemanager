@@ -47,7 +47,8 @@ const EVENTS = Object.freeze({
     SELECTION_CLICK: 'selection:item_clicked',
     SELECTION_CHANGED: 'selection:changed',
     SELECTION_CLEARED: 'selection:cleared',
-    SELECTION_RETURN: 'selection:return_selected_files',
+    SELECTION_ON_CHOOSE: 'selection:return_selected_files',
+    SELECTION_CHOSEN: 'selection:return_selected_files',
 
     SELECTION_SELECT_BUTTON_MADE : 'selection:make_button',
 
@@ -63,7 +64,12 @@ const EVENTS = Object.freeze({
     FILTER_CHANGED: 'filter:changed',
 
     /* Error */
-    ERROR: 'error'
+
+    CHOOSE: 'choose',
+    UPLOAD: 'upload',
+    DELETE: 'delete',
+    UPDATE: 'update',
+    ERROR: 'error',
 
 });
 

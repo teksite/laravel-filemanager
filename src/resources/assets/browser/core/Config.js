@@ -27,7 +27,7 @@ const defaultConfig = {
     load: {
         perPage: 25,
         cursorName: 'cursor',
-        userId : null,
+        userId: null,
 
         selectedDisk: null,
         selectedType: null,
@@ -44,7 +44,7 @@ const defaultConfig = {
 
     selection: {
         mode: 'multi', //single: only one file | multi : multi file | null : disable
-        expect: 'id'
+        expect: 'url',
     },
 
     debounce: {
@@ -76,9 +76,9 @@ const defaultConfig = {
         copyUrlBtnSelector: '[data-copy]',
 
         /* footer */
-        filesCounterSelector : '[data-file-counter]',
-        selectionButtonSelector : '[data-actions-sec]',
-        selectionGridSelector : '[data-selected-list]',
+        filesCounterSelector: '[data-file-counter]',
+        selectionButtonSelector: '[data-actions-sec]',
+        selectionGridSelector: '[data-selected-list]',
 
         /* uploader ui*/
         uploadFormSelector: '[data-upload-form]',

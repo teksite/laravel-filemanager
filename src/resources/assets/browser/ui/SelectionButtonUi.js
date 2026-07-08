@@ -76,7 +76,11 @@ export default class SelectionButtonUi {
     emitReturnFiles(e) {
         e.preventDefault();
         e.stopPropagation();
-        this.eventBus.emit(events.SELECTION_RETURN, {})
+
+        const files = this.state.get('select.file');
+
+        this.eventBus.emit(events.SELECTION_ON_CHOOSE, {files});
+        this.state.set('select.file' , null);
 
     }
 

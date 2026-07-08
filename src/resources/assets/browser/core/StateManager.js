@@ -14,7 +14,6 @@ export default class StateManager {
 
             select: {
                 current: null,
-                type: null,
                 files: [],
             },
             load: {

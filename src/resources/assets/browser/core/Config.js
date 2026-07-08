@@ -15,6 +15,7 @@ const defaultConfig = {
         selectedType: null,
         firstRequest: true
     },
+
     upload: {
         concurrency: 3,
         chunkSize: 0,
@@ -22,7 +23,6 @@ const defaultConfig = {
         allowedMimes: [],
         allowedDisks: [],
     },
-
 
     load: {
         perPage: 25,
@@ -34,7 +34,6 @@ const defaultConfig = {
         getOnInit: true,
         loadingStyle: 'block' //overlay | block
     },
-
 
     log: {
         debug: false,

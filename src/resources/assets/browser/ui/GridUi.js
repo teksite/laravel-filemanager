@@ -165,12 +165,10 @@ export default class GridUi {
 
         const card = e.target.closest('[data-media-card]');
 
-        console.log(card)
         if (!card) return;
 
         const fileId = card.dataset.id;
 
-        console.log(fileId)
         if (!fileId) return;
 
         this.state.set('select.current', fileId);

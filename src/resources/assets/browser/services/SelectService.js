@@ -1,8 +1,9 @@
 import Events from "../constants/events.js";
+import events from "../constants/events.js";
 
 export default class SelectService {
 
-    constructor(options={},eventBus, state) {
+    constructor(options = {}, eventBus, state) {
 
         this.options = {...options};
         this.eventBus = eventBus;
@@ -14,43 +15,39 @@ export default class SelectService {
 
     bindEvents() {
 
-        this.handleSelect = this.handleSelect.bind(this);
+        this.addToSelections = this.addToSelections.bind(this);
 
-        this.eventBus.on(
-            Events.FILE_SELECT,
-            this.handleSelect
-        );
+        this.eventBus.on(Events.SELECTION_CLICK, this.addToSelections);
+
     }
 
 
-    handleSelect({fileId} = {}) {
+    addToSelections({fileId}) {
+        const {mode, expect} = this.options;
+        const files = this.state.get('load.files', {});
 
-        if (!fileId) {
+        const selectedFile = files[fileId] ?? null;
+
+        if (!selectedFile) return;
+        const expectedOutput = (mode === 'multi' || mode === 'multiple')
+            ? expectedOutput.id
+            : expectedOutput.url;
+
+
+        if (mode === 'multi') {
+            const preState = this.state.get('select.file', {});
+            const newState = {...preState ,expectedOutput };
+            this.state.set('select.file', newState);
             return;
         }
 
+        this.state.set('select.file', expectedOutput);
 
-        this.state.set(
-            'select.current',
-            fileId
-        );
-    }
-
-
-    clear() {
-
-        this.state.set(
-            'select.current',
-            null
-        );
     }
 
 
     destroy() {
 
-        this.eventBus.off(
-            Events.FILE_SELECT,
-            this.handleSelect
-        );
+        this.eventBus.off(Events.SELECTION_CLICK, this.addToSelections);
     }
 }

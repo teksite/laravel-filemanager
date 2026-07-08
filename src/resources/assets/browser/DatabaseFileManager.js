@@ -19,6 +19,7 @@ import CounterUi from "./ui/CounterUi.js";
 import FilterUi from "./ui/FilterUi.js";
 import SelectService from "./services/SelectService.js";
 import SelectionButtonUi from "./ui/SelectionButtonUi.js";
+import SelectionGridUi from "./ui/SelectionGridUi.js";
 
 export default class DatabaseFileManager {
 
@@ -161,12 +162,16 @@ export default class DatabaseFileManager {
 
     initializeSelection() {
         this.selectionService = new SelectService(
-            this.config.section('selection')
-            , this.eventBus, this.state);
+            this.config.section('selection'), this.eventBus, this.state);
 
         this.selectionUi = new SelectionButtonUi({
             elements: {
                 actionsEl: this.config.get('ui.selectionButtonSelector'),
+            }
+        }, this.config.section('selection'), this.eventBus, this.state);
+
+        this.selectionGridUi = new SelectionGridUi({
+            elements: {
                 gridEl: this.config.get('ui.selectionGridSelector'),
             }
         }, this.config.section('selection'), this.eventBus, this.state);
@@ -190,6 +195,7 @@ export default class DatabaseFileManager {
             this.moreBtnUi,
             this.counterUi,
             this.infoUi,
+            this.selectionGridUi,
 
         ].forEach(instance => instance?.destroy?.());
     }

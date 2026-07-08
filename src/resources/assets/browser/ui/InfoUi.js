@@ -114,8 +114,10 @@ export default class InfoUi {
 
         if (!box) return;
 
+        this.primaryPreviewText = box.innerText ?? 'select media';
+
         if (!item) {
-            box.innerHTML = 'Select media';
+            box.innerHTML = this.primaryPreviewText;
             return;
         }
         box.innerHTML = renderMedia(item);
@@ -168,6 +170,10 @@ export default class InfoUi {
     emitDeleteRequest() {
 
         if (!this.current?.id) return;
+
+        const answer = confirm('Are you sure you want to permanently delete this file?')
+
+        if (!answer) return;
 
         this.eventBus.emit(events.FILE_DELETE_SIGNAL, {fileId: this.current.id});
     }
@@ -231,8 +237,6 @@ export default class InfoUi {
             }
 
         });
-
-
 
 
         input.addEventListener('blur', submit);

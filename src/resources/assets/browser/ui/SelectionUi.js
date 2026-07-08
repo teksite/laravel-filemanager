@@ -33,7 +33,7 @@ export default class SelectionUi {
 
         this.actionsEl = $(actionsSelector);
         this.gridEl = $(gridSelector);
-        this.chooseBtn =null;
+        this.chooseBtn = null;
     }
 
     createButtons() {
@@ -56,10 +56,9 @@ export default class SelectionUi {
 
         this.actionsEl.prepend(selectionBtn);
 
-        this.chooseBtn= selectionBtn;
+        this.chooseBtn = selectionBtn;
 
         this.eventBus.emit(events.SELECTION_SELECT_BUTTON_MADE, {button: selectionBtn});
-
 
 
     }
@@ -67,23 +66,23 @@ export default class SelectionUi {
 
     bindUiEvents() {
 
-        this.returnFiles = this.returnFiles.bind(this);
-        // this.updateDiskFilter = this.updateDiskFilter.bind(this);
-        //
-        this.chooseBtn?.addEventListener('click', this.returnFiles);
-        // this.disksEl?.addEventListener('click', this.updateDiskFilter);
+        this.emitReturnFiles = this.emitReturnFiles.bind(this);
+
+        this.chooseBtn?.addEventListener('click', this.emitReturnFiles);
 
 
     }
 
-    returnFiles(){
+    emitReturnFiles(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.eventBus.emit(events.SELECTION_RETURN, {})
 
     }
 
 
     destroy() {
-        this.chooseBtn?.removeEventListener('click', this.returnFiles);
-        // this.disksEl?.removeEventListener('change', this.updateDiskFilter)
+        this.chooseBtn?.removeEventListener('click', this.emitReturnFiles);
     }
 
 }

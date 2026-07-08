@@ -36,15 +36,13 @@ export function isAudio(mime) {
 export function isDocument(mime) {
     const group = getMimeGroup(mime);
 
-    if (group === 'application') {
-        return true;
-    }
+    return group === 'application';
 
-    return false;
+
 }
 
 /**
- * Get human readable label
+ * Get human-readable label
  */
 export function getMimeLabel(mime = '') {
 

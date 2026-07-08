@@ -1,5 +1,6 @@
 import Events from "../constants/events.js";
 import handler from "../helpers/handler.js";
+import events from "../constants/events.js";
 
 export default class UpdateService {
 
@@ -16,7 +17,6 @@ export default class UpdateService {
         this.request = requestService;
         this.errorBus = errorService;
 
-
         this.bindEvents();
     }
 
@@ -25,44 +25,29 @@ export default class UpdateService {
 
         this.updateTitle = this.updateTitle.bind(this);
 
-        this.eventBus.on(
-            Events.FILE_UPDATE_TITLE,
-            this.updateTitle
-        );
+        this.eventBus.on(Events.FILE_UPDATE_TITLE, this.updateTitle);
     }
 
 
     async updateTitle({fileId, title} = {}) {
 
-        if (!fileId || title == null) {
-            return;
-        }
+        if (!fileId || title == null) return;
 
         const {success} = await handler({
 
             resolve: async () => {
 
-                const file = await this.request.patch(
-                    `${this.options.endpoint}/${fileId}`,
-                    {
-                        title
-                    }
-                );
+                const file = await this.request.patch(`${this.options.endpoint}/${fileId}`, {title});
 
-                this.updateState(fileId, file ?? { title });
+                this.updateState(fileId, file ?? {title});
 
-                this.eventBus.emit(
-                    Events.FILE_UPDATED_TITLE,
-                    {
-                        fileId,
-                        file
-                    }
-                );
+                this.eventBus.emit(Events.FILE_UPDATED_TITLE, {fileId, file});
             },
 
             reject: async (error) => {
 
                 this.errorBus?.emit?.(error);
+                this.eventBus.emit(events.FILE_UPDATE_FAILED, {fileId, title});
 
                 throw error;
             }
@@ -75,18 +60,11 @@ export default class UpdateService {
 
     updateState(fileId, file = {}) {
 
-        const files = this.state.get(
-            'load.files',
-            {}
-        );
+        const files = this.state.get('load.files', {});
 
-        if (!files[fileId]) {
-            return;
-        }
+        if (!files[fileId]) return;
 
-        this.state.set(
-            'load.files',
-            {
+        this.state.set('load.files', {
                 ...files,
                 [fileId]: {
                     ...files[fileId],
@@ -95,7 +73,6 @@ export default class UpdateService {
             }
         );
     }
-
 
 
     destroy() {

@@ -22,10 +22,7 @@ export default class DeleteService {
     bindEventBus() {
         this.handleDeleteSignal = this.handleDeleteSignal.bind(this);
 
-        this.eventBus.on(
-            events.FILE_DELETE_SIGNAL,
-            this.handleDeleteSignal
-        );
+        this.eventBus.on(events.FILE_DELETE_SIGNAL, this.handleDeleteSignal);
     }
 
 
@@ -35,28 +32,28 @@ export default class DeleteService {
         if (!id) return;
 
         const {success, error} = await handler({
-            resolve: () => this.request.deleteFile(id),
+            resolve: () =>{
+                this.request.deleteFile(id)
+
+            },
 
             reject: (error) => {
                 this.errorService?.emit(error);
+                this.eventBus.emit(events.FILE_DELETE_FAILED , {fileId});
                 throw error;
             }
         });
 
 
-        if (!success) {
-            return;
-        }
+        if (!success) return;
+
 
 
         this.removeFileFromState(id);
 
         this.state.set('select.current', null);
 
-
-        this.eventBus.emit(events.FILE_DELETED, {
-            fileId: id
-        });
+        this.eventBus.emit(events.FILE_DELETED, {fileId});
     }
 
 
@@ -66,25 +63,17 @@ export default class DeleteService {
 
         if (!files[fileId]) return;
 
-
         const remainingFiles = {...files};
 
         delete remainingFiles[fileId];
 
-
-        this.state.set(
-            'load.files',
-            remainingFiles
-        );
+        this.state.set('load.files', remainingFiles);
     }
 
 
     destroy() {
 
-        this.eventBus.off(
-            events.FILE_DELETE_SIGNAL,
-            this.handleDeleteSignal
-        );
+        this.eventBus.off(events.FILE_DELETE_SIGNAL, this.handleDeleteSignal);
 
     }
 }

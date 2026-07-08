@@ -1,4 +1,4 @@
-import {$} from "../helpers/dom.js";
+import {$, escapeHtml} from "../helpers/dom.js";
 import events from "../constants/events.js";
 import formatSize from "../helpers/formatSize.js";
 import {renderMedia} from "../helpers/preview.js";
@@ -203,8 +203,8 @@ export default class InfoUi {
             submitted = true;
             this.editingTitle = false;
 
-            const oldTitle = this.current.title ?? '-';
-            const newTitle = input.value.trim();
+            const oldTitle = this.current.title;
+            const newTitle = escapeHtml(input.value.trim());
 
             if (oldTitle === newTitle) {
                 this.renderTitle();
@@ -231,6 +231,9 @@ export default class InfoUi {
             }
 
         });
+
+
+
 
         input.addEventListener('blur', submit);
     }

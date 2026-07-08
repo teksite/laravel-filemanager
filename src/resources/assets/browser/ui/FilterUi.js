@@ -26,10 +26,11 @@ export default class FilterUi {
     }
 
     bindUiEvents() {
-        this.updateTypeFilter = this.updateTypeFilter.bind(this)
-        this.updateDiskFilter = this.updateDiskFilter.bind(this)
-        this.mimesEl?.addEventListener('change', this.updateTypeFilter)
-        this.disksEl?.addEventListener('change', this.updateDiskFilter)
+        this.updateTypeFilter = this.updateTypeFilter.bind(this);
+        this.updateDiskFilter = this.updateDiskFilter.bind(this);
+
+        this.mimesEl?.addEventListener('change', this.updateTypeFilter);
+        this.disksEl?.addEventListener('change', this.updateDiskFilter);
 
 
     }
@@ -39,8 +40,7 @@ export default class FilterUi {
         const value = target.value.length > 0 ? target.value : null;
 
         this.state.set('load.disk', value);
-        this.eventBus.emit(events.GRID_RESET, {value})
-
+        this.eventBus.emit(events.GRID_CLEAR, {value})
     }
 
     updateTypeFilter(e) {
@@ -48,15 +48,13 @@ export default class FilterUi {
         const value = target.value.length > 0 ? target.value : null;
 
         this.state.set('load.type', value);
-        this.eventBus.emit(events.GRID_RESET, {value})
-
+        this.eventBus.emit(events.GRID_CLEAR, {value})
     }
 
 
     destroy() {
         this.mimesEl?.removeEventListener('change', this.updateTypeFilter)
         this.disksEl?.removeEventListener('change', this.updateDiskFilter)
-        this.eventBus.off('load.files', this.listeners.counting);
     }
 
 }

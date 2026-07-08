@@ -55,7 +55,7 @@ export default class GridUi {
         };
 
 
-        this.eventBus.on(events.GRID_RESET, this.listeners.emptyGrid);
+        this.eventBus.on(events.GRID_CLEAR, this.listeners.emptyGrid);
 
         this.eventBus.on('load.append', this.listeners.append);
 
@@ -69,9 +69,9 @@ export default class GridUi {
 
     bindUiEvents() {
 
-        this.selectAction = this.selectAction.bind(this);
+        this.selectingAction = this.selectingAction.bind(this);
 
-        this.gridEl.addEventListener('click', this.selectAction);
+        this.gridEl.addEventListener('click', this.selectingAction);
     }
 
 
@@ -93,7 +93,7 @@ export default class GridUi {
         this.gridEl.appendChild(fragment);
         this.eventBus.emit(events.GRID_UPDATED, {items, 'action': 'append file'})
 
-        this.state.set('load.append' , {});
+        this.state.set('load.append', {});
     }
 
 
@@ -169,40 +169,33 @@ export default class GridUi {
 
     emptyGrid() {
         this.gridEl.innerHTML = '';
-        this.eventBus.emit(events.GRID_CLEARED , {});
-
+        this.eventBus.emit(events.GRID_CLEARED, {});
     }
 
 
-    selectAction(e) {
+    selectingAction(e) {
         e.preventDefault();
 
         const card = e.target.closest('[data-media-card]');
 
         console.log(card)
-        if (!card)  return;
+        if (!card) return;
 
         const fileId = card.dataset.id;
 
         console.log(fileId)
-        if (!fileId)  return;
+        if (!fileId) return;
 
         this.state.set('select.current', fileId);
-        this.eventBus.emit(events.SELECTION_CLICK , {fileId});
+        this.eventBus.emit(events.SELECTION_CLICK, {fileId});
     }
 
 
     removeFile(fileId) {
 
-        if (!fileId) {
-            return;
-        }
+        if (!fileId) return;
 
-
-        const card = this.gridEl.querySelector(
-            `[data-media-card][data-id="${CSS.escape(fileId)}"]`
-        );
-
+        const card = this.gridEl.querySelector(`[data-media-card][data-id="${CSS.escape(fileId)}"]`);
 
         card?.remove();
     }
@@ -210,17 +203,9 @@ export default class GridUi {
 
     destroy() {
 
-        this.eventBus.off(
-            'load.append',
-            this.listeners.append
-        );
+        this.eventBus.off('load.append', this.listeners.append);
 
-
-        this.eventBus.off(
-            'load.loading',
-            this.listeners.toggleLoading
-        );
-
+        this.eventBus.off('load.loading', this.listeners.toggleLoading);
 
         this.eventBus.off(
             events.UPLOAD_SUCCESS,
@@ -228,22 +213,11 @@ export default class GridUi {
         );
 
 
-        this.eventBus.off(
-            events.GRID_RESET,
-            this.listeners.emptyGrid
-        );
+        this.eventBus.off(events.GRID_CLEAR, this.listeners.emptyGrid);
 
+        this.eventBus.off(events.FILE_DELETED, this.listeners.remove);
 
-        this.eventBus.off(
-            events.FILE_DELETED,
-            this.listeners.remove
-        );
-
-
-        this.gridEl.removeEventListener(
-            'click',
-            this.loadPreview
-        );
+        this.gridEl.removeEventListener('click', this.selectingAction);
     }
 
 }

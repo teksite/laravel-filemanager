@@ -71,7 +71,7 @@ export default class LoadService {
 
                 this.state.set("load.loading", true);
 
-                this.eventBus.emit(Events.FILES_REQUEST, {...params ,action: 'load more'});
+                this.eventBus.emit(Events.FILES_REQUEST, {...params, action: 'load more'});
 
                 const response = await this.request.getFiles(params);
 
@@ -83,12 +83,12 @@ export default class LoadService {
 
                 this.appendFiles(files);
 
-                this.eventBus.emit(Events.FILES_RECEIVE, {files, meta , action: 'load more'});
+                this.eventBus.emit(Events.FILES_RECEIVE, {files, meta, action: 'load more'});
             },
 
             reject: async (error) => {
                 this.errorBus?.emit?.(error);
-                this.eventBus.emit(Events.FILES_REQUEST_FAILED, error , {action: 'load more'});
+                this.eventBus.emit(Events.FILES_REQUEST_FAILED, error, {action: 'load more'});
             },
 
             final: () => {
@@ -118,9 +118,7 @@ export default class LoadService {
 
     async updateFilter() {
 
-        if (this.state.get('load.loading')) {
-            return;
-        }
+        if (this.state.get('load.loading')) return;
 
         this.reset();
 
@@ -141,15 +139,11 @@ export default class LoadService {
 
     stop() {
 
-        this.eventBus.off(
-            Events.FILES_NEED_MORE,
-            this.sendRequest
-        );
+        this.eventBus.off(Events.FILES_NEED_MORE, this.sendRequest);
     }
 
 
     destroy() {
-
         this.stop();
     }
 }

@@ -26,16 +26,19 @@ const EVENTS = Object.freeze({
 
     FILE_DELETE_SIGNAL: 'file:send_delete_signal',
     FILE_DELETED: 'file:send_deleted',
+    FILE_DELETE_FAILED: 'file:delete_file_failed',
     FILE_SELECT:'file_selected',
 
     FILE_UPDATE_TITLE : 'file_update_title',
     FILE_UPDATED_TITLE : 'file_updated_title',
+    FILE_UPDATE_FAILED : 'file_updated_title',
 
 
 
     /* Grid */
     GRID_UPDATED: 'grid:updated',
     GRID_CLEARED: 'grid:cleared',
+    GRID_CLEAR: 'grid:clear',
     GRID_LOAD_START: 'grid:load:start',
     GRID_LOAD_END: 'grid:load:end',
 

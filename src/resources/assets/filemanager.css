@@ -7,7 +7,10 @@
     --accent: #6b67b0;
     --primary: #0900b8;
     --primary-darker: #08035e;
+    --seconadry: #028d9e;
+    --seconadry-darker: #004c55;
     --danger: #ef4444;
+    --danger-dark: #711a1a;
     --text: #1f2937;
     --text-light: #6b7280;
     --radius-lg: 18px;
@@ -461,6 +464,21 @@
     color: #fff;
     margin: auto 0 0 0;
 }
+.filemanager .delete-button:hover {
+    background: var(--danger-dark);
+
+}
+
+.filemanager .upload-btn {
+    background: var(--seconadry);
+    color: #fff;
+    margin: auto 0 0 0;
+}
+.filemanager .upload-btn:hover {
+    background: var(--seconadry-darker);
+
+}
+
 
 
 /* =========================

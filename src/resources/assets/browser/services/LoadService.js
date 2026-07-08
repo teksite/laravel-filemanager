@@ -55,12 +55,15 @@ export default class LoadService {
 
         const perPage = this.options.perPage;
 
+        const userId = this.options.userId;
+
 
         const params = {
             cursor: cursor,
             disk: disk,
             mime_type: mimeType,
-            per_page: perPage
+            per_page: perPage,
+            user_id: userId,
         };
         await handler({
 

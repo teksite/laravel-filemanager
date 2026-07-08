@@ -28,16 +28,21 @@ export default class SelectService {
         const selectedFile = files[fileId] ?? null;
 
         if (!selectedFile) return;
-        const expectedOutput = (mode === 'multi' || mode === 'multiple')
-            ? selectedFile.id
-            : selectedFile.url;
 
-        if (mode === 'multi') {
+        const expectedOutput = (expect === 'url')
+            ? selectedFile.url
+            : selectedFile.id;
+
+        if (['multi' ,'multiple'].includes(mode)) {
             const preState = this.state.get('select.file', []);
-            const newState = [...preState ,expectedOutput ];
-            this.state.set('select.file', newState);
-            return;
 
+            const newState = preState.includes(expectedOutput)
+                ? preState.filter(item => item !== expectedOutput)
+                : [...preState, expectedOutput];
+
+            this.state.set('select.file', newState);
+
+            return;
         }
         this.state.set('select.file', expectedOutput);
 

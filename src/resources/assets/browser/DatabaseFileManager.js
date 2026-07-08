@@ -200,4 +200,12 @@ export default class DatabaseFileManager {
         ].forEach(instance => instance?.destroy?.());
     }
 
+    getSelection() {
+
+        const output = this.state.get('select.file', []);
+        this.state.set('select.file', null);
+        return output;
+    }
+
+
 }

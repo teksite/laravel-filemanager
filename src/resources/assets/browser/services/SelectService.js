@@ -1,5 +1,4 @@
 import Events from "../constants/events.js";
-import events from "../constants/events.js";
 
 export default class SelectService {
 
@@ -16,8 +15,10 @@ export default class SelectService {
     bindEvents() {
 
         this.addToSelections = this.addToSelections.bind(this);
+        this.returnSelections = this.returnSelections.bind(this);
 
         this.eventBus.on(Events.SELECTION_CLICK, this.addToSelections);
+        this.eventBus.on(Events.SELECTION_RETURN, this.returnSelections);
 
     }
 
@@ -30,24 +31,29 @@ export default class SelectService {
 
         if (!selectedFile) return;
         const expectedOutput = (mode === 'multi' || mode === 'multiple')
-            ? expectedOutput.id
-            : expectedOutput.url;
-
+            ? selectedFile.id
+            : selectedFile.url;
 
         if (mode === 'multi') {
-            const preState = this.state.get('select.file', {});
-            const newState = {...preState ,expectedOutput };
+            const preState = this.state.get('select.file', []);
+            const newState = [...preState ,expectedOutput ];
             this.state.set('select.file', newState);
             return;
-        }
 
-        this.state.set('select.file', expectedOutput);
+        }
+        this.state.set('select.file', {expectedOutput});
 
     }
+
+    returnSelections(){
+        return this.state.get('select.file', {});
+    }
+
 
 
     destroy() {
 
         this.eventBus.off(Events.SELECTION_CLICK, this.addToSelections);
+        this.eventBus.off(Events.SELECTION_RETURN, this.returnSelections);
     }
 }

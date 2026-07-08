@@ -8,19 +8,22 @@
         @include('filemanager::partials.footer')
 
     </section>
-
+    <button type="button" role="button" id="choose">
+        click
+    </button>
 </div>
 
 <script type="module">
     import initFileManager
         from "{{ Vite::asset('packages/teksite/laravel-filemanager/src/resources/assets/browser/index.js') }}";
+
     document.addEventListener('DOMContentLoaded', () => {
-        initFileManager({
+        const fm = initFileManager({
             config:
                 {
-                    load:{
-                        disks :@js($disks),
-                        types :@js($mimes),
+                    load: {
+                        disks:@js($disks),
+                        types:@js($mimes),
                         perPage: {{$perPage}}
                     },
                     upload: {
@@ -28,10 +31,16 @@
                         allowedDisks: @js($allowedDisks)
                     }
                 }
-
         });
-    })
-    ;
+
+        document.querySelector('#choose').onclick = () => {
+            console.log(11111111111111111)
+          const coosen= fm.getSelection();
+            console.log(coosen)
+        };
+    });
+
+
 </script>
 {{--
 

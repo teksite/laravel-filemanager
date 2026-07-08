@@ -3,7 +3,7 @@ import DatabaseFileManager from "./DatabaseFileManager.js";
 
 export function initFileManager(config = {}) {
 
-    const fm = new DatabaseFileManager(config);
+   return new DatabaseFileManager(config);
 }
 
 export default initFileManager;

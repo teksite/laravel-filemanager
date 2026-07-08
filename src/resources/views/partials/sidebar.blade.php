@@ -1,12 +1,12 @@
 <aside class="aside" data-aside>
 
     <div class="preview-box" data-preview>
-        Select media
+       {{__('select media')}}
     </div>
 
     <div class="file-info">
 
-        <h3>File Info</h3>
+        <h3>{{__('file info')}}</h3>
 
         <div>
             <b>ID</b>
@@ -14,12 +14,12 @@
         </div>
 
         <div>
-            <b>Title</b>
+            <b>{{__('title')}}</b>
             <span data-title>-</span>
         </div>
 
         <div>
-            <b>URL</b>
+            <b>{{__('URL')}}</b>
 
             <span data-url>-</span>
             <div class="url-btns">
@@ -29,27 +29,27 @@
         </div>
 
         <div>
-            <b>Size</b>
+            <b>{{__('size')}}</b>
             <span data-size>-</span>
         </div>
 
         <div>
-            <b>Mime</b>
+            <b>{{__('mime type')}}</b>
             <span data-mime>-</span>
         </div>
 
         <div>
-            <b>Disk</b>
+            <b>{{__('disk')}}</b>
             <span data-disk>-</span>
         </div>
 
         <div>
-            <b>Created</b>
+            <b>{{__('created at')}}</b>
             <span data-created>-</span>
         </div>
 
     </div>
     <button data-delete type="button" class="delete-button" disabled>
-        🗑 Delete
+        🗑 {{__('delete')}}
     </button>
 </aside>

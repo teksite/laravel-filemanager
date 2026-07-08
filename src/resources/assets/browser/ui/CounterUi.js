@@ -1,6 +1,6 @@
 import {$} from "../helpers/dom.js";
 
-export default class FooterUi {
+export default class CounterUi {
 
     constructor({elements = {}} = {}, options = {}, eventBus, stateManager) {
 
@@ -24,9 +24,7 @@ export default class FooterUi {
 
 
     bindBusEvents() {
-
         this.listeners = {
-
             counting: () => {
                 this.updateCounter();
             }

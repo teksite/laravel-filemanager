@@ -2,7 +2,7 @@ import {$} from "../helpers/dom.js";
 import events from "../constants/events.js";
 import {renderMedia} from "../helpers/preview.js";
 
-export default class SelectionUi {
+export default class SelectionButtonUi {
 
     constructor({elements = {}} = {}, options = {}, eventBus, stateManager) {
 

@@ -2,8 +2,9 @@ import Events from "../constants/events.js";
 
 export default class SelectService {
 
-    constructor(eventBus, state) {
+    constructor(options={},eventBus, state) {
 
+        this.options = {...options};
         this.eventBus = eventBus;
         this.state = state;
 

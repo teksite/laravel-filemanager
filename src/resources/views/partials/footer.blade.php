@@ -1,11 +1,6 @@
 <footer class="footer">
     <div>
-        <button role="button" type="button" class="loadMoreBtn" data-load-more>Load More</button>
-    </div>
-
-    <div>
-        <span> counter files</span>
-        <span data-file-counter>0</span>
+        <button role="button" type="button" class="loadMoreBtn" data-load-more>{{__('load more')}}</button>
     </div>
     <div class="selected-list" data-selected-list></div>
     <div class="action-buttons" data-actions-sec></div>

@@ -1,6 +1,6 @@
 <header class="header">
     <div data-filter-section>
-        <span>Filters</span>
+        <span>{{__('filters')}}</span>
         <div class="filtering">
             @if(count($mimes))
                 <select data-mimeList>
@@ -29,5 +29,8 @@
             @endif
         </div>
     </div>
-    <div></div>
+    <div>
+        <span>{{__('counter files')}}</span>
+        <span data-file-counter>0</span>
+    </div>
 </header>

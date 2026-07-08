@@ -15,10 +15,10 @@ import UploaderUi from "./ui/UploaderUi.js";
 import GridUi from "./ui/GridUi.js";
 import MoreBtnUi from "./ui/MoreBtnUi.js";
 import InfoUi from "./ui/InfoUi.js";
-import FooterUi from "./ui/FooterUi.js";
+import CounterUi from "./ui/CounterUi.js";
 import FilterUi from "./ui/FilterUi.js";
 import SelectService from "./services/SelectService.js";
-import SelectionUi from "./ui/SelectionUi.js";
+import SelectionButtonUi from "./ui/SelectionButtonUi.js";
 
 export default class DatabaseFileManager {
 
@@ -97,14 +97,14 @@ export default class DatabaseFileManager {
         }, this.eventBus, this.state);
 
 
-        this.footerUi = new FooterUi({
+        this.counterUi = new CounterUi({
             elements: {
                 counterEl: this.config.get('ui.filesCounterSelector'),
             }
         }, {}, this.eventBus, this.state);
 
 
-        this.footerUi = new FilterUi({
+        this.counterUi = new FilterUi({
             elements: {
                 mimesEl: this.config.get('ui.mimesSelector'),
                 disksEl: this.config.get('ui.disksSelector'),
@@ -160,9 +160,11 @@ export default class DatabaseFileManager {
 
 
     initializeSelection() {
-        // this.selectionService = new SelectService({});
+        this.selectionService = new SelectService(
+            this.config.section('selection')
+            , this.eventBus, this.state);
 
-        this.selectionUi = new SelectionUi({
+        this.selectionUi = new SelectionButtonUi({
             elements: {
                 actionsEl: this.config.get('ui.selectionButtonSelector'),
                 gridEl: this.config.get('ui.selectionGridSelector'),
@@ -186,7 +188,7 @@ export default class DatabaseFileManager {
             this.uploaderUi,
             this.gridUi,
             this.moreBtnUi,
-            this.footerUi,
+            this.counterUi,
             this.infoUi,
 
         ].forEach(instance => instance?.destroy?.());

@@ -1,7 +1,6 @@
 import {$} from "../helpers/dom.js";
 import events from "../constants/events.js";
 import formatSize from "../helpers/formatSize.js";
-import {getMimeGroup, getMimeIcon} from "../helpers/mime.js";
 import {renderMedia} from "../helpers/preview.js";
 import handler from "../helpers/handler.js";
 
@@ -198,15 +197,13 @@ export default class InfoUi {
         let submitted = false;
 
         const submit = () => {
-
             if (submitted) {
                 return;
             }
-
             submitted = true;
             this.editingTitle = false;
 
-            const oldTitle = this.current.title ?? '';
+            const oldTitle = this.current.title ?? '-';
             const newTitle = input.value.trim();
 
             if (oldTitle === newTitle) {
@@ -217,10 +214,7 @@ export default class InfoUi {
             this.current.title = newTitle;
             this.renderTitle();
 
-            this.eventBus.emit(events.FILE_UPDATE_TITLE, {
-                fileId: this.current.id,
-                title: newTitle
-            });
+            this.eventBus.emit(events.FILE_UPDATE_TITLE, {fileId: this.current.id, title: newTitle});
         };
 
         input.addEventListener('keydown', e => {
@@ -243,7 +237,9 @@ export default class InfoUi {
 
     renderTitle() {
 
-        this.titleInfoEl.textContent = this.current?.title ?? '-';
+        this.titleInfoEl.textContent = this.current?.title?.length
+            ? this.current?.title
+            : '-';
     }
 
 

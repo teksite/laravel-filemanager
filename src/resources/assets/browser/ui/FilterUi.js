@@ -9,7 +9,7 @@ export default class FilterUi {
 
         this.loadElements(elements)
 
-        this.listeners = [];
+        this.listeners = {};
 
         this.eventBus = eventBus;
         this.state = stateManager;

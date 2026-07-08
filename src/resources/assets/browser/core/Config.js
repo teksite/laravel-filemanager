@@ -44,9 +44,8 @@ const defaultConfig = {
 
 
     selection: {
-        enable: false,
-        mode: 'single',
-        type: 'id'
+        mode: 'single', //single: only one file | multi : multi file | null : disable
+        expect: 'id'
     },
 
     debounce: {
@@ -78,8 +77,9 @@ const defaultConfig = {
         copyUrlBtnSelector: '[data-copy]',
 
         /* footer */
-
-        filesCounter : '[data-file-counter]',
+        filesCounterSelector : '[data-file-counter]',
+        selectionButtonSelector : '[data-actions-sec]',
+        selectionGridSelector : '[data-selected-list]',
 
         /* uploader ui*/
         uploadFormSelector: '[data-upload-form]',

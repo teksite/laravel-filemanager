@@ -7,8 +7,8 @@
         <span> counter files</span>
         <span data-file-counter>0</span>
     </div>
-    <div class="selected-list"></div>
-    <div class="action-buttons"></div>
+    <div class="selected-list" data-selected-list></div>
+    <div class="action-buttons" data-actions-sec></div>
 </footer>
 
 

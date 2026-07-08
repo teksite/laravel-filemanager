@@ -151,8 +151,6 @@ export default class GridUi {
         this.loadingEl.style.top = this.options.loadingStyle === 'overlay'
             ? '0'
             : 'calc(100% - 25px)';
-
-
     }
 
 

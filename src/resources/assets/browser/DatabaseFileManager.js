@@ -99,7 +99,7 @@ export default class DatabaseFileManager {
 
         this.footerUi = new FooterUi({
             elements: {
-                counterEl: this.config.get('ui.filesCounter'),
+                counterEl: this.config.get('ui.filesCounterSelector'),
             }
         }, {}, this.eventBus, this.state);
 
@@ -110,6 +110,8 @@ export default class DatabaseFileManager {
                 disksEl: this.config.get('ui.disksSelector'),
             }
         }, {}, this.eventBus, this.state);
+
+
     }
 
 
@@ -158,9 +160,16 @@ export default class DatabaseFileManager {
 
 
     initializeSelection() {
-        this.selectionService = new SelectService({});
+        // this.selectionService = new SelectService({});
 
-        this.selectionUi = new SelectionUi({});
+        this.selectionUi = new SelectionUi({
+            elements: {
+                actionsEl: this.config.get('ui.selectionButtonSelector'),
+                gridEl: this.config.get('ui.selectionGridSelector'),
+            }
+        }, this.config.section('selection'), this.eventBus, this.state);
+
+
     }
 
 

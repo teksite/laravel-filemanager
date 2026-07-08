@@ -1,5 +1,6 @@
 import {$} from "../helpers/dom.js";
 import events from "../constants/events.js";
+import {renderMedia} from "../helpers/preview.js";
 
 export default class SelectionUi {
 
@@ -7,54 +8,82 @@ export default class SelectionUi {
 
         this.option = {...options}
 
-        this.loadElements(elements)
+        this.loadElements(elements);
 
-        this.listeners = [];
+        if (!this.option.mode) return
+
+
+        this.listeners = {};
 
         this.eventBus = eventBus;
         this.state = stateManager;
 
+        this.createButtons();
         this.bindUiEvents();
+
+
     }
 
 
     loadElements(elements) {
-        const mimesSelector = elements.mimesEl ?? '[data-mimeList]';
-        const disksSelector = elements.disksEl ?? '[data-diskList]';
-        this.mimesEl = $(mimesSelector);
-        this.disksEl = $(disksSelector);
+
+        const actionsSelector = elements.actionsEl ?? '[data-actions-sec]';
+        const gridSelector = elements.gridEl ?? '[data-selected-list]';
+
+
+        this.actionsEl = $(actionsSelector);
+        this.gridEl = $(gridSelector);
+        this.chooseBtn =null;
     }
+
+    createButtons() {
+
+        if (!this.actionsEl) return;
+
+        const selectionBtn = document.createElement('button');
+
+        selectionBtn.className = 'choose-btn';
+
+        selectionBtn.dataset.chooseButton = '';
+
+        selectionBtn.role = 'button';
+
+        selectionBtn.type = 'button';
+
+        selectionBtn.title = 'have file(s)';
+
+        selectionBtn.innerText = 'Choose';
+
+        this.actionsEl.prepend(selectionBtn);
+
+        this.chooseBtn= selectionBtn;
+
+        this.eventBus.emit(events.SELECTION_SELECT_BUTTON_MADE, {button: selectionBtn});
+
+
+
+    }
+
 
     bindUiEvents() {
-        this.updateTypeFilter = this.updateTypeFilter.bind(this);
-        this.updateDiskFilter = this.updateDiskFilter.bind(this);
 
-        this.mimesEl?.addEventListener('change', this.updateTypeFilter);
-        this.disksEl?.addEventListener('change', this.updateDiskFilter);
+        this.returnFiles = this.returnFiles.bind(this);
+        // this.updateDiskFilter = this.updateDiskFilter.bind(this);
+        //
+        this.chooseBtn?.addEventListener('click', this.returnFiles);
+        // this.disksEl?.addEventListener('click', this.updateDiskFilter);
 
 
     }
 
-    updateDiskFilter(e) {
-        const target = e.target;
-        const value = target.value.length > 0 ? target.value : null;
+    returnFiles(){
 
-        this.state.set('load.disk', value);
-        this.eventBus.emit(events.GRID_CLEAR, {value})
-    }
-
-    updateTypeFilter(e) {
-        const target = e.target;
-        const value = target.value.length > 0 ? target.value : null;
-
-        this.state.set('load.type', value);
-        this.eventBus.emit(events.GRID_CLEAR, {value})
     }
 
 
     destroy() {
-        this.mimesEl?.removeEventListener('change', this.updateTypeFilter)
-        this.disksEl?.removeEventListener('change', this.updateDiskFilter)
+        this.chooseBtn?.removeEventListener('click', this.returnFiles);
+        // this.disksEl?.removeEventListener('change', this.updateDiskFilter)
     }
 
 }

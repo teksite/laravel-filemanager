@@ -2,6 +2,8 @@ import {$} from "../helpers/dom.js";
 import events from "../constants/events.js";
 import formatSize from "../helpers/formatSize.js";
 import {getMimeGroup, getMimeIcon} from "../helpers/mime.js";
+import {renderMedia} from "../helpers/preview.js";
+import handler from "../helpers/handler.js";
 
 export default class InfoUi {
 
@@ -47,8 +49,8 @@ export default class InfoUi {
 
         this.listeners = {
 
-            showInfo: ({value}) => {
-                this.showInfo(value);
+            revealInfo: ({value}) => {
+                this.revealInfo(value);
             },
 
             activeButtons: ({value}) => {
@@ -61,21 +63,11 @@ export default class InfoUi {
 
         };
 
+        this.eventBus.on('select.current', this.listeners.revealInfo);
 
-        this.eventBus.on(
-            'select.current',
-            this.listeners.showInfo
-        );
+        this.eventBus.on('select.current', this.listeners.activeButtons);
 
-        this.eventBus.on(
-            'select.current',
-            this.listeners.activeButtons
-        );
-
-        this.eventBus.on(
-            events.FILE_DELETED,
-            this.listeners.fileDeleted
-        );
+        this.eventBus.on(events.FILE_DELETED, this.listeners.fileDeleted);
     }
 
 
@@ -98,14 +90,13 @@ export default class InfoUi {
     }
 
 
-    showInfo(fileId) {
+    revealInfo(fileId) {
 
         const files = this.state.get('load.files', {});
+
         const file = files[fileId];
 
-
         this.current = file ?? null;
-
 
         this.idInfoEl.innerText = file?.id ?? '-';
         this.titleInfoEl.innerText = file?.title ?? '-';
@@ -115,10 +106,8 @@ export default class InfoUi {
         this.diskInfoEl.innerText = file?.disk ?? '-';
         this.createdInfoEl.innerText = file?.created_at ?? '-';
 
-
         this.renderPreview(file);
     }
-
 
     renderPreview(item) {
 
@@ -126,62 +115,17 @@ export default class InfoUi {
 
         if (!box) return;
 
-
         if (!item) {
-
             box.innerHTML = 'Select media';
-
             return;
         }
+        box.innerHTML = renderMedia(item);
 
-
-        const type = getMimeGroup(item.mime_type);
-
-
-        switch (type) {
-
-            case 'image':
-
-                box.innerHTML = `
-                    <img src="${item.url}" alt="${item.title ?? ''}">
-                `;
-
-                break;
-
-
-            case 'video':
-
-                box.innerHTML = `
-                    <video controls src="${item.url}"></video>
-                `;
-
-                break;
-
-
-            case 'audio':
-
-                box.innerHTML = `
-                    <audio controls src="${item.url}"></audio>
-                `;
-
-                break;
-
-
-            default:
-
-                box.innerHTML = `
-                    <div class="file-placeholder">
-                        ${getMimeIcon(type)}
-                    </div>
-                `;
-        }
     }
-
 
     activeButtons(active = false) {
 
         const disabled = !active;
-
         this.deleteBtnEl && (this.deleteBtnEl.disabled = disabled);
         this.copyBtnEl && (this.copyBtnEl.disabled = disabled);
         this.openBtnEl && (this.openBtnEl.disabled = disabled);
@@ -190,10 +134,7 @@ export default class InfoUi {
 
     handleDeletedFile(fileId) {
 
-        if (this.current?.id !== fileId) {
-            return;
-        }
-
+        if (this.current?.id !== fileId) return;
 
         this.current = null;
 
@@ -207,30 +148,21 @@ export default class InfoUi {
 
         if (!this.current?.url) return;
 
-
-        try {
-
-            await navigator.clipboard.writeText(
-                this.current.url
-            );
-
-        } catch (error) {
-
-            console.error(error);
-        }
+        handler({
+            resolve: async () => {
+                await navigator.clipboard.writeText(this.current.url);
+            },
+            reject: (error) => {
+                console.error(error);
+                alert('SSL in not enabled or you are running on localhost')
+            }
+        });
     }
 
 
     openFile() {
-
         if (!this.current?.url) return;
-
-
-        window.open(
-            this.current.url,
-            '_blank',
-            'noopener,noreferrer'
-        );
+        window.open(this.current.url, '_blank', 'noopener,noreferrer');
     }
 
 
@@ -238,13 +170,7 @@ export default class InfoUi {
 
         if (!this.current?.id) return;
 
-
-        this.eventBus.emit(
-            events.FILE_DELETE_SIGNAL,
-            {
-                fileId: this.current.id
-            }
-        );
+        this.eventBus.emit(events.FILE_DELETE_SIGNAL, {fileId: this.current.id});
     }
 
 
@@ -323,46 +249,23 @@ export default class InfoUi {
     }
 
 
-
-
     destroy() {
 
-        this.copyBtnEl?.removeEventListener(
-            'click',
-            this.copyHandler
-        );
+        this.copyBtnEl?.removeEventListener('click', this.copyHandler);
 
-        this.openBtnEl?.removeEventListener(
-            'click',
-            this.openHandler
-        );
+        this.openBtnEl?.removeEventListener('click', this.openHandler);
 
-        this.deleteBtnEl?.removeEventListener(
-            'click',
-            this.deleteHandler
-        );
+        this.deleteBtnEl?.removeEventListener('click', this.deleteHandler);
 
-        this.titleInfoEl?.removeEventListener(
-            'dblclick',
-            this.enableEditTitleMode
-        );
+        this.titleInfoEl?.removeEventListener('dblclick', this.enableEditTitleMode);
 
 
-        this.eventBus.off(
-            'select.current',
-            this.listeners.showInfo
-        );
+        this.eventBus.off('select.current', this.listeners.revealInfo);
 
-        this.eventBus.off(
-            'select.current',
-            this.listeners.activeButtons
-        );
+        this.eventBus.off('select.current', this.listeners.activeButtons);
 
 
-        this.eventBus.off(
-            events.FILE_DELETED,
-            this.listeners.fileDeleted
-        );
+        this.eventBus.off(events.FILE_DELETED, this.listeners.fileDeleted);
     }
 
 }

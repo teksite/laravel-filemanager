@@ -3,7 +3,7 @@ import handler from "../helpers/handler.js";
 
 export default class LoadService {
 
-    constructor({url, options = {}}, eventBus, state, requestService) {
+    constructor({url, options = {}}, eventBus, state, requestService, errorService) {
 
         this.options = {
             endpoint: url ?? "/api/filemanager",
@@ -15,6 +15,7 @@ export default class LoadService {
         this.eventBus = eventBus;
         this.state = state;
         this.request = requestService;
+        this.errorBus = requestService;
 
         this.bindEvents();
 
@@ -45,17 +46,15 @@ export default class LoadService {
 
         const cursor = this.state.get("load.cursor", null);
 
-
         if (!hasMore) return;
 
+        const disk = this.state.get('load.disk', null);
 
-        const disk = this.state.get('load.disk' , null);
+        const mimeType = this.state.get('load.type', null);
 
-        const mimeType = this.state.get('load.type' , null);
+        const perPage = this.options.perPage ?? 25;
 
-        const perPage = this.options.perPage;
-
-        const userId = this.options.userId;
+        const userId = this.options.userId ?? null;
 
 
         const params = {
@@ -65,70 +64,35 @@ export default class LoadService {
             per_page: perPage,
             user_id: userId,
         };
+
         await handler({
 
             resolve: async () => {
 
-                this.state.set(
-                    "load.loading",
-                    true
-                );
+                this.state.set("load.loading", true);
 
-
-                this.eventBus.emit(Events.FILES_REQUEST, params);
-
+                this.eventBus.emit(Events.FILES_REQUEST, {...params ,action: 'load more'});
 
                 const response = await this.request.getFiles(params);
 
-                const {
-                    files = [],
-                    meta = {}
-                } = response;
+                const {files = [], meta = {}} = response;
 
+                this.state.set("load.hasMore", Boolean(meta.has_more));
 
-                this.state.set(
-                    "load.hasMore",
-                    Boolean(meta.has_more)
-                );
-
-
-                this.state.set(
-                    "load.cursor",
-                    meta.next_cursor ?? null
-                );
-
+                this.state.set("load.cursor", meta.next_cursor ?? null);
 
                 this.appendFiles(files);
 
-
-                this.eventBus.emit(
-                    Events.FILES_RECEIVE,
-                    {
-                        files,
-                        meta
-                    }
-                );
+                this.eventBus.emit(Events.FILES_RECEIVE, {files, meta , action: 'load more'});
             },
-
 
             reject: async (error) => {
-
                 this.errorBus?.emit?.(error);
-
-
-                this.eventBus.emit(
-                    Events.FILES_REQUEST_FAILED,
-                    error
-                );
+                this.eventBus.emit(Events.FILES_REQUEST_FAILED, error , {action: 'load more'});
             },
 
-
             final: () => {
-
-                this.state.set(
-                    "load.loading",
-                    false
-                );
+                this.state.set("load.loading", false);
             }
 
         });
@@ -138,34 +102,17 @@ export default class LoadService {
     appendFiles(files = []) {
 
         const normalizedFiles = Array.isArray(files)
-            ? Object.fromEntries(
-                files.map(file => [file.id, file])
-            )
+            ? Object.fromEntries(files.map(file => [file.id, file]))
             : files;
 
+        const currentFiles = this.state.get("load.files", {});
 
-        const currentFiles = this.state.get(
-            "load.files",
-            {}
-        );
+        const updatedFiles = {...currentFiles, ...normalizedFiles};
 
 
-        const updatedFiles = {
-            ...currentFiles,
-            ...normalizedFiles
-        };
+        this.state.set("load.files", updatedFiles);
 
-
-        this.state.set(
-            "load.files",
-            updatedFiles
-        );
-
-
-        this.state.set(
-            "load.addedFiles",
-            normalizedFiles
-        );
+        this.state.set("load.append", normalizedFiles);
     }
 
 
@@ -187,7 +134,7 @@ export default class LoadService {
         this.state.set('load.cursor', null);
         this.state.set('load.hasMore', true);
         this.state.set('load.files', files);
-        this.state.set('load.addedFiles', {});
+        this.state.set('load.append', {});
 
     }
 

@@ -13,7 +13,6 @@ class FileIndexRequest extends BaseApiRequest
 {
     public function rules(): array
     {
-        Log::debug(implode('\n',request()->toArray()));
         return [
             'disk'      => ['nullable', 'string'],
             'search'    => ['nullable', 'string',],

@@ -35,11 +35,13 @@ const EVENTS = Object.freeze({
 
     /* Grid */
     GRID_UPDATED: 'grid:updated',
-    GRID_RESET: 'grid:reset',
+    GRID_CLEARED: 'grid:cleared',
     GRID_LOAD_START: 'grid:load:start',
     GRID_LOAD_END: 'grid:load:end',
 
+
     /* Selection */
+    SELECTION_CLICK: 'selection:item_clicked',
     SELECTION_CHANGED: 'selection:changed',
     SELECTION_CLEARED: 'selection:cleared',
 

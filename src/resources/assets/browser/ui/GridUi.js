@@ -1,6 +1,6 @@
-import {$, escapeHtml} from "../helpers/dom.js";
-import {getMimeGroup, getMimeIcon} from "../helpers/mime.js";
+import {$} from "../helpers/dom.js";
 import events from "../constants/events.js";
+import {renderMedia} from "../helpers/preview.js";
 
 export default class GridUi {
 
@@ -24,9 +24,6 @@ export default class GridUi {
         this.state = stateManager;
 
 
-
-
-
         this.bindBusEvents();
         this.bindUiEvents();
     }
@@ -40,16 +37,13 @@ export default class GridUi {
                 this.appendFile(value);
             },
 
-
             prepend: ({file: value}) => {
                 this.prependFile(value);
             },
 
-
             toggleLoading: ({value}) => {
                 this.toggleLoading(value);
             },
-
 
             remove: ({fileId}) => {
                 this.removeFile(fileId);
@@ -58,18 +52,16 @@ export default class GridUi {
             emptyGrid: () => {
                 this.emptyGrid();
             },
-
-
         };
 
 
         this.eventBus.on(events.GRID_RESET, this.listeners.emptyGrid);
 
-        this.eventBus.on('load.addedFiles', this.listeners.append);
+        this.eventBus.on('load.append', this.listeners.append);
 
         this.eventBus.on('load.loading', this.listeners.toggleLoading);
 
-        // this.eventBus.on(events.UPLOAD_SUCCESS, this.listeners.prepend);
+        this.eventBus.on(events.UPLOAD_SUCCESS, this.listeners.prepend);
 
         this.eventBus.on(events.FILE_DELETED, this.listeners.remove);
     }
@@ -77,29 +69,31 @@ export default class GridUi {
 
     bindUiEvents() {
 
-        this.loadPreview = this.loadPreview.bind(this);
+        this.selectAction = this.selectAction.bind(this);
 
-        this.gridEl.addEventListener('click', this.loadPreview);
+        this.gridEl.addEventListener('click', this.selectAction);
     }
 
 
     appendFile(items = {}) {
 
-        const fragment = document.createDocumentFragment();
+        if (!items || Object.keys(items).length === 0) {
+            return;
+        }
 
+        const fragment = document.createDocumentFragment();
 
         Object.values(items).forEach(item => {
 
             const card = this.renderCard(item);
 
-            if (card) {
-                fragment.appendChild(card);
-            }
-
+            if (card) fragment.appendChild(card);
         });
 
-
         this.gridEl.appendChild(fragment);
+        this.eventBus.emit(events.GRID_UPDATED, {items, 'action': 'append file'})
+
+        this.state.set('load.append' , {});
     }
 
 
@@ -107,33 +101,23 @@ export default class GridUi {
 
         const fragment = document.createDocumentFragment();
 
+        Object.values(items).reverse().forEach(item => {
 
-        Object.values(items)
-            .reverse()
-            .forEach(item => {
+            const card = this.renderCard(item);
 
-                const card = this.renderCard(item);
-
-                if (card) {
-                    fragment.appendChild(card);
-                }
-
-            });
-
+            if (card) fragment.appendChild(card);
+        });
 
         this.gridEl.prepend(fragment);
+        this.eventBus.emit(events.GRID_UPDATED, {items, 'action': 'prepend file'})
     }
 
 
     renderCard(item) {
 
-        if (!item?.id) {
-            return null;
-        }
-
+        if (!item?.id) return null;
 
         const card = document.createElement('div');
-
 
         card.className = 'media-card';
 
@@ -150,66 +134,11 @@ export default class GridUi {
 
         thumb.className = 'media-thumb';
 
-        thumb.innerHTML = this.renderMedia(item);
-
+        thumb.innerHTML = renderMedia(item);
 
         card.appendChild(thumb);
 
-
         return card;
-    }
-
-
-    renderMedia(item = {}) {
-
-        const mime = item.mime_type ?? '';
-
-        const type = getMimeGroup(mime);
-
-
-        switch (type) {
-
-            case 'image':
-
-                return `
-                    <img
-                        src="${item.url}"
-                        loading="lazy"
-                        alt="${escapeHtml(item.title ?? item.original_name ?? '')}"
-                    >
-                `;
-
-
-            case 'video':
-
-                return `
-                    <video
-                        src="${item.url}"
-                        preload="metadata">
-                    </video>
-                `;
-
-
-            case 'audio':
-
-                return `
-                    <audio
-                        src="${item.url}"
-                        preload="metadata">
-                    </audio>
-                `;
-
-
-            default:
-
-                return `
-                    <div class="media-fallback">
-                        <span class="icon">
-                            ${getMimeIcon(mime)}
-                        </span>
-                    </div>
-                `;
-        }
     }
 
 
@@ -240,34 +169,26 @@ export default class GridUi {
 
     emptyGrid() {
         this.gridEl.innerHTML = '';
+        this.eventBus.emit(events.GRID_CLEARED , {});
+
     }
 
 
-    loadPreview(e) {
-
+    selectAction(e) {
         e.preventDefault();
-
 
         const card = e.target.closest('[data-media-card]');
 
-
-        if (!card) {
-            return;
-        }
-
+        console.log(card)
+        if (!card)  return;
 
         const fileId = card.dataset.id;
 
+        console.log(fileId)
+        if (!fileId)  return;
 
-        if (!fileId) {
-            return;
-        }
-
-
-        this.state.set(
-            'select.current',
-            fileId
-        );
+        this.state.set('select.current', fileId);
+        this.eventBus.emit(events.SELECTION_CLICK , {fileId});
     }
 
 
@@ -290,7 +211,7 @@ export default class GridUi {
     destroy() {
 
         this.eventBus.off(
-            'load.addedFiles',
+            'load.append',
             this.listeners.append
         );
 

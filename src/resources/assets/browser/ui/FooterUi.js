@@ -8,13 +8,10 @@ export default class FooterUi {
 
         this.loadElements(elements);
 
-
         this.listeners = {};
-
 
         this.eventBus = eventBus;
         this.state = stateManager;
-
 
         this.bindBusEvents();
     }
@@ -22,9 +19,7 @@ export default class FooterUi {
 
     loadElements(elements) {
 
-        this.counterEl = $(
-            elements.counterEl ?? '[data-file-counter]'
-        );
+        this.counterEl = $(elements.counterEl ?? '[data-file-counter]');
     }
 
 
@@ -38,38 +33,23 @@ export default class FooterUi {
 
         };
 
-
-        this.eventBus.on(
-            'load.files',
-            this.listeners.counting
-        );
+        this.eventBus.on('load.files', this.listeners.counting);
     }
 
 
     updateCounter() {
 
-        if (!this.counterEl) {
-            return;
-        }
+        if (!this.counterEl) return;
 
+        const files = this.state.get('load.files', {});
 
-        const files = this.state.get(
-            'load.files',
-            {}
-        );
-
-
-        this.counterEl.innerText =
-            Object.keys(files).length;
+        this.counterEl.innerText = Object.keys(files).length;
     }
 
 
     destroy() {
 
-        this.eventBus.off(
-            'load.files',
-            this.listeners.counting
-        );
+        this.eventBus.off('load.files', this.listeners.counting);
     }
 
 }

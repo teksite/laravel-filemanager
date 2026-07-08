@@ -74,8 +74,8 @@ const defaultConfig = {
         diskInfoSelector: '[data-disk]',
         createdInfoSelector: '[data-created]',
         deleteBtnSelector: '[data-delete]',
-        copyUrlBtnSelector: '[data-open]',
-        openBtnSelector: '[data-copy]',
+        openUrlBtnSelector: '[data-open]',
+        copyUrlBtnSelector: '[data-copy]',
 
         /* footer */
 

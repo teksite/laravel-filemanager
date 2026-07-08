@@ -19,7 +19,8 @@ export default class StateManager {
             },
             load: {
                 files: {},
-                addedFiles: {},
+                append: {},
+                prepend: {},
 
                 loading: false,
                 hasMore: true,

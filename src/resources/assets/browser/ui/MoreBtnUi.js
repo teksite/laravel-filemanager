@@ -11,12 +11,10 @@ export default class MoreBtnUi {
 
         if (!this.moreBtn) return;
 
-
         this.eventBus = eventBus;
         this.state = stateManager;
 
         this.listeners = {};
-
 
         this.bindDomEvents();
         this.bindBusEvents();
@@ -37,61 +35,36 @@ export default class MoreBtnUi {
 
         };
 
-
-        this.eventBus.on(
-            'load.hasMore',
-            this.listeners.removeBtn
-        );
-
-
-        this.eventBus.on(
-            'load.loading',
-            this.listeners.updateBtn
-        );
+        this.eventBus.on('load.hasMore', this.listeners.removeBtn);
+        this.eventBus.on('load.loading', this.listeners.updateBtn);
     }
 
 
     bindDomEvents() {
 
         this.clickHandler = (e) => {
-
             e.preventDefault();
-
-            this.requestMoreEvent();
+            this.requestMore();
         };
 
-
-        this.moreBtn.addEventListener(
-            'click',
-            this.clickHandler
-        );
+        this.moreBtn.addEventListener('click', this.clickHandler);
     }
 
 
-    requestMoreEvent() {
+    requestMore() {
 
         const isLoading = this.state.get('load.loading');
         const hasMore = this.state.get('load.hasMore');
 
+        if (isLoading || !hasMore) return;
 
-        if (isLoading || !hasMore) {
-            return;
-        }
-
-
-        this.eventBus.emit(
-            events.FILES_NEED_MORE,
-            {}
-        );
+        this.eventBus.emit(events.FILES_NEED_MORE, {action: 'click on button'});
     }
 
 
     removeBtn(value) {
 
-        if (value) {
-            return;
-        }
-
+        if (value) return;
 
         this.moreBtn.remove();
 
@@ -100,9 +73,7 @@ export default class MoreBtnUi {
 
 
     updateBtn(value) {
-
         if (value) {
-
             this.moreBtn.disabled = true;
             this.moreBtn.innerText = 'loading ...';
 
@@ -117,22 +88,11 @@ export default class MoreBtnUi {
 
     destroy() {
 
-        this.eventBus.off(
-            'load.hasMore',
-            this.listeners.removeBtn
-        );
+        this.eventBus.off('load.hasMore', this.listeners.removeBtn);
 
+        this.eventBus.off('load.loading', this.listeners.updateBtn);
 
-        this.eventBus.off(
-            'load.loading',
-            this.listeners.updateBtn
-        );
-
-
-        this.moreBtn?.removeEventListener(
-            'click',
-            this.clickHandler
-        );
+        this.moreBtn?.removeEventListener('click', this.clickHandler);
     }
 
 }

@@ -76,7 +76,7 @@ export default class DatabaseFileManager {
         this.loadService = new LoadService({
             url: this.config.get('api.getUrl'),
             options: {...this.config.section('load') , ...this.config.section('filter')},
-        }, this.eventBus, this.state, this.request);
+        }, this.eventBus, this.state, this.request , this.errorBus);
 
 
         this.gridUi = new GridUi({
@@ -143,8 +143,8 @@ export default class DatabaseFileManager {
                 createdInfoEl: this.config.get('ui.createdInfoSelector'),
 
                 deleteBtnEl: this.config.get('ui.deleteBtnSelector'),
-                copyBtnEl: this.config.get('ui.copyBtnSelector'),
-                openBtnEl: this.config.get('ui.openBtnSelector'),
+                copyBtnEl: this.config.get('ui.copyUrlBtnSelector'),
+                openBtnEl: this.config.get('ui.openUrlBtnSelector'),
             }
         }, {}, this.eventBus, this.state);
     }

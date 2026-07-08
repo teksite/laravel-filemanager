@@ -21,7 +21,9 @@ class DatabaseBrowserController
         $allowedDisks = $this->allowedDisks();
         $allowedTypes = $this->allowedTypes();
 
-        return view('filemanager::browser', compact('disks', 'mimes' ,'allowedDisks' ,'allowedTypes'));
+        $perPage= config('filemanager.per_page' , 25);
+        
+        return view('filemanager::browser', compact('disks', 'mimes' ,'allowedDisks' ,'allowedTypes' ,'perPage'));
     }
 
     private function resolveListDisks(): array

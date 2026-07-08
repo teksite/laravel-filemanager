@@ -6,11 +6,7 @@ export default class GridUi {
 
     constructor({elements = {}} = {}, options = {}, eventBus, stateManager) {
 
-        this.options = {
-            loadingStyle: 'overlay',
-            ...options
-        };
-
+        this.options = {loadingStyle: 'overlay', ...options};
 
         const gridSelector = elements.gridEl ?? '[data-grid]';
         const loadingSelector = elements.loadingEl ?? '[data-loading]';
@@ -22,15 +18,13 @@ export default class GridUi {
 
         if (!this.gridEl) return;
 
-
         this.listeners = {};
-
 
         this.eventBus = eventBus;
         this.state = stateManager;
 
 
-        this.loadPreview = this.loadPreview.bind(this);
+
 
 
         this.bindBusEvents();
@@ -69,43 +63,23 @@ export default class GridUi {
         };
 
 
-        this.eventBus.on(
-            events.GRID_RESET,
-            this.listeners.emptyGrid
-        );
+        this.eventBus.on(events.GRID_RESET, this.listeners.emptyGrid);
 
+        this.eventBus.on('load.addedFiles', this.listeners.append);
 
-        this.eventBus.on(
-            'load.addedFiles',
-            this.listeners.append
-        );
+        this.eventBus.on('load.loading', this.listeners.toggleLoading);
 
+        // this.eventBus.on(events.UPLOAD_SUCCESS, this.listeners.prepend);
 
-        this.eventBus.on(
-            'load.loading',
-            this.listeners.toggleLoading
-        );
-
-
-        this.eventBus.on(
-            events.UPLOAD_SUCCESS,
-            this.listeners.prepend
-        );
-
-
-        this.eventBus.on(
-            events.FILE_DELETED,
-            this.listeners.remove
-        );
+        this.eventBus.on(events.FILE_DELETED, this.listeners.remove);
     }
 
 
     bindUiEvents() {
 
-        this.gridEl.addEventListener(
-            'click',
-            this.loadPreview
-        );
+        this.loadPreview = this.loadPreview.bind(this);
+
+        this.gridEl.addEventListener('click', this.loadPreview);
     }
 
 

@@ -10,10 +10,10 @@
     </section>
 
 </div>
+
 <script type="module">
     import initFileManager
         from "{{ Vite::asset('packages/teksite/laravel-filemanager/src/resources/assets/browser/index.js') }}";
-
     document.addEventListener('DOMContentLoaded', () => {
         initFileManager({
             config:
@@ -21,6 +21,7 @@
                     load:{
                         disks :@js($disks),
                         types :@js($mimes),
+                        perPage: {{$perPage}}
                     },
                     upload: {
                         allowedMimes: @js($allowedTypes),

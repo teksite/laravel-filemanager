@@ -3,7 +3,7 @@ import handler from "../helpers/handler.js";
 
 export default class LoadService {
 
-    constructor({url, options = {}}, eventBus, state, requestService, errorService) {
+    constructor({url, options = {}}, eventBus, state, requestService) {
 
         this.options = {
             endpoint: url ?? "/api/filemanager",
@@ -15,77 +15,52 @@ export default class LoadService {
         this.eventBus = eventBus;
         this.state = state;
         this.request = requestService;
-        this.errorBus = errorService;
-
-
-        this.updateFilter = this.updateFilter.bind(this);
-        this.sendRequest = this.sendRequest.bind(this);
-
 
         this.bindEvents();
 
+        if (this.options.getOnInit) this.sendRequest();
 
-        if (this.options.getOnInit) {
-            this.sendRequest();
-        }
     }
 
 
     bindEvents() {
 
-        this.eventBus.on(
-            Events.FILES_NEED_MORE,
-            this.sendRequest
-        );
+        this.updateFilter = this.updateFilter.bind(this);
+        this.sendRequest = this.sendRequest.bind(this);
 
-        this.eventBus.on(
-            'load.disk',
-            this.updateFilter
-        );
+        this.eventBus.on(Events.FILES_NEED_MORE, this.sendRequest);
 
+        this.eventBus.on('load.disk', this.updateFilter);
 
-        this.eventBus.on(
-            'load.type',
-            this.updateFilter
-        );
+        this.eventBus.on('load.type', this.updateFilter);
 
     }
 
 
     async sendRequest() {
 
-        if (this.state.get("load.loading")) {
-            return;
-        }
+        if (this.state.get("load.loading")) return;
+
+        const hasMore = this.state.get("load.hasMore", true);
+
+        const cursor = this.state.get("load.cursor", null);
 
 
-        const hasMore = this.state.get(
-            "load.hasMore",
-            true
-        );
-
-
-        const cursor = this.state.get(
-            "load.cursor",
-            null
-        );
-
-
-        if (cursor !== null && !hasMore) {
-            return;
-        }
+        if (!hasMore) return;
 
 
         const disk = this.state.get('load.disk' , null);
 
-
         const mimeType = this.state.get('load.type' , null);
+
+        const perPage = this.options.perPage;
 
 
         const params = {
             cursor: cursor,
             disk: disk,
             mime_type: mimeType,
+            per_page: perPage
         };
         await handler({
 

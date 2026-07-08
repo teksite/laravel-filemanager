@@ -47,9 +47,8 @@ class GetFileService
     private function resolvePerPage(int|string|null $reqPerPage = null): int
     {
         $reqPerPage = is_null($reqPerPage)
-            ? config('filemanager.per_page', 50)
+            ? config('filemanager.per_page', 25)
             : (int) $reqPerPage;
-
         return max(1, min($reqPerPage, 100));
     }
 

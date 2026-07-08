@@ -161,10 +161,9 @@ export default class RequestService {
 
     /* ---- For the App -----  */
 
-    getFiles({cursor = null, disk = null, mime_type = null} = {}) {
+    getFiles({cursor = null, disk = null, mime_type = null , per_page = null} = {}) {
         const endPoint = this.options.getUrl ?? '/api/filemanager';
-
-        return this.get(endPoint, {cursor, disk, mime_type});
+        return this.get(endPoint, {cursor, disk, mime_type  ,per_page});
     }
 
     deleteFile(id, options = {}) {

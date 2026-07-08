@@ -48,7 +48,7 @@ return [
 
     'type_list' => [null, 'image', 'text', 'video', 'audio'],               // Allowed mime types ,[] means all mimes without filter ,set it [null , image , video/mp4 ...] to have all and filter
 
-    'per_page' => 5,                                // Default pagination size
+    'per_page' => 3,                                // Default pagination size
 
     /*
     |--------------------------------------------------------------------------

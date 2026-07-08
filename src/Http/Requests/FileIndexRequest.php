@@ -4,6 +4,7 @@ namespace Teksite\FileManager\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 use Teksite\FileManager\Support\AuthorizeRequestResolver;
@@ -12,6 +13,7 @@ class FileIndexRequest extends BaseApiRequest
 {
     public function rules(): array
     {
+        Log::debug(implode('\n',request()->toArray()));
         return [
             'disk'      => ['nullable', 'string'],
             'search'    => ['nullable', 'string',],

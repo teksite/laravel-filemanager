@@ -25,7 +25,7 @@ const defaultConfig = {
 
 
     load: {
-        perPage: 50,
+        perPage: 25,
         cursorName: 'cursor',
         selectedDisk: null,
         selectedType: null,

@@ -34,7 +34,7 @@ export default class DatabaseFileManager {
         }, this.errorBus);
 
         this.initializeUploader();
-        this.initializeLoader();
+        this.initializeGrid();
         this.initializeInspector();
     }
 
@@ -71,12 +71,12 @@ export default class DatabaseFileManager {
      | Loader
      |----------------------------------------------------------------- */
 
-    initializeLoader() {
+    initializeGrid() {
 
         this.loadService = new LoadService({
             url: this.config.get('api.getUrl'),
             options: {...this.config.section('load') , ...this.config.section('filter')},
-        }, this.eventBus, this.state, this.request, this.errorBus);
+        }, this.eventBus, this.state, this.request);
 
 
         this.gridUi = new GridUi({

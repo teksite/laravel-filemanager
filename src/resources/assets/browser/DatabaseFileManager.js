@@ -17,6 +17,8 @@ import MoreBtnUi from "./ui/MoreBtnUi.js";
 import InfoUi from "./ui/InfoUi.js";
 import FooterUi from "./ui/FooterUi.js";
 import FilterUi from "./ui/FilterUi.js";
+import SelectService from "./services/SelectService.js";
+import SelectionUi from "./ui/SelectionUi.js";
 
 export default class DatabaseFileManager {
 
@@ -36,6 +38,7 @@ export default class DatabaseFileManager {
         this.initializeUploader();
         this.initializeGrid();
         this.initializeInspector();
+        this.initializeSelection();
     }
 
 
@@ -75,8 +78,8 @@ export default class DatabaseFileManager {
 
         this.loadService = new LoadService({
             url: this.config.get('api.getUrl'),
-            options: {...this.config.section('load') , ...this.config.section('filter')},
-        }, this.eventBus, this.state, this.request , this.errorBus);
+            options: {...this.config.section('load'), ...this.config.section('filter')},
+        }, this.eventBus, this.state, this.request, this.errorBus);
 
 
         this.gridUi = new GridUi({
@@ -99,7 +102,6 @@ export default class DatabaseFileManager {
                 counterEl: this.config.get('ui.filesCounter'),
             }
         }, {}, this.eventBus, this.state);
-
 
 
         this.footerUi = new FilterUi({
@@ -150,14 +152,28 @@ export default class DatabaseFileManager {
     }
 
 
+    /* -----------------------------------------------------------------
+     | Selection
+     |----------------------------------------------------------------- */
+
+
+    initializeSelection() {
+        this.selectionService = new SelectService({});
+
+        this.selectionUi = new SelectionUi({});
+    }
+
+
     destroy() {
 
         [
+            this.selectionService,
             this.uploadService,
             this.loadService,
             this.updateService,
             this.deleteService,
 
+            this.selectionUi,
             this.uploaderUi,
             this.gridUi,
             this.moreBtnUi,

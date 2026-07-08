@@ -144,26 +144,15 @@ export default class GridUi {
 
     toggleLoading(value) {
 
-        if (!this.loadingEl) {
-            return;
-        }
+        if (!this.loadingEl) return;
+
+        this.loadingEl.style.display = value ? 'flex' : 'none';
+
+        this.loadingEl.style.top = this.options.loadingStyle === 'overlay'
+            ? '0'
+            : 'calc(100% - 25px)';
 
 
-        if (this.options.loadingStyle === 'overlay') {
-
-            this.loadingEl.style.display =
-                value ? 'flex' : 'none';
-
-            return;
-        }
-
-
-        this.loadingEl.style.display =
-            value ? 'block' : 'none';
-
-
-        this.loadingEl.style.position =
-            value ? 'static' : '';
     }
 
 

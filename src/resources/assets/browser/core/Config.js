@@ -32,7 +32,7 @@ const defaultConfig = {
         selectedDisk: null,
         selectedType: null,
         getOnInit: true,
-        loadingStyle: 'block' //overlay | end
+        loadingStyle: 'block' //overlay | block
     },
 
 

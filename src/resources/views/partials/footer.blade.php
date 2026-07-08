@@ -8,7 +8,7 @@
         <span data-file-counter>0</span>
     </div>
     <div class="selected-list"></div>
-    <div class="action-btns"></div>
+    <div class="action-buttons"></div>
 </footer>
 
 

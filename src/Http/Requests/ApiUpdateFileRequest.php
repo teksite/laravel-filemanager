@@ -12,7 +12,7 @@ class ApiUpdateFileRequest  extends BaseApiRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:100',
+            'title' => 'nullable|string|max:100',
         ];
     }
 

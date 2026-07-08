@@ -175,9 +175,7 @@ export default class InfoUi {
 
 
     enableEditTitleMode() {
-        if (!this.current || this.editingTitle) {
-            return;
-        }
+        if (!this.current || this.editingTitle) return;
 
         this.editingTitle = true;
 

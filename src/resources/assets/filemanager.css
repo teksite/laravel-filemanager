@@ -398,6 +398,26 @@
     height: 100%;
     object-fit: cover;
 }
+.filemanager .media-fallback {
+    justify-content: space-between;
+    gap:8px;
+    height: 100%;
+
+}
+
+.filemanager .media-fallback .icon-box {
+    display: flex;
+    gap:4px;
+    align-items: center;
+}
+.filemanager .media-fallback .icon-box .icon {
+    font-size: 38px;
+}.filemanager .media-fallback  .name {
+     font-weight: bold;
+     margin: 24px auto 80px;
+     display: block;
+     text-align: center;
+ }
 
 /* =========================
    FOOTER
@@ -448,13 +468,16 @@
 ========================= */
 
 .filemanager input{
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
     padding: 4px 8px;
+    outline: none;
 }
 
 .filemanager input:focus{
-    border: 1px solid var(--border-active);
+    border-color: var(--border-active);
+    outline: none;
+
 
 }
 

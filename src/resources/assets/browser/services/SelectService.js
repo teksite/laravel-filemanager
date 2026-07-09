@@ -90,7 +90,6 @@ export default class SelectService {
         const files = this.state.get('select.files', {});
         const {mode = 'single', expect = 'url'} = this.options;
 
-        const values = Object.values(files);
         const format = (file) => {
             switch (expect) {
                 case 'id':
@@ -109,16 +108,10 @@ export default class SelectService {
         };
 
         if (['multi', 'multiple'].includes(mode)) {
-            return values.map(format);
+            return Object.values(files).map(format);
         }
 
-        const file = values[0];
-
-        if (!file) {
-            return null;
-        }
-
-        return format(file);
+        return format(files);
     }
 
 

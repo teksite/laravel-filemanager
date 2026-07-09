@@ -38,7 +38,7 @@ export default class GridUi {
 
 
     bindBusEvents() {
-        this.updateTitle=this.updateTitle.bind(this)
+        this.updateTitle = this.updateTitle.bind(this)
 
         this.listeners = {
 
@@ -58,13 +58,18 @@ export default class GridUi {
                 this.removeFile(fileId);
             },
 
+            hideItem: ({fileId}) => {
+                this.hideItem(fileId);
+            },
+
+
             unHideItem: ({fileId}) => {
                 this.unHideItem(fileId);
             },
 
 
-            updateTitle: ({fileId, title , file}) => {
-                this.updateTitle(fileId, title , file);
+            updateTitle: ({fileId, title, file}) => {
+                this.updateTitle(fileId, title, file);
             },
 
             emptyGrid: () => {
@@ -141,7 +146,9 @@ export default class GridUi {
 
         if (!item?.id) return null;
 
-        if (this.gridEl.querySelector(`[data-grid][data-id="${CSS.escape(item.id)}"]`)) return null;
+        if (this.gridEl.querySelector(`[data-media-card][data-id="${CSS.escape(item.id)}"]`)) {
+            return null;
+        }
 
         const card = document.createElement('div');
 
@@ -219,6 +226,7 @@ export default class GridUi {
         const card = this.gridEl.querySelector(`[data-media-card][data-id="${CSS.escape(fileId)}"]`);
 
         if (card) card.style.display = 'block';
+        if (card) card.classList.remove( 'is_hidden');
     }
 
     hideItem(fileId) {
@@ -228,6 +236,8 @@ export default class GridUi {
         const card = this.gridEl.querySelector(`[data-media-card][data-id="${CSS.escape(fileId)}"]`);
 
         if (card) card.style.display = 'none';
+        if (card) card.classList.add( 'is_hidden');
+
 
     }
 
@@ -235,7 +245,7 @@ export default class GridUi {
 
         if (!fileId) return;
 
-        const newTitle = title ?? file?.title ?? file?.original_name ?? 'UNKOWN';
+        const newTitle = title ?? file?.title ?? file?.original_name ?? 'UNKNOWN';
 
         if (!newTitle) return;
 
@@ -245,8 +255,6 @@ export default class GridUi {
                 item.textContent = newTitle;
             });
     }
-
-
 
 
     destroy() {
@@ -264,8 +272,7 @@ export default class GridUi {
 
         this.eventBus.off(Events.FILE_DELETE_FAILED, this.listeners.unHideItem);
 
-        this.eventBus.off(Events.FILE_DELETE_SIGNAL, this.listeners.hideItem);
-
+        this.eventBus.on(Events.FILE_DELETE_SIGNAL, this.listeners.hideItem);
 
         this.eventBus.off(Events.FILE_UPDATED_TITLE, this.listeners.updateTitle);
 

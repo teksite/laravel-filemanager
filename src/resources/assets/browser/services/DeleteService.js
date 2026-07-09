@@ -36,6 +36,7 @@ export default class DeleteService {
 
         const {success} = await handler({
             resolve: () => {
+                throw Error('ddddddddddddd')
                this.request.deleteFile(id);
             },
 

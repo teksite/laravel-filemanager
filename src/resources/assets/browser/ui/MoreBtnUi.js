@@ -3,39 +3,48 @@ import events from "../constants/events.js";
 
 export default class MoreBtnUi {
 
-    constructor({btnEl = null} = {}, eventBus, stateManager) {
+    constructor(elements = {}, eventBus, stateManager) {
 
-        const selector = btnEl ?? '[data-load-more]';
-
-        this.moreBtn = $(selector);
+        this.loadElements(elements)
 
         if (!this.moreBtn) return;
 
-        this.eventBus = eventBus;
         this.state = stateManager;
+
+        this.eventBus = eventBus;
 
         this.listeners = {};
 
         this.bindDomEvents();
+
         this.bindBusEvents();
     }
 
+    loadElements(elements) {
+
+        this.moreBtn = $(elements.btnEl ?? '[data-load-more]');
+
+        this.primaryText =this.moreBtn?.innerText;
+
+    }
 
     bindBusEvents() {
 
         this.listeners = {
+            toggleVisibility: ({value}) => {
 
-            toggleVisibilityMorBtn: ({value}) => {
-                this.toggleVisibilityMorBtn(value);
+                this.toggleVisibility(value);
             },
 
             updateBtn: ({value}) => {
+
                 this.updateBtn(value);
             }
 
         };
 
-        this.eventBus.on('load.hasMore', this.listeners.toggleVisibilityMorBtn);
+        this.eventBus.on('load.hasMore', this.listeners.toggleVisibility);
+
         this.eventBus.on('load.loading', this.listeners.updateBtn);
     }
 
@@ -43,7 +52,9 @@ export default class MoreBtnUi {
     bindDomEvents() {
 
         this.clickHandler = (e) => {
+
             e.preventDefault();
+
             this.requestMore();
         };
 
@@ -54,6 +65,7 @@ export default class MoreBtnUi {
     requestMore() {
 
         const isLoading = this.state.get('load.loading');
+
         const hasMore = this.state.get('load.hasMore');
 
         if (isLoading || !hasMore) return;
@@ -62,34 +74,48 @@ export default class MoreBtnUi {
     }
 
 
-    toggleVisibilityMorBtn(value) {
+    toggleVisibility(value) {
 
         if (value) {
             this.moreBtn.style.display = 'inline-block';
+            this.moreBtn.classList.remove('is-hidden');
 
             return
         }
         this.moreBtn.style.display = 'none';
+        this.moreBtn.classList.add('is-hidden');
     }
 
 
     updateBtn(value) {
         if (value) {
             this.moreBtn.disabled = true;
-            this.moreBtn.innerText = 'loading ...';
+
+            this.moreBtn.innerHTML = this.loadingEl();
 
             return;
         }
 
 
         this.moreBtn.disabled = false;
-        this.moreBtn.innerText = 'Load More';
+
+        this.moreBtn.textContent = this.primaryText
+    }
+
+    loadingEl(){
+        return `
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:block;margin:auto" >
+    <circle cx="12" cy="12" r="10" stroke="#5996FF" stroke-width="3" opacity=".25" />
+        <path d="M22 12a10 10 0 0 0-10-10" stroke="#293681" stroke-width="3" stroke-linecap="round">
+        <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite" />
+    </path>
+</svg>`
     }
 
 
     destroy() {
 
-        this.eventBus.off('load.hasMore', this.listeners.removeBtn);
+        this.eventBus.off('load.hasMore', this.listeners.toggleVisibility);
 
         this.eventBus.off('load.loading', this.listeners.updateBtn);
 

@@ -5,12 +5,14 @@
         @include('filemanager::partials.sidebar')
         @include('filemanager::partials.header')
         @include('filemanager::partials.grid')
-        @include('filemanager::partials.footer')
+       <div>
+           <div class="loader-buttons">
+               <button role="button" type="button" class="loadMoreBtn" data-load-more>{{__('load more')}}</button>
+           </div>
+           @include('filemanager::partials.footer')
+       </div>
 
     </section>
-    <button type="button" role="button" id="choose">
-        click
-    </button>
 </div>
 
 <script type="module">

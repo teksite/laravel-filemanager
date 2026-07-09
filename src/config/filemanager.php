@@ -46,7 +46,7 @@ return [
         's3-arvan_public',
     ],                 // Allowed filesystem disks ,[] means all disks without filter ,set it [null , public , ...] to have all and filter
 
-    'type_list' => [null, 'image', 'text', 'video', 'audio'],               // Allowed mime types ,[] means all mimes without filter ,set it [null , image , video/mp4 ...] to have all and filter
+    'type_list' => [null, 'image', 'text', 'video', 'audio' ,'application/pdf'],               // Allowed mime types ,[] means all mimes without filter ,set it [null , image , video/mp4 ...] to have all and filter
 
     'per_page' => 3,                                // Default pagination size
 

@@ -13,10 +13,8 @@ export default class SelectService {
 
 
     bindEvents() {
-
         this.addToSelections = this.addToSelections.bind(this);
         this.eventBus.on(Events.SELECTION_CLICK, this.addToSelections);
-
     }
 
 
@@ -44,7 +42,6 @@ export default class SelectService {
             return;
         }
 
-
         this.state.set('select.files', selectedFile);
 
     }
@@ -64,8 +61,10 @@ export default class SelectService {
 
                 case 'file':
                 case 'object':
-                default:
                     return file;
+
+                default:
+                    return null;
             }
         };
 

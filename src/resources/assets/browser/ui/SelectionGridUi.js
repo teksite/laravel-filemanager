@@ -1,4 +1,7 @@
 import {$} from "../helpers/dom.js";
+import SelectService from "../services/SelectService.js";
+import events from "../constants/events.js";
+import {renderMedia} from "../helpers/preview.js";
 
 export default class SelectionGridUi {
 
@@ -27,22 +30,46 @@ export default class SelectionGridUi {
         this.appendItem = this.appendItem.bind(this);
 
         this.listeners = {
-            appendItem: ({value}) => {
-                this.appendItem(value);
+            appendItem: () => {
+                this.appendItem();
             }
         };
-        this.eventBus.on('select.files', this.listeners.appendItem);
+        this.eventBus.on(events.SELECTION_CLICK, this.listeners.appendItem);
     }
 
+    appendItem() {
+        const files = this.state.get('select.files');
 
-    appendItem(files) {
+        if (files == null) {
+            this.gridEl.innerHTML = '';
+            return;
+        }
 
+        if ('id' in files) {
+            this.gridEl.innerHTML = this.renderItems(files);
+            return;
+        }
+
+        this.gridEl.innerHTML = '';
+
+        Object.values(files).forEach(file => {
+            this.gridEl.insertAdjacentHTML('beforeend', this.renderItems(file));
+        });
+    }
+    renderItems(file) {
+
+       return `<div class="selected-item">
+${renderMedia(file)}
+<button class="selected-item-delete-btn">
+✖
+</button>
+</div>`;
     }
 
 
     destroy() {
 
-        this.eventBus.off('load.files', this.listeners.counting);
+        this.eventBus.off(events.SELECTION_CLICK, this.listeners.counting);
     }
 
 }

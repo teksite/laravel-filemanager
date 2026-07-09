@@ -6,11 +6,11 @@ export default class SelectionButtonUi {
 
     constructor({elements = {}} = {}, options = {}, eventBus, stateManager) {
 
-        this.option = {...options}
+        this.options = {...options}
 
         this.loadElements(elements);
 
-        if (!this.option.mode) return
+        if (!this.options.expect) return
 
 
         this.listeners = {};
@@ -37,6 +37,7 @@ export default class SelectionButtonUi {
     }
 
     createButtons() {
+
 
         if (!this.actionsEl) return;
 

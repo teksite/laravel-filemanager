@@ -29,26 +29,30 @@ export default class SelectionGridUi {
 
     bindBusEvents() {
         this.handleDeleteClick = this.handleDeleteClick.bind(this);
-
         this.gridEl.addEventListener('click', this.handleDeleteClick);
     }
 
     bindUiEvents() {
         this.appendItem = this.appendItem.bind(this);
+        this.clearGrid = this.clearGrid.bind(this);
 
         this.listeners = {
             appendItem: () => {
                 this.appendItem();
-            }
+            },
+            clearGrid: () => {
+                this.clearGrid();
+            },
         };
         this.eventBus.on(events.SELECTION_CLICK, this.listeners.appendItem);
+        this.eventBus.on(events.SELECTION_ON_CHOOSE, this.listeners.clearGrid);
     }
 
     appendItem() {
         const files = this.state.get('select.files');
 
         if (files == null) {
-            this.gridEl.innerHTML = '';
+            this.clearGrid();
             return;
         }
 
@@ -57,13 +61,16 @@ export default class SelectionGridUi {
             return;
         }
 
-        this.gridEl.innerHTML = '';
+        this.clearGrid();
 
         Object.values(files).forEach(file => {
             this.gridEl.insertAdjacentHTML('beforeend', this.renderItems(file));
         });
     }
 
+    clearGrid(){
+        this.gridEl.innerHTML = '';
+    }
     renderItems(file) {
 
         return `
@@ -91,6 +98,7 @@ export default class SelectionGridUi {
         this.gridEl.removeEventListener('click', this.handleDeleteClick);
 
         this.eventBus.off(events.SELECTION_CLICK, this.listeners.counting);
+        this.eventBus.off(events.SELECTION_ON_CHOOSE, this.listeners.clearGrid);
     }
 
 }

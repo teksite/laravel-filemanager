@@ -25,8 +25,8 @@ export default class MoreBtnUi {
 
         this.listeners = {
 
-            removeBtn: ({value}) => {
-                this.removeBtn(value);
+            toggleVisibilityMorBtn: ({value}) => {
+                this.toggleVisibilityMorBtn(value);
             },
 
             updateBtn: ({value}) => {
@@ -35,7 +35,7 @@ export default class MoreBtnUi {
 
         };
 
-        this.eventBus.on('load.hasMore', this.listeners.removeBtn);
+        this.eventBus.on('load.hasMore', this.listeners.toggleVisibilityMorBtn);
         this.eventBus.on('load.loading', this.listeners.updateBtn);
     }
 
@@ -62,13 +62,14 @@ export default class MoreBtnUi {
     }
 
 
-    removeBtn(value) {
+    toggleVisibilityMorBtn(value) {
 
-        if (value) return;
+        if (value) {
+            this.moreBtn.style.display = 'inline-block';
 
-        this.moreBtn.remove();
-
-        this.destroy();
+            return
+        }
+        this.moreBtn.style.display = 'none';
     }
 
 

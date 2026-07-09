@@ -24,8 +24,6 @@ export default class InfoUi {
 
         this.bindUiEvents();
 
-        this.initDefaultValues();
-
     }
 
 
@@ -60,10 +58,9 @@ export default class InfoUi {
     }
 
 
-
     bindBusEvents() {
 
-        this.recoverTitle=this.recoverTitle.bind(this)
+        this.recoverTitle = this.recoverTitle.bind(this)
 
         this.listeners = {
 
@@ -79,8 +76,8 @@ export default class InfoUi {
                 this.handleDeletedFile(fileId);
             },
 
-            recoverTitle: ({fileId, title , oldTitle}) => {
-                this.recoverTitle(fileId , title , oldTitle);
+            recoverTitle: ({fileId, title, oldTitle}) => {
+                this.recoverTitle(fileId, title, oldTitle);
             },
 
         };
@@ -94,9 +91,6 @@ export default class InfoUi {
         this.eventBus.on(Events.FILE_UPDATE_TITLE_FAILED, this.listeners.recoverTitle);
     }
 
-    initDefaultValues(){
-        this.oldTitle = null
-    }
 
     bindUiEvents() {
 
@@ -128,19 +122,19 @@ export default class InfoUi {
 
         this.current = file ?? null;
 
-        this.idInfoEl.textContent = file?.id ?? '-';
+        this.idInfoEl.textContent && (this.idInfoEl.textContent = file?.id ?? '-');
 
-        this.titleInfoEl.textContent = file?.title ?? '-';
+        this.titleInfoEl.textContent && (this.titleInfoEl.textContent = file?.title ?? '-');
 
-        this.urlInfoEl.textContent = file?.url ?? '-';
+        this.urlInfoEl.textContent && (this.urlInfoEl.textContent = file?.url ?? '-');
 
-        this.sizeInfoEl.textContent = formatSize(file?.size ?? 0);
+        this.sizeInfoEl.textContent && (this.sizeInfoEl.textContent = formatSize(file?.size ?? 0));
 
-        this.mimeInfoEl.textContent = file?.mime_type ?? '-';
+        this.mimeInfoEl.textContent && (this.mimeInfoEl.textContent = file?.mime_type ?? '-');
 
-        this.diskInfoEl.textContent = file?.disk ?? '-';
+        this.diskInfoEl.textContent && (this.diskInfoEl.textContent = file?.disk ?? '-');
 
-        this.createdInfoEl.textContent = file?.created_at ?? '-';
+        this.createdInfoEl.textContent && (this.createdInfoEl.textContent = file?.created_at ?? '-');
 
         this.renderPreview(file);
     }
@@ -152,7 +146,7 @@ export default class InfoUi {
         if (!box) return;
 
         if (!item) {
-            box.innerHTML = this.primaryPreviewText;
+            box.textContent = this.primaryPreviewText;
             return;
         }
         box.innerHTML = renderMedia(item);
@@ -247,7 +241,7 @@ export default class InfoUi {
         input.name = 'title';
         input.value = this.current.title ?? '';
 
-        const oldTitle = this.current.title;
+        const oldTitle = this.current.title ?? '';
 
         this.titleInfoEl.replaceChildren(input);
 
@@ -274,11 +268,10 @@ export default class InfoUi {
             this.current.title = newTitle;
 
 
-
             this.renderTitle();
 
 
-            this.eventBus.emit(Events.FILE_UPDATE_TITLE_SIGNAL, {fileId: this.current.id, title: newTitle , oldTitle});
+            this.eventBus.emit(Events.FILE_UPDATE_TITLE_SIGNAL, {fileId: this.current.id, title: newTitle, oldTitle});
         };
 
         input.addEventListener('keydown', e => {
@@ -300,7 +293,7 @@ export default class InfoUi {
         input.addEventListener('blur', submit);
     }
 
-    recoverTitle(fileId , title , oldTitle) {
+    recoverTitle(fileId, title, oldTitle) {
 
         if (this.current?.id !== fileId) {
             return;

@@ -8,24 +8,32 @@ export default class GridUi {
 
         this.options = {loadingStyle: 'overlay', ...options};
 
-        const gridSelector = elements.gridEl ?? '[data-grid]';
-        const loadingSelector = elements.loadingEl ?? '[data-loading]';
-
-
-        this.gridEl = $(gridSelector);
-        this.loadingEl = $(loadingSelector);
-
+        this.loadElements(elements);
 
         if (!this.gridEl) return;
 
         this.listeners = {};
 
-        this.eventBus = eventBus;
         this.state = stateManager;
+
+        this.eventBus = eventBus;
 
 
         this.bindBusEvents();
+
         this.bindUiEvents();
+    }
+
+    loadElements(elements) {
+
+        const gridSelector = elements.gridEl ?? '[data-grid]';
+
+        const loadingSelector = elements.loadingEl ?? '[data-loading]';
+
+
+        this.gridEl = $(gridSelector);
+
+        this.loadingEl = $(loadingSelector);
     }
 
 
@@ -77,9 +85,7 @@ export default class GridUi {
 
     appendFile(items = {}) {
 
-        if (!items || Object.keys(items).length === 0) {
-            return;
-        }
+        if (!items || Object.keys(items).length === 0) return;
 
         const fragment = document.createDocumentFragment();
 
@@ -117,6 +123,8 @@ export default class GridUi {
 
         if (!item?.id) return null;
 
+        if (this.gridEl.querySelector(`[data-id="${CSS.escape(item.id)}"]`)) return null;
+
         const card = document.createElement('div');
 
         card.className = 'media-card';
@@ -134,6 +142,8 @@ export default class GridUi {
 
         thumb.className = 'media-thumb';
 
+        thumb.dataset.mediaThumb = '';
+
         thumb.innerHTML = renderMedia(item);
 
         card.appendChild(thumb);
@@ -146,11 +156,10 @@ export default class GridUi {
 
         if (!this.loadingEl) return;
 
-        this.loadingEl.style.display = value ? 'flex' : 'none';
+        value
+            ? this.loadingEl.classList.add('show')
+            : this.loadingEl.classList.remove('show');
 
-        this.loadingEl.style.top = this.options.loadingStyle === 'overlay'
-            ? '0'
-            : 'calc(100% - 25px)';
     }
 
 
@@ -161,7 +170,6 @@ export default class GridUi {
 
 
     selectingAction(e) {
-        e.preventDefault();
 
         const card = e.target.closest('[data-media-card]');
 
@@ -192,17 +200,14 @@ export default class GridUi {
 
         this.eventBus.off('load.loading', this.listeners.toggleLoading);
 
-        this.eventBus.off(
-            Events.UPLOAD_SUCCESS,
-            this.listeners.prepend
-        );
+        this.eventBus.off(Events.UPLOAD_SUCCESS, this.listeners.prepend);
 
 
         this.eventBus.off(Events.GRID_CLEAR, this.listeners.emptyGrid);
 
         this.eventBus.off(Events.FILE_DELETED, this.listeners.remove);
 
-        this.gridEl.removeEventListener('click', this.selectingAction);
+        this.gridEl?.removeEventListener('click', this.selectingAction);
     }
 
 }

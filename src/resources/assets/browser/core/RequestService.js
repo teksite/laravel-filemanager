@@ -161,9 +161,9 @@ export default class RequestService {
 
     /* ---- For the App -----  */
 
-    getFiles(params = {}) {
+    getFiles(params = {}, options = {}) {
         const endPoint = this.options.getUrl ?? '/api/filemanager';
-        return this.get(endPoint, params);
+        return this.get(endPoint, params , options);
     }
 
     deleteFile(id, options = {}) {

@@ -349,12 +349,14 @@
     background: #fff;
     border: 1px solid var(--border);
     overflow: hidden;
+    user-select: none;
 }
 
 
 .filemanager .media-thumb,
 .filemanager .media-thumb img,
-.filemanager .media-thumb video {
+.filemanager .media-thumb video,
+.filemanager .media-thumb .media-fallback {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -401,26 +403,30 @@
     height: 100%;
     object-fit: cover;
 }
+
 .filemanager .media-fallback {
     justify-content: space-between;
-    gap:8px;
+    gap: 8px;
     height: 100%;
 
 }
 
 .filemanager .media-fallback .icon-box {
     display: flex;
-    gap:4px;
+    gap: 4px;
     align-items: center;
 }
+
 .filemanager .media-fallback .icon-box .icon {
     font-size: 38px;
-}.filemanager .media-fallback  .name {
-     font-weight: bold;
-     margin: 24px auto 80px;
-     display: block;
-     text-align: center;
- }
+}
+
+.filemanager .media-fallback .name {
+    font-weight: bold;
+    margin: 24px auto 80px;
+    display: block;
+    text-align: center;
+}
 
 /* =========================
    FOOTER
@@ -436,11 +442,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: sticky;
-    bottom: 0;
     gap: 16px;
+    z-index: 10;
 }
-.filemanager .footer .loader-buttons , .filemanager .footer .action-button {
+
+.filemanager .footer .loader-buttons, .filemanager .footer .action-button {
     min-width: fit-content;
 }
 
@@ -471,6 +477,7 @@
     color: #fff;
     margin: auto 0 0 0;
 }
+
 .filemanager .delete-button:hover {
     background: var(--danger-dark);
 
@@ -481,25 +488,49 @@
     color: #fff;
     margin: auto 0 0 0;
 }
+
 .filemanager .upload-btn:hover {
     background: var(--seconadry-darker);
 
 }
 
+/* selected grid */
+.filemanager .selected-item {
+    position: relative;
+}
 
+.filemanager  .selected-item img,
+.filemanager  .selected-item video,
+.filemanager  .selected-item audio{
+    width: 100%;
+    height: 100%;
+}
+.filemanager  .selected-item button.selected-item-delete-btn {
+    color: var(--danger);
+    position: absolute;
+    top: 0;
+    inset-inline-end: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    width: 12px !important;
+    aspect-ratio: 1 / 1;
+    padding: 6px;
+}
 
 /* =========================
    input
 ========================= */
 
-.filemanager input{
+.filemanager input {
     border: 2px solid var(--border);
     border-radius: var(--radius-sm);
     padding: 4px 8px;
     outline: none;
 }
 
-.filemanager input:focus{
+.filemanager input:focus {
     border-color: var(--border-active);
     outline: none;
 
@@ -638,5 +669,3 @@
             repeat(auto-fill, minmax(130px, 1fr));
     }
 }
-
-

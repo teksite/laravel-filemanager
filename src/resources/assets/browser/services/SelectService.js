@@ -5,16 +5,20 @@ export default class SelectService {
     constructor(options = {}, eventBus, state) {
 
         this.options = {...options};
-        this.eventBus = eventBus;
+
         this.state = state;
+
+        this.eventBus = eventBus;
+
         this.listeners = {};
+
         this.bindEvents();
     }
 
 
     bindEvents() {
 
-        this.addToSelections = this.addToSelections.bind(this);
+        this.removeFromSelections = this.removeFromSelections.bind(this);
 
         this.addToSelections = this.addToSelections.bind(this);
 
@@ -29,37 +33,38 @@ export default class SelectService {
 
 
         this.eventBus.on(Events.SELECTION_CLICK, this.listeners.addToSelections);
+
         this.eventBus.on(Events.SELECTION_REMOVE, this.listeners.removeFromSelections);
-
-
     }
 
 
     addToSelections(fileId) {
         const {mode} = this.options;
+
         const files = this.state.get('load.files', {});
 
-        const selectedFile = files[fileId] ?? null;
+        const selectedFile = files[fileId];
 
         if (!selectedFile) return;
 
+        const selected = this.state.get('select.files', {});
+
+        const next = {...selected};
+
+        if (next[fileId]) {
+            delete next[fileId];
+        } else {
+            next[fileId] = selectedFile;
+        }
+
+
         if (['multi', 'multiple'].includes(mode)) {
-            const preState = this.state.get('select.files', {});
-
-            const newState = {...preState};
-
-            if (newState[selectedFile.id]) {
-                delete newState[selectedFile.id];
-            } else {
-                newState[selectedFile.id] = selectedFile;
-            }
-
-            this.state.set('select.files', newState);
-
+            this.state.set('select.files', next);
             return;
         }
 
-        this.state.set('select.files', selectedFile);
+        this.state.set('select.files', {[selectedFile.id]: selectedFile});
+
 
     }
 
@@ -68,22 +73,12 @@ export default class SelectService {
 
         if (!selections) return;
 
-        if ('id' in selections) {
-            if (selections.id === fileId) {
-                this.state.set('select.files', null);
+        const next = {...selections};
 
-            }
-            return;
-        }
+        delete next[fileId];
 
-        const newState = {...selections};
-        delete newState[fileId];
+        this.state.set('select.files', Object.keys(next).length ? next : {});
 
-
-        this.state.set(
-            'select.files',
-            Object.keys(newState).length ? newState : null
-        );
     }
 
     returnSelections() {
@@ -106,12 +101,15 @@ export default class SelectService {
                     return null;
             }
         };
+        const values = Object.values(files);
+
 
         if (['multi', 'multiple'].includes(mode)) {
-            return Object.values(files).map(format);
+            return values.map(format);
         }
 
-        return format(files);
+        return values.length ? format(values[0]) : null;
+
     }
 
 

@@ -1,5 +1,6 @@
 import Events from "../constants/events.js";
 import handler from "../helpers/handler.js";
+import ErrorService from "../core/ErrorService.js";
 
 export default class LoadService {
 
@@ -11,15 +12,21 @@ export default class LoadService {
             ...options
         };
 
+        this.state = state;
 
         this.eventBus = eventBus;
-        this.state = state;
+
         this.request = requestService;
-        this.errorBus = requestService;
+
+        this.errorBus = ErrorService;
 
         this.bindEvents();
 
         if (this.options.getOnInit) this.sendRequest();
+
+
+        this.controller = null;
+
 
     }
 
@@ -27,6 +34,7 @@ export default class LoadService {
     bindEvents() {
 
         this.updateFilter = this.updateFilter.bind(this);
+
         this.sendRequest = this.sendRequest.bind(this);
 
         this.eventBus.on(Events.FILES_NEED_MORE, this.sendRequest);
@@ -40,6 +48,7 @@ export default class LoadService {
 
     async sendRequest() {
 
+
         if (this.state.get("load.loading")) return;
 
         const hasMore = this.state.get("load.hasMore", true);
@@ -48,21 +57,16 @@ export default class LoadService {
 
         if (!hasMore) return;
 
-        const disk = this.state.get('load.disk', null);
-
-        const mimeType = this.state.get('load.type', null);
-
-        const perPage = this.options.perPage ?? 25;
-
-        const userId = this.options.userId ?? null;
+        this.controller = new AbortController();
+        const signal = this.controller.signal;
 
 
         const params = {
             cursor: cursor,
-            disk: disk,
-            mime_type: mimeType,
-            per_page: perPage,
-            user_id: userId,
+            disk: this.state.get('load.disk', null),
+            mime_type: this.state.get('load.type', null),
+            per_page: this.options.perPage ?? 25,
+            user_id: this.options.userId ?? null,
         };
 
         await handler({
@@ -87,11 +91,19 @@ export default class LoadService {
             },
 
             reject: async (error) => {
+
                 this.errorBus?.emit?.(error);
+
                 this.eventBus.emit(Events.FILES_REQUEST_FAILED, error, {action: 'load more'});
+
+                throw error;
             },
 
             final: () => {
+                if (this.controller?.signal === signal) {
+                    this.controller = null;
+                }
+
                 this.state.set("load.loading", false);
             }
 
@@ -129,9 +141,13 @@ export default class LoadService {
     reset(files = {}) {
 
         this.state.set('load.loading', false);
+
         this.state.set('load.cursor', null);
+
         this.state.set('load.hasMore', true);
+
         this.state.set('load.files', files);
+
         this.state.set('load.append', {});
 
     }
@@ -140,10 +156,16 @@ export default class LoadService {
     stop() {
 
         this.eventBus.off(Events.FILES_NEED_MORE, this.sendRequest);
+
+        this.eventBus.off(Events.load.disk, this.updateFilter);
+
+        this.eventBus.off(Events.load.type, this.updateFilter);
     }
 
 
     destroy() {
+
         this.stop();
+
     }
 }

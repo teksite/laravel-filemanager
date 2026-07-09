@@ -79,8 +79,8 @@ export default class InfoUi {
                 this.handleDeletedFile(fileId);
             },
 
-            recoverTitle: ({filed, title}) => {
-                this.recoverTitle(filed);
+            recoverTitle: ({filed, title , oldTitle}) => {
+                this.recoverTitle(filed , title , oldTitle);
             },
 
         };
@@ -302,15 +302,10 @@ export default class InfoUi {
         input.addEventListener('blur', submit);
     }
 
-    recoverTitle(fileId) {
+    recoverTitle(fileId , title , oldTitle) {
 
-        console.log(oldTitle)
-        const oldTitle =this.oldTitle ?? '-';
 
-        const infoTitleEl = document.querySelector('[data-title]');
-        if (infoTitleEl) {
-            infoTitleEl.textContent = oldTitle
-        }
+
     }
 
     renderTitle() {

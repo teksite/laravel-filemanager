@@ -35,7 +35,10 @@ export default class DeleteService {
         if (!id) return;
 
         const {success} = await handler({
-            resolve: () => this.request.deleteFile(id),
+            resolve: () => {
+               this.request.deleteFile(id);
+            },
+
 
             reject: (error) => {
                 this.errorBus?.emit(error);
@@ -53,7 +56,7 @@ export default class DeleteService {
 
         this.state.set('select.current', null);
 
-        this.eventBus.emit(Events.FILE_DELETED, {fileId : id});
+        this.eventBus.emit(Events.FILE_DELETED, {fileId: id});
     }
 
 

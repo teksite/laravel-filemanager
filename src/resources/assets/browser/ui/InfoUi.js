@@ -1,5 +1,5 @@
 import {$, escapeHtml} from "../helpers/dom.js";
-import events from "../constants/events.js";
+import Events from "../constants/events.js";
 import formatSize from "../helpers/formatSize.js";
 import {renderMedia} from "../helpers/preview.js";
 import handler from "../helpers/handler.js";
@@ -11,15 +11,21 @@ export default class InfoUi {
         this.loadElements(elements);
 
         this.options = {...options};
+
         this.current = null;
 
         this.listeners = {};
 
-        this.eventBus = eventBus;
         this.state = stateManager;
 
+        this.eventBus = eventBus;
+
         this.bindBusEvents();
+
         this.bindUiEvents();
+
+        this.initDefaultValues();
+
     }
 
 
@@ -30,21 +36,34 @@ export default class InfoUi {
         this.filePreviewEl = $(elements.filePreviewEl ?? '[data-preview]');
 
         this.idInfoEl = $(elements.idInfoEl ?? '[data-id]');
+
         this.titleInfoEl = $(elements.titleInfoEl ?? '[data-title]');
+
         this.urlInfoEl = $(elements.urlInfoEl ?? '[data-url]');
+
         this.sizeInfoEl = $(elements.sizeInfoEl ?? '[data-size]');
+
         this.mimeInfoEl = $(elements.mimeInfoEl ?? '[data-mime]');
+
         this.diskInfoEl = $(elements.diskInfoEl ?? '[data-disk]');
+
         this.createdInfoEl = $(elements.createdInfoEl ?? '[data-created]');
 
-
         this.deleteBtnEl = $(elements.deleteBtnEl ?? '[data-delete]');
+
         this.copyBtnEl = $(elements.copyBtnEl ?? '[data-copy]');
+
         this.openBtnEl = $(elements.openBtnEl ?? '[data-open]');
+
+        this.primaryPreviewText = this.filePreviewEl?.innerText ?? 'select media'
+
     }
 
 
+
     bindBusEvents() {
+
+        this.recoverTitle=this.recoverTitle.bind(this)
 
         this.listeners = {
 
@@ -58,7 +77,11 @@ export default class InfoUi {
 
             fileDeleted: ({fileId}) => {
                 this.handleDeletedFile(fileId);
-            }
+            },
+
+            recoverTitle: ({filed, title}) => {
+                this.recoverTitle(filed);
+            },
 
         };
 
@@ -66,15 +89,23 @@ export default class InfoUi {
 
         this.eventBus.on('select.current', this.listeners.activeButtons);
 
-        this.eventBus.on(events.FILE_DELETED, this.listeners.fileDeleted);
+        this.eventBus.on(Events.FILE_DELETED, this.listeners.fileDeleted);
+
+        this.eventBus.on(Events.FILE_UPDATE_TITLE_FAILED, this.listeners.recoverTitle);
     }
 
+    initDefaultValues(){
+        this.oldTitle = null
+    }
 
     bindUiEvents() {
 
         this.copyHandler = this.copyUrl.bind(this);
+
         this.openHandler = this.openFile.bind(this);
+
         this.deleteHandler = this.emitDeleteRequest.bind(this);
+
         this.enableEditTitleMode = this.enableEditTitleMode.bind(this);
 
 
@@ -97,13 +128,19 @@ export default class InfoUi {
 
         this.current = file ?? null;
 
-        this.idInfoEl.innerText = file?.id ?? '-';
-        this.titleInfoEl.innerText = file?.title ?? '-';
-        this.urlInfoEl.innerText = file?.url ?? '-';
-        this.sizeInfoEl.innerText = formatSize(file?.size ?? 0);
-        this.mimeInfoEl.innerText = file?.mime_type ?? '-';
-        this.diskInfoEl.innerText = file?.disk ?? '-';
-        this.createdInfoEl.innerText = file?.created_at ?? '-';
+        this.idInfoEl.textContent = file?.id ?? '-';
+
+        this.titleInfoEl.textContent = file?.title ?? '-';
+
+        this.urlInfoEl.textContent = file?.url ?? '-';
+
+        this.sizeInfoEl.textContent = formatSize(file?.size ?? 0);
+
+        this.mimeInfoEl.textContent = file?.mime_type ?? '-';
+
+        this.diskInfoEl.textContent = file?.disk ?? '-';
+
+        this.createdInfoEl.textContent = file?.created_at ?? '-';
 
         this.renderPreview(file);
     }
@@ -113,8 +150,6 @@ export default class InfoUi {
         const box = this.filePreviewEl;
 
         if (!box) return;
-
-        this.primaryPreviewText = box.innerText ?? 'select media';
 
         if (!item) {
             box.innerHTML = this.primaryPreviewText;
@@ -127,9 +162,13 @@ export default class InfoUi {
     activeButtons(active = false) {
 
         const disabled = !active;
+
         this.deleteBtnEl && (this.deleteBtnEl.disabled = disabled);
+
         this.copyBtnEl && (this.copyBtnEl.disabled = disabled);
+
         this.openBtnEl && (this.openBtnEl.disabled = disabled);
+
     }
 
 
@@ -149,20 +188,35 @@ export default class InfoUi {
 
         if (!this.current?.url) return;
 
-        handler({
+        const {success} = await handler({
+
             resolve: async () => {
                 await navigator.clipboard.writeText(this.current.url);
+
+
             },
             reject: (error) => {
-                console.error(error);
-                alert('SSL in not enabled or you are running on localhost')
+
+                this.eventBus.emit(Events.FILE_URL_COPIED_FAILED, {file: this.current})
+
+                alert('SSL in not enabled or you are running on localhost');
+
+                throw (error)
             }
         });
+
+        if (success) {
+
+            this.eventBus.emit(Events.FILE_URL_COPIED_FAILED, {file: this.current});
+
+        }
     }
 
 
     openFile() {
+
         if (!this.current?.url) return;
+
         window.open(this.current.url, '_blank', 'noopener,noreferrer');
     }
 
@@ -175,7 +229,7 @@ export default class InfoUi {
 
         if (!answer) return;
 
-        this.eventBus.emit(events.FILE_DELETE_SIGNAL, {fileId: this.current.id});
+        this.eventBus.emit(Events.FILE_DELETE_SIGNAL, {fileId: this.current.id});
     }
 
 
@@ -195,6 +249,8 @@ export default class InfoUi {
         input.name = 'title';
         input.value = this.current.title ?? '';
 
+        const oldTitle = this.current.title;
+
         this.titleInfoEl.replaceChildren(input);
 
         input.focus();
@@ -209,8 +265,8 @@ export default class InfoUi {
             submitted = true;
             this.editingTitle = false;
 
-            const oldTitle = this.current.title;
-            const newTitle = escapeHtml(input.value.trim());
+
+            const newTitle = input.value.trim();
 
             if (oldTitle === newTitle) {
                 this.renderTitle();
@@ -218,9 +274,13 @@ export default class InfoUi {
             }
 
             this.current.title = newTitle;
+
+
+
             this.renderTitle();
 
-            this.eventBus.emit(events.FILE_UPDATE_TITLE, {fileId: this.current.id, title: newTitle});
+
+            this.eventBus.emit(Events.FILE_UPDATE_TITLE_SIGNAL, {fileId: this.current.id, title: newTitle , oldTitle});
         };
 
         input.addEventListener('keydown', e => {
@@ -240,6 +300,17 @@ export default class InfoUi {
 
 
         input.addEventListener('blur', submit);
+    }
+
+    recoverTitle(fileId) {
+
+        console.log(oldTitle)
+        const oldTitle =this.oldTitle ?? '-';
+
+        const infoTitleEl = document.querySelector('[data-title]');
+        if (infoTitleEl) {
+            infoTitleEl.textContent = oldTitle
+        }
     }
 
     renderTitle() {
@@ -265,8 +336,9 @@ export default class InfoUi {
 
         this.eventBus.off('select.current', this.listeners.activeButtons);
 
+        this.eventBus.off(Events.FILE_UPDATE_TITLE_FAILED, this.listeners.recoverTitle);
 
-        this.eventBus.off(events.FILE_DELETED, this.listeners.fileDeleted);
+        this.eventBus.off(Events.FILE_DELETED, this.listeners.fileDeleted);
     }
 
 }

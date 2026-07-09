@@ -26,35 +26,42 @@ export default class UpdateService {
 
         this.updateTitle = this.updateTitle.bind(this);
 
-        this.eventBus.on(Events.FILE_UPDATE_TITLE, this.updateTitle);
+        this.eventBus.on(Events.FILE_UPDATE_TITLE_SIGNAL, this.updateTitle);
     }
 
 
-    async updateTitle({fileId, title} = {}) {
+    async updateTitle({fileId, title , oldTitle} = {}) {
 
         if (!fileId || !title) return;
 
-        const {success} = await handler({
+        const {success, data} = await handler({
 
             resolve: async () => {
+
+                throw Error('test');
 
                 const data = await this.request.patch(`${this.options.endpoint}/${encodeURIComponent(fileId)}`, {title});
                 const file = await data?.file
                 this.updateState(fileId, file);
+                return {file, fileId, title , oldTitle}
 
-                this.eventBus.emit(Events.FILE_UPDATED_TITLE, {fileId, file});
             },
 
             reject: (error) => {
 
                 this.errorBus?.emit?.(error);
 
-                this.eventBus.emit(Events.FILE_UPDATE_FAILED, {fileId, title});
+                this.eventBus.emit(Events.FILE_UPDATE_TITLE_FAILED, {fileId, title , oldTitle});
 
                 throw error;
             }
 
         });
+
+        if (success) {
+            const {fileId, file, title , oldTitle} = data;
+            this.eventBus.emit(Events.FILE_UPDATED_TITLE, {fileId, file, title ,oldTitle});
+        }
 
         return success;
     }
@@ -76,9 +83,6 @@ export default class UpdateService {
 
     destroy() {
 
-        this.eventBus.off(
-            Events.FILE_UPDATE_TITLE,
-            this.updateTitle
-        );
+        this.eventBus.off(Events.FILE_UPDATE_TITLE_SIGNAL, this.updateTitle);
     }
 }

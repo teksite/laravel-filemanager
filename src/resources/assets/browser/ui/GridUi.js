@@ -38,6 +38,7 @@ export default class GridUi {
 
 
     bindBusEvents() {
+        this.updateTitle=this.updateTitle.bind(this)
 
         this.listeners = {
 
@@ -57,6 +58,15 @@ export default class GridUi {
                 this.removeFile(fileId);
             },
 
+            unHideItem: ({fileId}) => {
+                this.unHideItem(fileId);
+            },
+
+
+            updateTitle: ({fileId, title , file}) => {
+                this.updateTitle(fileId, title , file);
+            },
+
             emptyGrid: () => {
                 this.emptyGrid();
             },
@@ -72,12 +82,20 @@ export default class GridUi {
         this.eventBus.on(Events.UPLOAD_SUCCESS, this.listeners.prepend);
 
         this.eventBus.on(Events.FILE_DELETED, this.listeners.remove);
+
+        this.eventBus.on(Events.FILE_DELETE_FAILED, this.listeners.unHideItem);
+
+        this.eventBus.on(Events.FILE_DELETE_SIGNAL, this.listeners.hideItem);
+
+        this.eventBus.on(Events.FILE_UPDATED_TITLE, this.listeners.updateTitle);
+
     }
 
 
     bindUiEvents() {
 
         this.selectingAction = this.selectingAction.bind(this);
+        this.hideItem = this.hideItem.bind(this);
 
         this.gridEl.addEventListener('click', this.selectingAction);
     }
@@ -123,7 +141,7 @@ export default class GridUi {
 
         if (!item?.id) return null;
 
-        if (this.gridEl.querySelector(`[data-id="${CSS.escape(item.id)}"]`)) return null;
+        if (this.gridEl.querySelector(`[data-grid][data-id="${CSS.escape(item.id)}"]`)) return null;
 
         const card = document.createElement('div');
 
@@ -194,6 +212,43 @@ export default class GridUi {
     }
 
 
+    unHideItem(fileId) {
+
+        if (!fileId) return;
+
+        const card = this.gridEl.querySelector(`[data-media-card][data-id="${CSS.escape(fileId)}"]`);
+
+        if (card) card.style.display = 'block';
+    }
+
+    hideItem(fileId) {
+
+        if (!fileId) return;
+
+        const card = this.gridEl.querySelector(`[data-media-card][data-id="${CSS.escape(fileId)}"]`);
+
+        if (card) card.style.display = 'none';
+
+    }
+
+    updateTitle(fileId, title, file) {
+
+        if (!fileId) return;
+
+        const newTitle = title ?? file?.title ?? file?.original_name ?? 'UNKOWN';
+
+        if (!newTitle) return;
+
+        document
+            .querySelectorAll(`[data-id="${fileId}"] [data-item-name]`)
+            .forEach(item => {
+                item.textContent = newTitle;
+            });
+    }
+
+
+
+
     destroy() {
 
         this.eventBus.off('load.append', this.listeners.append);
@@ -207,7 +262,16 @@ export default class GridUi {
 
         this.eventBus.off(Events.FILE_DELETED, this.listeners.remove);
 
+        this.eventBus.off(Events.FILE_DELETE_FAILED, this.listeners.unHideItem);
+
+        this.eventBus.off(Events.FILE_DELETE_SIGNAL, this.listeners.hideItem);
+
+
+        this.eventBus.off(Events.FILE_UPDATED_TITLE, this.listeners.updateTitle);
+
         this.gridEl?.removeEventListener('click', this.selectingAction);
+
+
     }
 
 }

@@ -29,9 +29,14 @@ const EVENTS = Object.freeze({
     FILE_DELETE_FAILED: 'file:delete_file_failed',
     FILE_SELECT:'file_selected',
 
-    FILE_UPDATE_TITLE : 'file_update_title',
+
+    FILE_UPDATE_TITLE_SIGNAL: 'file:send_update_title_signal',
     FILE_UPDATED_TITLE : 'file_updated_title',
-    FILE_UPDATE_FAILED : 'file_updated_title',
+    FILE_UPDATE_TITLE_FAILED : 'file_updated_title_failed',
+
+    FILE_URL_COPIED : 'file_copied_url',
+    FILE_URL_COPIED_FAILED : 'file_copy_url_failed',
+
 
 
 

@@ -61,6 +61,9 @@ const defaultConfig = {
         mimesSelector: '[data-mimeList]',
         disksSelector: '[data-diskList]',
 
+        filesCounterSelector: '[data-file-counter]',
+
+
         /* aside ui*/
         baseInfoSelector: '[data-aside]',
         filePreviewSelector: '[data-preview]',
@@ -76,7 +79,6 @@ const defaultConfig = {
         copyUrlBtnSelector: '[data-copy]',
 
         /* footer */
-        filesCounterSelector: '[data-file-counter]',
         selectionButtonSelector: '[data-actions-sec]',
         selectionGridSelector: '[data-selected-list]',
 

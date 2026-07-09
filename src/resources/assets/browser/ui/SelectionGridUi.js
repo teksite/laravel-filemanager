@@ -14,12 +14,14 @@ export default class SelectionGridUi {
         this.state = stateManager;
 
         this.bindBusEvents();
+
+        console.log(this.gridEl)
     }
 
 
     loadElements(elements) {
 
-        this.counterEl = $(elements.counterEl ?? '[data-file-counter]');
+        this.gridEl = $(elements.counterEl ?? '[data-selected-list]');
     }
 
 

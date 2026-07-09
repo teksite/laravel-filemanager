@@ -283,11 +283,11 @@
     background: rgb(83 135 182 / 50%);
     backdrop-filter: blur(6px);
     position: absolute;
-    top: 50%;
     z-index: 1000;
     color: #ffffff;
-    right: 50%;
-    inset: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -427,6 +427,9 @@
 ========================= */
 .filemanager .footer {
     grid-area: footer;
+    height: 40px;
+    min-height: 40px;
+    max-height: 40px;
     padding: 12px 18px;
     background: #fff;
     border-top: 1px solid var(--border);
@@ -435,6 +438,10 @@
     align-items: center;
     position: sticky;
     bottom: 0;
+    gap: 16px;
+}
+.filemanager .footer .loader-buttons , .filemanager .footer .action-button {
+    min-width: fit-content;
 }
 
 /* =========================
@@ -511,6 +518,7 @@
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 .filemanager .selected-item {

@@ -7,18 +7,35 @@ export default class SelectService {
         this.options = {...options};
         this.eventBus = eventBus;
         this.state = state;
-
+        this.listeners = {};
         this.bindEvents();
     }
 
 
     bindEvents() {
+
         this.addToSelections = this.addToSelections.bind(this);
-        this.eventBus.on(Events.SELECTION_CLICK, this.addToSelections);
+
+        this.addToSelections = this.addToSelections.bind(this);
+
+        this.listeners = {
+            addToSelections: ({fileId}) => {
+                this.addToSelections(fileId)
+            },
+            removeFromSelections: ({fileId}) => {
+                this.removeFromSelections(fileId)
+            }
+        };
+
+
+        this.eventBus.on(Events.SELECTION_CLICK, this.listeners.addToSelections);
+        this.eventBus.on(Events.SELECTION_REMOVE, this.listeners.removeFromSelections);
+
+
     }
 
 
-    addToSelections({fileId}) {
+    addToSelections(fileId) {
         const {mode} = this.options;
         const files = this.state.get('load.files', {});
 
@@ -46,9 +63,30 @@ export default class SelectService {
 
     }
 
+    removeFromSelections(fileId) {
+        const selections = this.state.get('select.files');
+
+        if (!selections) return;
+
+        if ('id' in selections) {
+            if (selections.id === fileId) {
+                this.state.set('select.files', null);
+            }
+            return;
+        }
+
+        const newState = {...selections};
+        delete newState[fileId];
+
+        this.state.set(
+            'select.files',
+            Object.keys(newState).length ? newState : null
+        );
+    }
+
     returnSelections() {
         const files = this.state.get('select.files', {});
-        const { mode = 'single', expect = 'url' } = this.options;
+        const {mode = 'single', expect = 'url'} = this.options;
 
         const values = Object.values(files);
         const format = (file) => {
@@ -84,6 +122,8 @@ export default class SelectService {
 
     destroy() {
 
-        this.eventBus.off(Events.SELECTION_CLICK, this.addToSelections);
+        this.eventBus.off(Events.SELECTION_CLICK, this.listeners.addToSelections);
+
+        this.eventBus.off(Events.SELECTION_REMOVE, this.listeners.removeFromSelections);
     }
 }

@@ -45,6 +45,7 @@ const EVENTS = Object.freeze({
 
     /* Selection */
     SELECTION_CLICK: 'selection:item_clicked',
+    SELECTION_REMOVE: 'selection:item_remove',
     SELECTION_CHANGED: 'selection:changed',
     SELECTION_CLEARED: 'selection:cleared',
     SELECTION_ON_CHOOSE: 'selection:return_selected_files',

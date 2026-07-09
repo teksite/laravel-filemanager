@@ -1,6 +1,6 @@
 import {$} from "../helpers/dom.js";
-import events from "../constants/events.js";
-import {renderMedia} from "../helpers/preview.js";
+import EVENTS from "../constants/events.js";
+
 
 export default class SelectionButtonUi {
 
@@ -12,13 +12,14 @@ export default class SelectionButtonUi {
 
         if (!this.options.expect) return
 
-
         this.listeners = {};
 
-        this.eventBus = eventBus;
         this.state = stateManager;
 
+        this.eventBus = eventBus;
+
         this.createButtons();
+
         this.bindUiEvents();
 
 
@@ -28,16 +29,17 @@ export default class SelectionButtonUi {
     loadElements(elements) {
 
         const actionsSelector = elements.actionsEl ?? '[data-actions-sec]';
+
         const gridSelector = elements.gridEl ?? '[data-selected-list]';
 
-
         this.actionsEl = $(actionsSelector);
+
         this.gridEl = $(gridSelector);
+
         this.chooseBtn = null;
     }
 
     createButtons() {
-
 
         if (!this.actionsEl) return;
 
@@ -51,15 +53,15 @@ export default class SelectionButtonUi {
 
         selectionBtn.type = 'button';
 
-        selectionBtn.title = 'have file(s)';
+        selectionBtn.title = 'Choose selected file(s)';
 
-        selectionBtn.innerText = 'Choose';
+        selectionBtn.textContent = 'Choose';
 
         this.actionsEl.prepend(selectionBtn);
 
         this.chooseBtn = selectionBtn;
 
-        this.eventBus.emit(events.SELECTION_SELECT_BUTTON_MADE, {button: selectionBtn});
+        this.eventBus.emit(EVENTS.SELECTION_SELECT_BUTTON_MADE, {button: selectionBtn});
 
 
     }
@@ -71,22 +73,27 @@ export default class SelectionButtonUi {
 
         this.chooseBtn?.addEventListener('click', this.emitReturnFiles);
 
-
     }
 
     emitReturnFiles(e) {
+
         e.preventDefault();
+
         e.stopPropagation();
 
         const files = this.state.get('select.files');
 
-        this.eventBus.emit(events.SELECTION_ON_CHOOSE, {files});
+        this.eventBus.emit(EVENTS.SELECTION_ON_CHOOSE, {files});
+
         this.state.set('select.files' , null);
+
+        this.state.set('select.current', null);
 
     }
 
 
     destroy() {
+
         this.chooseBtn?.removeEventListener('click', this.emitReturnFiles);
     }
 

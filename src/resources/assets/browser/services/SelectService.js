@@ -34,7 +34,7 @@ export default class SelectService {
 
         this.eventBus.on(Events.SELECTION_CLICK, this.listeners.addToSelections);
 
-        this.eventBus.on(Events.SELECTION_REMOVE, this.listeners.removeFromSelections);
+        this.eventBus.on(Events.SELECTION_REMOVE_SIGNAL, this.listeners.removeFromSelections);
 
         this.eventBus.on(Events.FILE_DELETE_SIGNAL, this.listeners.removeFromSelections);
     }
@@ -81,6 +81,10 @@ export default class SelectService {
 
         this.state.set('select.files', Object.keys(next).length ? next : {});
 
+        this.eventBus.emit(Events.SELECTION_REMOVED , {fileId})
+
+
+
     }
 
     returnSelections() {
@@ -119,7 +123,7 @@ export default class SelectService {
 
         this.eventBus.off(Events.SELECTION_CLICK, this.listeners.addToSelections);
 
-        this.eventBus.off(Events.SELECTION_REMOVE, this.listeners.removeFromSelections);
+        this.eventBus.off(Events.SELECTION_REMOVE_SIGNAL, this.listeners.removeFromSelections);
 
         this.eventBus.off(Events.FILE_DELETE_SIGNAL, this.listeners.removeFromSelections);
 

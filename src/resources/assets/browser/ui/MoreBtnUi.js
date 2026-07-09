@@ -1,5 +1,5 @@
 import {$} from "../helpers/dom.js";
-import events from "../constants/events.js";
+import Events from "../constants/events.js";
 
 export default class MoreBtnUi {
 
@@ -70,7 +70,7 @@ export default class MoreBtnUi {
 
         if (isLoading || !hasMore) return;
 
-        this.eventBus.emit(events.FILES_NEED_MORE, {action: 'click on button'});
+        this.eventBus.emit(Events.FILES_NEED_MORE, {action: 'click on button'});
     }
 
 

@@ -1,6 +1,5 @@
 import {$} from "../helpers/dom.js";
-import SelectService from "../services/SelectService.js";
-import events from "../constants/events.js";
+import Events from "../constants/events.js";
 import {renderMedia} from "../helpers/preview.js";
 
 export default class SelectionGridUi {
@@ -11,72 +10,102 @@ export default class SelectionGridUi {
 
         this.loadElements(elements);
 
+        if (!this.gridEl) return;
+
         this.listeners = {};
 
-        this.eventBus = eventBus;
         this.state = stateManager;
 
+        this.eventBus = eventBus;
+
         this.bindBusEvents();
-        this.bindUiEvents();
+
+        this.bindDomEvents();
 
     }
 
 
     loadElements(elements) {
-        this.gridEl = $(elements.counterEl ?? '[data-selected-list]');
+
+        this.gridEl = $(elements.gridEl ?? '[data-selected-list]');
     }
 
+
+    bindDomEvents() {
+
+        this.handleDeleteClick = this.handleDeleteClick.bind(this);
+
+        this.gridEl.addEventListener('click', this.handleDeleteClick);
+
+    }
 
     bindBusEvents() {
-        this.handleDeleteClick = this.handleDeleteClick.bind(this);
-        this.gridEl.addEventListener('click', this.handleDeleteClick);
-    }
 
-    bindUiEvents() {
         this.appendItem = this.appendItem.bind(this);
+
         this.clearGrid = this.clearGrid.bind(this);
+
+        this.removeItemFromGrid = this.removeItemFromGrid.bind(this);
 
         this.listeners = {
             appendItem: () => {
+
                 this.appendItem();
+            },
+
+            removeItemFromGrid: ({fileId}) => {
+                this.removeItemFromGrid(fileId);
+
             },
             clearGrid: () => {
                 this.clearGrid();
+
             },
         };
-        this.eventBus.on(events.SELECTION_CLICK, this.listeners.appendItem);
-        this.eventBus.on(events.SELECTION_ON_CHOOSE, this.listeners.clearGrid);
+        this.eventBus.on(Events.SELECTION_CLICK, this.listeners.appendItem);
+
+        this.eventBus.on(Events.SELECTION_ON_CHOOSE, this.listeners.clearGrid);
+
+        this.eventBus.on(Events.SELECTION_REMOVED, this.listeners.removeItemFromGrid);
+
     }
 
     appendItem() {
         const files = this.state.get('select.files');
 
         if (files == null) {
+
             this.clearGrid();
+
             return;
         }
 
         if ('id' in files) {
             this.gridEl.innerHTML = this.renderItems(files);
+
             return;
         }
 
         this.clearGrid();
 
         Object.values(files).forEach(file => {
+
             this.gridEl.insertAdjacentHTML('beforeend', this.renderItems(file));
+
         });
     }
 
-    clearGrid(){
+    clearGrid() {
         this.gridEl.innerHTML = '';
+
     }
+
     renderItems(file) {
 
         return `
-        <div class="selected-item" data-selected-item-id="${file.id}">
+        <div class="selected-item" data-selected-item  data-id="${file.id}">
             ${renderMedia(file)}
-            <button class="selected-item-delete-btn" data-id="${file.id}">
+            <button class="selected-item-delete-btn"  data-selected-remove data-id="${file.id}">
                 ✖
             </button>
         </div>
@@ -84,21 +113,37 @@ export default class SelectionGridUi {
     }
 
     handleDeleteClick(e) {
+
         const btn = e.target.closest('.selected-item-delete-btn');
-        const parentItem = e.target.closest('[data-selected-item-id]');
 
         if (!btn) return;
-        const fileId =btn.dataset.id
-        this.eventBus.emit(events.SELECTION_REMOVE, {fileId});
-        parentItem.remove();
+
+        const fileId = btn.dataset.id;
+
+        this.eventBus.emit(Events.SELECTION_REMOVE_SIGNAL, {fileId});
+
+    }
+
+    removeItemFromGrid(fileId) {
+
+        if (!fileId) return;
+
+        const parentItem = this.gridEl.querySelector(`[data-selected-item][data-id='${fileId}']`);
+
+        parentItem?.remove();
     }
 
 
     destroy() {
-        this.gridEl.removeEventListener('click', this.handleDeleteClick);
 
-        this.eventBus.off(events.SELECTION_CLICK, this.listeners.counting);
-        this.eventBus.off(events.SELECTION_ON_CHOOSE, this.listeners.clearGrid);
+        this.gridEl?.removeEventListener('click', this.handleDeleteClick);
+
+        this.eventBus.off(Events.SELECTION_CLICK, this.listeners.appendItem);
+
+        this.eventBus.off(Events.SELECTION_ON_CHOOSE, this.listeners.clearGrid);
+
+        this.eventBus.off(Events.SELECTION_REMOVED, this.listeners.removeItemFromGrid);
+
     }
 
 }

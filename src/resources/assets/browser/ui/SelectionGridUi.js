@@ -17,6 +17,7 @@ export default class SelectionGridUi {
         this.state = stateManager;
 
         this.bindBusEvents();
+        this.bindUiEvents();
 
     }
 
@@ -27,6 +28,12 @@ export default class SelectionGridUi {
 
 
     bindBusEvents() {
+        this.handleDeleteClick = this.handleDeleteClick.bind(this);
+
+        this.gridEl.addEventListener('click', this.handleDeleteClick);
+    }
+
+    bindUiEvents() {
         this.appendItem = this.appendItem.bind(this);
 
         this.listeners = {
@@ -56,18 +63,30 @@ export default class SelectionGridUi {
             this.gridEl.insertAdjacentHTML('beforeend', this.renderItems(file));
         });
     }
+
     renderItems(file) {
 
-       return `<div class="selected-item">
-${renderMedia(file)}
-<button class="selected-item-delete-btn">
-✖
-</button>
-</div>`;
+        return `
+        <div class="selected-item">
+            ${renderMedia(file)}
+            <button class="selected-item-delete-btn" data-id="${file.id}">
+                ✖
+            </button>
+        </div>
+    `;
+    }
+
+    handleDeleteClick(e) {
+        const btn = e.target.closest('.selected-item-delete-btn');
+
+        if (!btn) return;
+
+        this.eventBus.emit(events.SELECTION_REMOVE, {fileId: btn.dataset.id});
     }
 
 
     destroy() {
+        this.gridEl.removeEventListener('click', this.handleDeleteClick);
 
         this.eventBus.off(events.SELECTION_CLICK, this.listeners.counting);
     }

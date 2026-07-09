@@ -82,6 +82,7 @@ export default class SelectService {
             'select.files',
             Object.keys(newState).length ? newState : null
         );
+        console.log(this.state.get('select.files'));
     }
 
     returnSelections() {

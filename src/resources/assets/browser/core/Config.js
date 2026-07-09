@@ -43,7 +43,7 @@ const defaultConfig = {
 
 
     selection: {
-        mode: 'multi', //single: only one file | multi,multiple : multi file
+        mode: 'single', //single: only one file | multi,multiple : multi file
         expect: 'id',  //url , id files,object |null : disable
     },
 

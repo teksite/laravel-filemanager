@@ -67,7 +67,7 @@ export default class SelectionGridUi {
     renderItems(file) {
 
         return `
-        <div class="selected-item">
+        <div class="selected-item" data-selected-item-id="${file.id}">
             ${renderMedia(file)}
             <button class="selected-item-delete-btn" data-id="${file.id}">
                 ✖
@@ -78,10 +78,12 @@ export default class SelectionGridUi {
 
     handleDeleteClick(e) {
         const btn = e.target.closest('.selected-item-delete-btn');
+        const parentItem = e.target.closest('[data-selected-item-id]');
 
         if (!btn) return;
-
-        this.eventBus.emit(events.SELECTION_REMOVE, {fileId: btn.dataset.id});
+        const fileId =btn.dataset.id
+        this.eventBus.emit(events.SELECTION_REMOVE, {fileId});
+        parentItem.remove();
     }
 
 

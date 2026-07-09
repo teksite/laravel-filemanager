@@ -71,6 +71,7 @@ export default class SelectService {
         if ('id' in selections) {
             if (selections.id === fileId) {
                 this.state.set('select.files', null);
+
             }
             return;
         }
@@ -78,11 +79,11 @@ export default class SelectService {
         const newState = {...selections};
         delete newState[fileId];
 
+
         this.state.set(
             'select.files',
             Object.keys(newState).length ? newState : null
         );
-        console.log(this.state.get('select.files'));
     }
 
     returnSelections() {

@@ -1,3 +1,5 @@
+import {$} from "./browser/helpers/dom.js";
+
 class DatabaseFileManager {
 
     static EVENTS = {
@@ -44,18 +46,18 @@ class DatabaseFileManager {
         };
 
         this.elements = {
-            grid: document.querySelector('[data-grid]'),
-            loader: document.querySelector('[data-loader]'),
-            loadMore: document.querySelector('[data-load-more]'),
-            mime: document.querySelector('[data-mimeList]'),
-            disk: document.querySelector('[data-diskList]'),
+            grid: $('[data-grid]'),
+            loader: $('[data-loader]'),
+            loadMore: $('[data-load-more]'),
+            mime: $('[data-mimeList]'),
+            disk: $('[data-diskList]'),
 
-            dropzone: document.querySelector('[data-dropzone]'),
-            fileInput: document.querySelector('[data-file-input]'),
-            uploadDisk: document.querySelector('[data-upload-disk]'),
-            uploadPreview: document.querySelector('[data-upload-preview]'),
-            uploadForm: document.querySelector('[data-upload-form]'),
-            uploadMessages: document.querySelector('[data-messages]')
+            dropzone: $('[data-dropzone]'),
+            fileInput: $('[data-file-input]'),
+            uploadDisk: $('[data-upload-disk]'),
+            uploadPreview: $('[data-upload-preview]'),
+            uploadForm: $('[data-upload-form]'),
+            uploadMessages: $('[data-messages]')
         };
 
         // debounce timers
@@ -362,7 +364,7 @@ class DatabaseFileManager {
 
     renderPreview(item) {
 
-        const box = document.querySelector('[data-preview]');
+        const box = $('[data-preview]');
         if (!box) return;
 
         const type = item.mime_type?.split('/')[0];
@@ -391,7 +393,7 @@ class DatabaseFileManager {
     renderInfo(item) {
 
         const set = (key, value) => {
-            const el = document.querySelector(`[data-${key}]`);
+            const el = $(`[data-${key}]`);
             if (el) el.textContent = value ?? '-';
         };
 
@@ -402,7 +404,7 @@ class DatabaseFileManager {
         set('disk', item.disk);
         set('created', new Date(item.created_at).toLocaleString());
 
-        const urlEl = document.querySelector('[data-url]');
+        const urlEl = $('[data-url]');
         if (urlEl) urlEl.textContent = item.url;
 
         this.bindActions(item);
@@ -412,9 +414,9 @@ class DatabaseFileManager {
 
     bindActions(item) {
 
-        const openBtn = document.querySelector('[data-open]');
-        const copyBtn = document.querySelector('[data-copy]');
-        const deleteBtn = document.querySelector('[data-delete]');
+        const openBtn = $('[data-open]');
+        const copyBtn = $('[data-copy]');
+        const deleteBtn = $('[data-delete]');
 
         if (openBtn) {
             openBtn.onclick = () => window.open(item.url, '_blank');
@@ -438,7 +440,7 @@ class DatabaseFileManager {
 
     enableTitleEdit(item) {
 
-        const el = document.querySelector('[data-title]');
+        const el = $('[data-title]');
         if (!el) return;
 
         el.ondblclick = () => {
@@ -560,12 +562,12 @@ class DatabaseFileManager {
 
         this.selected = null;
 
-        const box = document.querySelector('[data-preview]');
+        const box = $('[data-preview]');
         if (box) box.innerHTML = 'Select media';
 
         ['id', 'title', 'url', 'size', 'mime', 'disk', 'created']
             .forEach(k => {
-                const el = document.querySelector(`[data-${k}]`);
+                const el = $(`[data-${k}]`);
                 if (el) el.textContent = '-';
             });
 
@@ -680,7 +682,7 @@ class DatabaseFileManager {
 
                 const percent = Math.round((e.loaded / e.total) * 100);
 
-                const bar = document.querySelector(
+                const bar = $(
                     `[data-progress="${file.name}"]`
                 );
 
@@ -839,7 +841,7 @@ class DatabaseFileManager {
 
     renderChooseButton() {
 
-        const container = document.querySelector('.action-btns');
+        const container = $('.action-btns');
         if (!container) return;
 
         container.innerHTML = `<button type="button" class="choose-btn" data-choose> CHOOSE</button>`;
@@ -884,7 +886,7 @@ class DatabaseFileManager {
 
             this.selection.items = [];
 
-            document.querySelectorAll('.media-card.selected')
+            $$('.media-card.selected')
                 .forEach(x => x.classList.remove('selected'));
         }
 
@@ -898,7 +900,7 @@ class DatabaseFileManager {
 
     renderSelectedList() {
 
-        const container = document.querySelector('.selected-list');
+        const container = $('.selected-list');
 
         if (!container) return;
 

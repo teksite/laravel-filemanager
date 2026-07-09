@@ -1,5 +1,3 @@
-// resources/js/filemanager/helpers/dom.js
-
 /**
  * Safe DOM selector (single element)
  */
@@ -11,7 +9,7 @@ export function $(selector, root = document) {
 /**
  * Safe DOM selector (multiple elements)
  */
-export function $all(selector, root = document) {
+export function $$(selector, root = document) {
     if (!selector) return [];
     return Array.from(root.querySelectorAll(selector));
 }

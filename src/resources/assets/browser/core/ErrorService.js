@@ -1,4 +1,5 @@
 import EVENTS from "../constants/events.js";
+import {$} from "../helpers/dom.js";
 
 export default class ErrorService {
 
@@ -109,7 +110,7 @@ export default class ErrorService {
      */
     showToUser(message) {
 
-        const container = document.querySelector('[data-messages]');
+        const container = $('[data-messages]');
         if (!container) return;
 
         const el = document.createElement('div');

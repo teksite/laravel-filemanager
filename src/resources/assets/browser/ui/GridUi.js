@@ -1,4 +1,4 @@
-import {$} from "../helpers/dom.js";
+import {$, $$} from "../helpers/dom.js";
 import Events from "../constants/events.js";
 import {renderMedia} from "../helpers/preview.js";
 
@@ -249,8 +249,7 @@ export default class GridUi {
 
         if (!newTitle) return;
 
-        document
-            .querySelectorAll(`[data-id="${fileId}"] [data-item-name]`)
+        $$(`[data-id="${fileId}"] [data-item-name]`)
             .forEach(item => {
                 item.textContent = newTitle;
             });

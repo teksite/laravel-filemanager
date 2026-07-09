@@ -15,43 +15,72 @@ export default class SelectService {
     bindEvents() {
 
         this.addToSelections = this.addToSelections.bind(this);
-
         this.eventBus.on(Events.SELECTION_CLICK, this.addToSelections);
 
     }
 
 
     addToSelections({fileId}) {
-        const {mode, expect} = this.options;
+        const {mode} = this.options;
         const files = this.state.get('load.files', {});
 
         const selectedFile = files[fileId] ?? null;
 
         if (!selectedFile) return;
 
-        const expectedOutput = (expect === 'url')
-            ? selectedFile.url
-            : selectedFile.id;
+        if (['multi', 'multiple'].includes(mode)) {
+            const preState = this.state.get('select.files', {});
 
-        if (['multi' ,'multiple'].includes(mode)) {
-            const preState = this.state.get('select.file', []);
+            const newState = {...preState};
 
-            const newState = preState.includes(expectedOutput)
-                ? preState.filter(item => item !== expectedOutput)
-                : [...preState, expectedOutput];
+            if (newState[selectedFile.id]) {
+                delete newState[selectedFile.id];
+            } else {
+                newState[selectedFile.id] = selectedFile;
+            }
 
-            this.state.set('select.file', newState);
+            this.state.set('select.files', newState);
 
             return;
         }
-        this.state.set('select.file', expectedOutput);
+
+
+        this.state.set('select.files', selectedFile);
 
     }
 
-    returnSelections(){
-        return this.state.get('select.file', {});
-    }
+    returnSelections() {
+        const files = this.state.get('select.files', {});
+        const { mode = 'single', expect = 'url' } = this.options;
 
+        const values = Object.values(files);
+        const format = (file) => {
+            switch (expect) {
+                case 'id':
+                    return file.id;
+
+                case 'url':
+                    return file.url;
+
+                case 'file':
+                case 'object':
+                default:
+                    return file;
+            }
+        };
+
+        if (['multi', 'multiple'].includes(mode)) {
+            return values.map(format);
+        }
+
+        const file = values[0];
+
+        if (!file) {
+            return null;
+        }
+
+        return format(file);
+    }
 
 
     destroy() {

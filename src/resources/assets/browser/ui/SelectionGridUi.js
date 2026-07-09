@@ -15,35 +15,28 @@ export default class SelectionGridUi {
 
         this.bindBusEvents();
 
-        console.log(this.gridEl)
     }
 
 
     loadElements(elements) {
-
         this.gridEl = $(elements.counterEl ?? '[data-selected-list]');
     }
 
 
     bindBusEvents() {
+        this.appendItem = this.appendItem.bind(this);
+
         this.listeners = {
-            counting: () => {
-                this.updateCounter();
+            appendItem: ({value}) => {
+                this.appendItem(value);
             }
-
         };
-
-        this.eventBus.on('load.files', this.listeners.counting);
+        this.eventBus.on('select.files', this.listeners.appendItem);
     }
 
 
-    updateCounter() {
+    appendItem(files) {
 
-        if (!this.counterEl) return;
-
-        const files = this.state.get('load.files', {});
-
-        this.counterEl.innerText = Object.keys(files).length;
     }
 
 

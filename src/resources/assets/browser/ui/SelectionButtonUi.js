@@ -77,10 +77,10 @@ export default class SelectionButtonUi {
         e.preventDefault();
         e.stopPropagation();
 
-        const files = this.state.get('select.file');
+        const files = this.state.get('select.files');
 
         this.eventBus.emit(events.SELECTION_ON_CHOOSE, {files});
-        this.state.set('select.file' , null);
+        this.state.set('select.files' , null);
 
     }
 

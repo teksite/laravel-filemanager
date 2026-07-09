@@ -1,4 +1,4 @@
-import {$, escapeHtml} from "../helpers/dom.js";
+import {$} from "../helpers/dom.js";
 import Events from "../constants/events.js";
 import formatSize from "../helpers/formatSize.js";
 import {renderMedia} from "../helpers/preview.js";
@@ -79,8 +79,8 @@ export default class InfoUi {
                 this.handleDeletedFile(fileId);
             },
 
-            recoverTitle: ({filed, title , oldTitle}) => {
-                this.recoverTitle(filed , title , oldTitle);
+            recoverTitle: ({fileId, title , oldTitle}) => {
+                this.recoverTitle(fileId , title , oldTitle);
             },
 
         };
@@ -192,8 +192,6 @@ export default class InfoUi {
 
             resolve: async () => {
                 await navigator.clipboard.writeText(this.current.url);
-
-
             },
             reject: (error) => {
 
@@ -207,7 +205,7 @@ export default class InfoUi {
 
         if (success) {
 
-            this.eventBus.emit(Events.FILE_URL_COPIED_FAILED, {file: this.current});
+            this.eventBus.emit(Events.FILE_URL_COPIED, {file: this.current});
 
         }
     }
@@ -304,7 +302,13 @@ export default class InfoUi {
 
     recoverTitle(fileId , title , oldTitle) {
 
+        if (this.current?.id !== fileId) {
+            return;
+        }
 
+        this.current.title = oldTitle;
+
+        this.renderTitle();
 
     }
 

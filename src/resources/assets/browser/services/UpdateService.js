@@ -38,11 +38,12 @@ export default class UpdateService {
 
             resolve: async () => {
 
-                throw Error('test');
-
                 const data = await this.request.patch(`${this.options.endpoint}/${encodeURIComponent(fileId)}`, {title});
+
                 const file = await data?.file
+
                 this.updateState(fileId, file);
+
                 return {file, fileId, title , oldTitle}
 
             },

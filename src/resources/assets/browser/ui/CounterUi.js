@@ -10,25 +10,27 @@ export default class CounterUi {
 
         this.listeners = {};
 
-        this.eventBus = eventBus;
         this.state = stateManager;
 
-        this.bindBusEvents();
-    }
+        this.eventBus = eventBus;
 
+        this.bindBusEvents();
+
+    }
 
     loadElements(elements) {
 
         this.counterEl = $(elements.counterEl ?? '[data-file-counter]');
     }
 
-
     bindBusEvents() {
+
+        this.updateCounter = this.updateCounter.bind(this);
+
         this.listeners = {
             counting: () => {
                 this.updateCounter();
             }
-
         };
 
         this.eventBus.on('load.files', this.listeners.counting);
@@ -39,9 +41,9 @@ export default class CounterUi {
 
         if (!this.counterEl) return;
 
-        const files = this.state.get('load.files', {});
+        const files = this.state.get('load.files', {}) ?? {};
 
-        this.counterEl.innerText = Object.keys(files).length;
+        this.counterEl.textContent = Object.keys(files).length;
     }
 
 

@@ -150,6 +150,9 @@ export default class LoadService {
 
         this.state.set('load.append', {});
 
+        this.eventBus.emit(Events.GRID_CLEAR, {})
+
+
     }
 
 

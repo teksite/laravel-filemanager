@@ -1,5 +1,5 @@
 import {$} from "../helpers/dom.js";
-import events from "../constants/events.js";
+import Events from "../constants/events.js";
 import {renderMedia} from "../helpers/preview.js";
 
 export default class GridUi {
@@ -55,15 +55,15 @@ export default class GridUi {
         };
 
 
-        this.eventBus.on(events.GRID_CLEAR, this.listeners.emptyGrid);
+        this.eventBus.on(Events.GRID_CLEAR, this.listeners.emptyGrid);
 
         this.eventBus.on('load.append', this.listeners.append);
 
         this.eventBus.on('load.loading', this.listeners.toggleLoading);
 
-        this.eventBus.on(events.UPLOAD_SUCCESS, this.listeners.prepend);
+        this.eventBus.on(Events.UPLOAD_SUCCESS, this.listeners.prepend);
 
-        this.eventBus.on(events.FILE_DELETED, this.listeners.remove);
+        this.eventBus.on(Events.FILE_DELETED, this.listeners.remove);
     }
 
 
@@ -91,7 +91,7 @@ export default class GridUi {
         });
 
         this.gridEl.appendChild(fragment);
-        this.eventBus.emit(events.GRID_UPDATED, {items, 'action': 'append file'})
+        this.eventBus.emit(Events.GRID_UPDATED, {items, 'action': 'append file'})
 
         this.state.set('load.append', {});
     }
@@ -109,7 +109,7 @@ export default class GridUi {
         });
 
         this.gridEl.prepend(fragment);
-        this.eventBus.emit(events.GRID_UPDATED, {items, 'action': 'prepend file'})
+        this.eventBus.emit(Events.GRID_UPDATED, {items, 'action': 'prepend file'})
     }
 
 
@@ -156,7 +156,7 @@ export default class GridUi {
 
     emptyGrid() {
         this.gridEl.innerHTML = '';
-        this.eventBus.emit(events.GRID_CLEARED, {});
+        this.eventBus.emit(Events.GRID_CLEARED, {});
     }
 
 
@@ -172,7 +172,7 @@ export default class GridUi {
         if (!fileId) return;
 
         this.state.set('select.current', fileId);
-        this.eventBus.emit(events.SELECTION_CLICK, {fileId});
+        this.eventBus.emit(Events.SELECTION_CLICK, {fileId});
     }
 
 
@@ -193,14 +193,14 @@ export default class GridUi {
         this.eventBus.off('load.loading', this.listeners.toggleLoading);
 
         this.eventBus.off(
-            events.UPLOAD_SUCCESS,
+            Events.UPLOAD_SUCCESS,
             this.listeners.prepend
         );
 
 
-        this.eventBus.off(events.GRID_CLEAR, this.listeners.emptyGrid);
+        this.eventBus.off(Events.GRID_CLEAR, this.listeners.emptyGrid);
 
-        this.eventBus.off(events.FILE_DELETED, this.listeners.remove);
+        this.eventBus.off(Events.FILE_DELETED, this.listeners.remove);
 
         this.gridEl.removeEventListener('click', this.selectingAction);
     }

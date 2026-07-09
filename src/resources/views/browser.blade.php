@@ -33,38 +33,13 @@
                         allowedDisks: @js($allowedDisks)
                     }
                 }
-        });
+        } , 'filemanager-1');
         fm.on('choose', files => {
             console.log(files);
         });
-
     });
 
-
-
 </script>
-{{--
-
-   {
-        $disks = $this->chosenDisks();
-        $mimes = $this->chosenMimes();
-
-        $allowedDisks = $this->allowedDisks();
-        $allowedTypes = $this->allowedTypes();
-
-
-
-<script src="/assets/app.js"> </script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        new DatabaseFileManager().select({
-            mode: 'multi'
-        });
-    })
-</script>
---}}
-
-
 
 
 

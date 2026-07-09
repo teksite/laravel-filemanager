@@ -24,10 +24,18 @@ import Events from "./constants/events.js";
 
 export default class DatabaseFileManager {
 
-    constructor({config = {}} = {}) {
+    constructor({config = {}} = {} , root) {
 
 
-        this.config = new Config(config);
+        // this.config = new Config(config);
+        this.root = typeof root === 'string'
+            ? document.querySelector(root)
+            : root;
+
+        this.config = new Config({
+            ...config,
+            root:this.root
+        });
 
         this.eventBus = new EventEmitter();
         this.errorBus = new ErrorService();

@@ -124,7 +124,6 @@ export default class DatabaseFileManager {
                 }
             }],
 
-
             [GridUi, {
                 elements: {
                     gridEl: this.config.get('ui.gridSelector'),
@@ -133,18 +132,15 @@ export default class DatabaseFileManager {
                 loadingStyle: this.config.get('load.loadingStyle', 'block')
             }],
 
-
             [MoreButtonUi, {
                 elements: {
                     btnEl: this.config.get('ui.loadMoreSelector')
                 }
             }],
 
-
             [SelectService,
                 this.config.section('selection')
             ],
-
 
             [InfoUi, {
                 elements: {
@@ -175,7 +171,6 @@ export default class DatabaseFileManager {
                 }
             }],
 
-
             [UpdateService, {
                 url: this.config.get('api.updateUrl')
             }],
@@ -183,17 +178,18 @@ export default class DatabaseFileManager {
             [DeleteService, {
                 url: this.config.get('api.deleteUrl')
             }],
+
+            [DeleteService, {
+                url: this.config.get('api.deleteUrl')
+            }],
+
+            [CounterUi, {
+                elements: {
+                    counterEl: this.config.get('ui.filesCounterSelector')
+                }
+            }],
+            
             /*
-                        [
-                            DeleteService,
-                            {
-
-                                url:this.config.get(
-                                    'api.deleteUrl'
-                                )
-
-                            }
-                        ],
 
 
                         [
@@ -210,21 +206,7 @@ export default class DatabaseFileManager {
                             }
                         ],
 
-                        [
-                            CounterUi,
-                            {
 
-                                elements:{
-
-                                    counterEl:
-                                        this.config.get(
-                                            'ui.filesCounterSelector'
-                                        )
-
-                                }
-
-                            }
-                        ],
 
 
 

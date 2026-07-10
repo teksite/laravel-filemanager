@@ -1,83 +1,81 @@
 import Events from "../constants/events.js";
+import BaseServices from "../Foundation/BaseServices.js";
 import handler from "../helpers/handler.js";
 
-export default class DeleteService {
+export default class DeleteService extends BaseServices {
 
-    constructor(app , {url, options = {}}, eventBus, state, requestService, errorService) {
+    constructor(app, options = {}) {
+
+        super(app, options);
 
         this.options = {
-            endpoint: url ?? '/api/filemanager',
+            endpoint: "/api/filemanager",
             ...options
         };
 
-        this.state = state;
-
-        this.eventBus = eventBus;
-
-        this.errorBus = errorService;
-
-        this.request = requestService;
-
-        this.bindEventBus();
+        this.deletingId = null;
     }
 
+    busEvents() {
 
-    bindEventBus() {
-        this.handleDeleteSignal = this.handleDeleteSignal.bind(this);
+        return {
 
-        this.eventBus.on(Events.FILE_DELETE_SIGNAL, this.handleDeleteSignal);
+            [Events.FILE_DELETE_SIGNAL]: this.handleDeleteSignal,
+
+        };
     }
-
 
     async handleDeleteSignal({fileId} = {}) {
 
-        const id = fileId ?? this.state.get('select.current');
+        const id = fileId ?? this.state.get("select.current");
+
         if (!id) return;
 
-        const {success} = await handler({
-            resolve: () => {
-               return this.request.deleteFile(id);
+        if (this.deletingId === id) return;
+
+        this.deletingId = id;
+
+        const {success} = this.safe(
+            () => {
+
+                return this.request.deleteFile(encodeURIComponent(id));
             },
 
+            (error) => {
 
-            reject: (error) => {
-                this.errorBus?.emit(error);
+                this.errorBus?.emit?.(error);
 
-                this.eventBus.emit(Events.FILE_DELETE_FAILED, {fileId});
+                this.emit(Events.FILE_DELETE_FAILED, {fileId: id});
 
                 throw error;
-            }
-        });
+            },
 
+            () => {
+
+                this.deletingId = null;
+            }
+        );
 
         if (!success) return;
 
         this.removeFileFromState(id);
 
-        this.state.set('select.current', null);
+        this.state.set("select.current", null);
 
-        this.eventBus.emit(Events.FILE_DELETED, {fileId: id});
+        this.emit(Events.FILE_DELETED, {fileId: id});
     }
 
 
     removeFileFromState(fileId) {
 
-        const files = this.state.get('load.files', {});
+        const files = this.state.get("load.files", {});
 
         if (!files[fileId]) return;
 
-        const nextFiles = {...files};
+        const next = {...files};
 
-        delete nextFiles[fileId];
+        delete next[fileId];
 
-        this.state.set('load.files', nextFiles);
-
-    }
-
-
-    destroy() {
-
-        this.eventBus.off(Events.FILE_DELETE_SIGNAL, this.handleDeleteSignal);
-
+        this.state.set("load.files", next);
     }
 }

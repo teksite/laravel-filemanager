@@ -9,13 +9,14 @@ export default class InfoUi extends UiService {
 
     constructor(app, options) {
         super(app, options)
-        
+
         this.initialize();
     }
 
     defineElements() {
 
         return {
+            
             baseInfoEl: this.config.get('ui.baseInfoSelector', '[data-aside]'),
 
             filePreviewEl: this.config.get('ui.filePreviewSelector', '[data-preview]'),

@@ -1,70 +1,58 @@
 import Events from "../constants/events.js";
-import handler from "../helpers/handler.js";
+import BaseService from "../Foundation/BaseServices.js";
 
-export default class UpdateService {
 
-    constructor({url, options = {}}, eventBus, state, requestService, errorService) {
+export default class UpdateService extends BaseService {
 
-        this.options = {
-            endpoint: url ?? '/api/filemanager',
-            ...options
+
+    constructor(app, options = {}) {
+
+        super(app, options);
+
+        this.options = {endpoint: '/api/filemanager', ...options};
+    }
+
+    busEvents() {
+        return {
+
+            [Events.FILE_UPDATE_TITLE_SIGNAL]: this.updateTitle,
         };
-
-        this.state = state;
-
-        this.eventBus = eventBus;
-
-        this.request = requestService;
-
-        this.errorBus = errorService;
-
-        this.bindEvents();
     }
 
 
-    bindEvents() {
-
-        this.updateTitle = this.updateTitle.bind(this);
-
-        this.eventBus.on(Events.FILE_UPDATE_TITLE_SIGNAL, this.updateTitle);
-    }
-
-
-    async updateTitle({fileId, title , oldTitle} = {}) {
+    async updateTitle({fileId, title, oldTitle} = {}) {
 
         if (!fileId || !title) return;
 
-        const {success, data} = await handler({
+        const {success, data} =await this.safe(
 
-            resolve: async () => {
+            async () => {
 
-                const data = await this.request.patch(`${this.options.endpoint}/${encodeURIComponent(fileId)}`, {title});
+                const response = await this.request.patch(`${this.options.endpoint}/${encodeURIComponent(fileId)}`, {title});
 
-                const file = await data?.file
+                const file = response?.file ?? {};
 
                 this.updateState(fileId, file);
 
-                return {file, fileId, title , oldTitle}
-
+                console.log()
+                return {file, fileId, title, oldTitle};
             },
 
-            reject: (error) => {
+            (error) => {
 
                 this.errorBus?.emit?.(error);
 
-                this.eventBus.emit(Events.FILE_UPDATE_TITLE_FAILED, {fileId, title , oldTitle});
+                this.emit(Events.FILE_UPDATE_TITLE_FAILED, {fileId, title, oldTitle});
 
                 throw error;
             }
+        );
 
-        });
+        if (!success) return false;
 
-        if (success) {
-            const {fileId, file, title , oldTitle} = data;
-            this.eventBus.emit(Events.FILE_UPDATED_TITLE, {fileId, file, title ,oldTitle});
-        }
+        this.emit(Events.FILE_UPDATED_TITLE, data);
 
-        return success;
+        return true;
     }
 
 
@@ -73,17 +61,8 @@ export default class UpdateService {
         const files = this.state.get('load.files', {});
 
         if (!files[fileId]) return;
-        const next = {
-            ...files,
-            [fileId]: {...files[fileId], ...file}
-        }
 
-        this.state.set('load.files', next);
+        this.state.set('load.files', {...files, [fileId]: {...files[fileId], ...file}});
     }
 
-
-    destroy() {
-
-        this.eventBus.off(Events.FILE_UPDATE_TITLE_SIGNAL, this.updateTitle);
-    }
 }

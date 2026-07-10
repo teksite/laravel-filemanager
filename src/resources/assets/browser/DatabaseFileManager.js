@@ -124,6 +124,7 @@ export default class DatabaseFileManager {
                 }
             }],
 
+
             [GridUi, {
                 elements: {
                     gridEl: this.config.get('ui.gridSelector'),
@@ -132,15 +133,18 @@ export default class DatabaseFileManager {
                 loadingStyle: this.config.get('load.loadingStyle', 'block')
             }],
 
+
             [MoreButtonUi, {
                 elements: {
                     btnEl: this.config.get('ui.loadMoreSelector')
                 }
             }],
 
+
             [SelectService,
                 this.config.section('selection')
             ],
+
 
             [InfoUi, {
                 elements: {
@@ -172,6 +176,13 @@ export default class DatabaseFileManager {
             }],
 
 
+            [UpdateService, {
+                url: this.config.get('api.updateUrl')
+            }],
+
+            [DeleteService, {
+                url: this.config.get('api.deleteUrl')
+            }],
             /*
                         [
                             DeleteService,
@@ -183,23 +194,6 @@ export default class DatabaseFileManager {
 
                             }
                         ],
-
-
-                        [
-                            UpdateService,
-                            {
-
-                                url:this.config.get(
-                                    'api.updateUrl'
-                                )
-
-                            }
-                        ],
-
-
-
-
-
 
 
                         [
@@ -215,16 +209,6 @@ export default class DatabaseFileManager {
 
                             }
                         ],
-
-            */
-
-            /*
-
-
-
-
-
-
 
                         [
                             CounterUi,

@@ -132,7 +132,7 @@ export default class UploaderUi extends UiService {
         const allowed = this.config.get('upload.allowedMimes', [])
             .map(item => item.toLowerCase());
 
-        if (!allowed.length)  return {valid: files, invalid: {}};
+        if (!allowed.length) return {valid: files, invalid: {}};
 
         const valid = {};
 
@@ -207,7 +207,7 @@ export default class UploaderUi extends UiService {
     }
 
 
-    renderItem([id , file], valid) {
+    renderItem([id, file], valid) {
 
         return `
             <div class="upload-item ${valid ? 'valid-file' : 'invalid-file'}" data-upload-preview data-file-id="${file.id}">
@@ -218,7 +218,7 @@ export default class UploaderUi extends UiService {
                         <div class="upload-progress"><div class="progress-bar" data-progress-bar="${file.id}"></div></div>
                     </div>
                 </div>
-                <div class="upload-file-action">
+                <div class="upload-file-action" data-upload-action-box="${file.id}">
                    <div>
                         <small>
                             ${formatSize(file.size)}
@@ -237,108 +237,43 @@ export default class UploaderUi extends UiService {
 
     removeFile(event) {
 
+        const button = event.target.closest('[data-remove-file]');
 
-        const button =
-            event.target.closest(
-                '[data-remove-file]'
-            );
-
-
-        if (!button) {
-            return;
-        }
-
+        if (!button) return;
 
         const id = button.dataset.removeFile;
-
 
         delete this.validFiles[id];
 
         delete this.invalidFiles[id];
 
-
         this.syncState();
 
-
-        button
-            .closest(
-                '[data-upload-preview]'
-            )
-            ?.remove();
-
-
+        button.closest('[data-upload-preview]')?.remove();
     }
 
 
-    updateUploadStatus(
-        id,
-        success,
-        file
-    ) {
+    updateUploadStatus(id, success, file) {
 
+        const item = this.messagesEl?.querySelector(`[data-file-id="${CSS.escape(id)}"]`);
 
-        const item =
-            this.messagesEl?.querySelector(
-                `[data-file-id="${CSS.escape(id)}"]`
-            );
+        if (!item) return;
 
+        item.classList.toggle('valid-file', success);
 
-        if (!item) {
-            return;
-        }
+        item.classList.toggle('invalid-file', !success);
 
+        const bar = item.querySelector(`[data-progress-bar="${CSS.escape(id)}"]`);
 
-        item.classList.toggle(
-            'valid-file',
-            success
-        );
+        bar.classList.add('finish')
 
+        bar.classList.add(success ? 'success' : 'failed');
 
-        item.classList.toggle(
-            'invalid-file',
-            !success
-        );
-
-
-        const bar =
-            item.querySelector(
-                `[data-progress-bar="${CSS.escape(id)}"]`
-            );
-
-
-        if (bar) {
-
-            bar.style.width = '100%';
-
-            bar.classList.toggle(
-                'success',
-                success
-            );
-
-
-            bar.classList.toggle(
-                'failed',
-                !success
-            );
-
-        }
-
-
-        const status =
-            item.querySelector(
-                `[data-upload-status="${CSS.escape(id)}"]`
-            );
+        const status = item.querySelector(`[data-upload-action-box="${CSS.escape(id)}"]`);
 
 
         if (status) {
-
-            status.textContent =
-                success
-                    ?
-                    'Uploaded'
-                    :
-                    'Failed';
-
+            status.textContent = success ? 'Uploaded' : 'Failed';
         }
 
 

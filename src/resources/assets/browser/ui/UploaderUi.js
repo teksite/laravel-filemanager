@@ -97,6 +97,7 @@ export default class UploaderUi extends UiService {
 
         const normalized = this.normalizeFiles(files);
 
+        console.log(normalized)
         const mimeResult = this.validateMime(normalized);
 
         const sizeResult = this.validateSize(mimeResult.valid);
@@ -113,19 +114,20 @@ export default class UploaderUi extends UiService {
 
     normalizeFiles(files) {
 
-        return Array.from(files).reduce((result, file) => {
+        let items = {}
 
-            const id = `fake_${uniqueString()}`;
+        Object.entries(files).forEach(([id, item,]) => {
 
-            result[id] = {...file, id};
+            const fileId = `fake_${uniqueString()}`;
+            item.id = fileId
+            return items[fileId] = item
+        });
 
-            return result;
-        }, {});
+        return items;
     }
 
 
     validateMime(files = {}) {
-
         const allowed = this.config.get('upload.allowedMimes', [])
             .map(item => item.toLowerCase());
 
@@ -150,7 +152,6 @@ export default class UploaderUi extends UiService {
                 invalid[id] = file;
             }
         });
-
         return {valid, invalid};
     }
 
@@ -192,122 +193,40 @@ export default class UploaderUi extends UiService {
 
     renderPreview() {
 
-        if (!this.messagesEl)  return;
+        if (!this.messagesEl) return;
 
-        const invalid =
-            Object.entries(this.invalidFiles)
-                .map(
-                    item =>
-                        this.renderItem(
-                            item,
-                            false
-                        )
-                );
+        const invalid = Object.entries(this.invalidFiles)
+            .map((item) => this.renderItem(item, false));
+
+        const valid = Object.entries(this.validFiles)
+            .map((item) => this.renderItem(item, true));
 
 
-        const valid =
-            Object.entries(this.validFiles)
-                .map(
-                    item =>
-                        this.renderItem(
-                            item,
-                            true
-                        )
-                );
-
-
-        this.messagesEl.innerHTML =
-            [
-                ...invalid,
-                ...valid
-            ].join('');
-
+        this.messagesEl.innerHTML = [...invalid, ...valid].join('');
     }
 
 
-    renderItem(
-        [id, file],
-        valid
-    ) {
-
-
+    renderItem([id , file], valid) {
+        console.log(file)
         return `
-
-<div
- class="upload-item ${valid ? 'valid-file' : 'invalid-file'}"
- data-upload-preview
- data-file-id="${id}"
->
-
-
-<div class="upload-file-info">
-
-${getMimeIcon(file.type)}
-
-<div>
-
-<strong>
-${escapeHtml(file.name)}
-</strong>
-
-
-
-${
-            valid
-                ?
-                `
-<div class="upload-progress">
-
-<div
-class="progress-bar"
-data-progress-bar="${id}">
-</div>
-
-</div>
-`
-                :
-                `
-<div>
-Invalid file
-</div>
-`
-        }
-
-
-
-<small data-upload-status="${id}">
-</small>
-
-
-</div>
-
-
-</div>
-
-
-
-<div>
-
-<small>
-${formatSize(file.size)}
-</small>
-
-
-<button
-type="button"
-data-remove-file="${id}">
-×
-</button>
-
-
-</div>
-
-
-
-</div>
-
-`;
-
+            <div class="upload-item ${valid ? 'valid-file' : 'invalid-file'}" data-upload-preview data-file-id="${file.id}">
+                <div class="upload-file-info">
+                     ${getMimeIcon(file.type)}
+                     ${escapeHtml(file.name)}
+                    <div class="info">
+                        <div class="upload-progress"><div class="progress-bar" data-progress-bar="${file.id}"></div></div>
+                        <small data-upload-status="${file.id}">${valid ? 'ready to upload' : 'invalid file'}</small>
+                    </div>
+                </div>
+                <div class="upload-file-action">
+                    <small>
+                        ${formatSize(file.size)}
+                    </small>
+                    <button type="button" data-remove-file="${file.id}">
+                        ×
+                    </button>
+                </div>
+            </div>`;
     }
 
 

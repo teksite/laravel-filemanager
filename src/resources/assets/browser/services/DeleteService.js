@@ -35,7 +35,7 @@ export default class DeleteService extends BaseServices {
 
         this.deletingId = id;
 
-        const {success} = this.safe(
+        const {success} = await this.safe(
             () => {
 
                 return this.request.deleteFile(encodeURIComponent(id));

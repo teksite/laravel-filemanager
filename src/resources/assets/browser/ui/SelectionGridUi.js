@@ -1,149 +1,106 @@
-import {$} from "../helpers/dom.js";
+import UiService from "../Foundation/UiService.js";
 import Events from "../constants/events.js";
 import {renderMedia} from "../helpers/preview.js";
 
-export default class SelectionGridUi {
+export default class SelectionGridUi extends UiService {
 
-    constructor({elements = {}} = {}, options = {}, eventBus, stateManager) {
+    defineElements() {
 
-        this.options = {...options};
+        return {
 
-        this.loadElements(elements);
-
-        if (!this.gridEl) return;
-
-        this.listeners = {};
-
-        this.state = stateManager;
-
-        this.eventBus = eventBus;
-
-        this.bindBusEvents();
-
-        this.bindDomEvents();
-
-    }
-
-
-    loadElements(elements) {
-
-        this.gridEl = $(elements.gridEl ?? '[data-selected-list]');
-    }
-
-
-    bindDomEvents() {
-
-        this.handleDeleteClick = this.handleDeleteClick.bind(this);
-
-        this.gridEl.addEventListener('click', this.handleDeleteClick);
-
-    }
-
-    bindBusEvents() {
-
-        this.appendItem = this.appendItem.bind(this);
-
-        this.clearGrid = this.clearGrid.bind(this);
-
-        this.removeItemFromGrid = this.removeItemFromGrid.bind(this);
-
-        this.listeners = {
-            appendItem: () => {
-
-                this.appendItem();
-            },
-
-            removeItemFromGrid: ({fileId}) => {
-                this.removeItemFromGrid(fileId);
-
-            },
-            clearGrid: () => {
-                this.clearGrid();
-
-            },
+            gridEl: "[data-selected-list]",
         };
-        this.eventBus.on(Events.SELECTION_CLICK, this.listeners.appendItem);
-
-        this.eventBus.on(Events.SELECTION_ON_CHOOSE, this.listeners.clearGrid);
-
-        this.eventBus.on(Events.SELECTION_REMOVED, this.listeners.removeItemFromGrid);
-
     }
 
-    appendItem() {
-        const files = this.state.get('select.files');
 
-        if (files == null) {
+    shouldInitialize() {
 
-            this.clearGrid();
+        return !!this.gridEl;
+    }
 
-            return;
-        }
 
-        if ('id' in files) {
-            this.gridEl.innerHTML = this.renderItems(files);
+    busEvents() {
 
-            return;
-        }
+        return {
+
+            [Events.SELECTION_CLICK]: this.renderSelections,
+
+            [Events.SELECTION_ON_CHOOSE]: this.clearGrid,
+
+            [Events.SELECTION_REMOVED]: ({fileId}) => this.removeItem(fileId),
+        };
+    }
+
+
+    domEvents() {
+
+        return [
+            [
+                this.gridEl, "click", this.handleRemoveClick
+            ]
+        ];
+    }
+
+
+    renderSelections() {
+
+        const files = this.state.get("select.files", {});
 
         this.clearGrid();
 
-        Object.values(files).forEach(file => {
+        const values = Object.values(files);
 
-            this.gridEl.insertAdjacentHTML('beforeend', this.renderItems(file));
+        if (!values.length) return;
 
+        const fragment = document.createDocumentFragment();
+
+        values.forEach(file => {
+
+            const wrapper = document.createElement("div");
+
+            wrapper.innerHTML = this.renderItem(file);
+
+            fragment.appendChild(wrapper.firstElementChild);
         });
+
+        this.gridEl.appendChild(fragment);
     }
+
 
     clearGrid() {
-        this.gridEl.innerHTML = '';
 
+        this.gridEl.innerHTML = "";
     }
 
-    renderItems(file) {
+
+    renderItem(file) {
 
         return `
-        <div class="selected-item" data-selected-item  data-id="${file.id}">
-            ${renderMedia(file)}
-            <button class="selected-item-delete-btn"  data-selected-remove data-id="${file.id}">
-                ✖
-            </button>
-        </div>
-    `;
+            <div class="selected-item" data-selected-item data-id="${file.id}">
+                ${renderMedia(file)}
+                <button class="selected-item-delete-btn" data-selected-remove data-id="${file.id}" type="button">
+                    ✖
+                </button>
+            </div>
+        `;
     }
 
-    handleDeleteClick(e) {
 
-        const btn = e.target.closest('.selected-item-delete-btn');
+    handleRemoveClick(event) {
 
-        if (!btn) return;
+        const button = event.target.closest("[data-selected-remove]");
 
-        const fileId = btn.dataset.id;
+        if (!button) return;
 
-        this.eventBus.emit(Events.SELECTION_REMOVE_SIGNAL, {fileId});
-
+        this.emit(Events.SELECTION_REMOVE_SIGNAL, {fileId: button.dataset.id});
     }
 
-    removeItemFromGrid(fileId) {
+
+    removeItem(fileId) {
 
         if (!fileId) return;
 
-        const parentItem = this.gridEl.querySelector(`[data-selected-item][data-id='${fileId}']`);
-
-        parentItem?.remove();
-    }
-
-
-    destroy() {
-
-        this.gridEl?.removeEventListener('click', this.handleDeleteClick);
-
-        this.eventBus.off(Events.SELECTION_CLICK, this.listeners.appendItem);
-
-        this.eventBus.off(Events.SELECTION_ON_CHOOSE, this.listeners.clearGrid);
-
-        this.eventBus.off(Events.SELECTION_REMOVED, this.listeners.removeItemFromGrid);
-
+        this.gridEl.querySelector(`[data-selected-item][data-id="${CSS.escape(fileId)}"]`)?.remove();
     }
 
 }

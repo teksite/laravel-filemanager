@@ -165,7 +165,11 @@ export default class GridUi extends UiService {
 
         if (!fileId) return;
 
-        this.state.set('select.current', fileId);
+        (fileId === (this.state.get('select.current', null)) ?? null)
+
+            ? this.state.set('select.current', null)
+
+            : this.state.set('select.current', fileId);
 
         this.eventBus.emit(Events.SELECTION_CLICK, {fileId});
     }

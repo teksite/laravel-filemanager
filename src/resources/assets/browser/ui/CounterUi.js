@@ -31,6 +31,7 @@ export default class CounterUi extends UiService {
     updateCounter() {
 
         const files = this.state.get("load.files", {});
+        console.log()
 
         this.counterEl.textContent = Object.keys(files).length;
     }

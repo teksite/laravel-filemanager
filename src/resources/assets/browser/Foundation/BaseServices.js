@@ -1,67 +1,33 @@
 import BaseComponent from "./BaseComponent.js";
 
-export default class UiService extends BaseComponent {
+export default class Service extends BaseComponent {
 
-    constructor(app) {
+    constructor(app, options = {}) {
 
         super(app);
 
+        this.options = options;
+
         this._busListeners = [];
-
-        this._domListeners = [];
-
-        this.loadElements();
 
         if (!this.shouldInitialize()) return;
 
-
         this.bindBusEvents();
 
-        this.bindDomEvents();
-
         this.initialize?.();
-
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Elements
-    |--------------------------------------------------------------------------
-    */
-
-    loadElements() {
-
-        const elements = this.defineElements?.() ?? {};
-
-        for (const [name, selector] of Object.entries(elements)) {
-
-            this[name] = typeof selector === 'function'
-                ? selector.call(this)
-                : this.$(selector);
-
-        }
-
-    }
-
-    defineElements() {
+    busEvents() {
 
         return {};
 
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | EventBus
-    |--------------------------------------------------------------------------
-    */
-
     bindBusEvents() {
 
-        const events = this.busEvents?.() ?? {};
+        for (const [event, handler] of Object.entries(this.busEvents())) {
 
-        for (const [event, handler] of Object.entries(events)) {
-
-            if (typeof handler !== 'function') continue;
+            if (typeof handler !== "function") continue;
 
             const listener = handler.bind(this);
 
@@ -73,49 +39,11 @@ export default class UiService extends BaseComponent {
 
     }
 
-    busEvents() {
+    emit(event, payload = {}) {
 
-        return {};
-
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | DOM Events
-    |--------------------------------------------------------------------------
-    */
-
-    bindDomEvents() {
-
-        const events = this.domEvents?.() ?? [];
-
-        for (const [element, event, handler] of events) {
-
-            if (!element || typeof handler !== 'function') {
-                continue;
-            }
-
-            const listener = handler.bind(this);
-
-            element.addEventListener(event, listener);
-
-            this._domListeners.push({element, event, listener});
-
-        }
+        this.eventBus.emit(event, payload);
 
     }
-
-    domEvents() {
-
-        return [];
-
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | LifeCycle
-    |--------------------------------------------------------------------------
-    */
 
     shouldInitialize() {
 
@@ -125,21 +53,15 @@ export default class UiService extends BaseComponent {
 
     destroy() {
 
-        for (const {event, listener} of this._busListeners) {
+        super.destroy();
 
-            this.eventBus.off(event, listener);
+        for (const item of this._busListeners) {
 
-        }
-
-        for (const {element, event, listener} of this._domListeners) {
-
-            element.removeEventListener(event, listener);
+            this.eventBus.off(item.event, item.listener);
 
         }
 
         this._busListeners.length = 0;
-
-        this._domListeners.length = 0;
 
     }
 

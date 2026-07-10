@@ -2,9 +2,11 @@ import BaseComponent from "./BaseComponent.js";
 
 export default class UiService extends BaseComponent {
 
-    constructor(app) {
+    constructor(app, options = {}) {
 
         super(app);
+
+        this.options = options;
 
         this._busListeners = [];
 
@@ -13,7 +15,6 @@ export default class UiService extends BaseComponent {
         this.loadElements();
 
         if (!this.shouldInitialize()) return;
-
 
         this.bindBusEvents();
 
@@ -29,13 +30,19 @@ export default class UiService extends BaseComponent {
     |--------------------------------------------------------------------------
     */
 
+    defineElements() {
+
+        return {};
+
+    }
+
     loadElements() {
 
-        const elements = this.defineElements?.() ?? {};
+        const map = this.defineElements();
 
-        for (const [name, selector] of Object.entries(elements)) {
+        for (const [key, selector] of Object.entries(map)) {
 
-            this[name] = typeof selector === 'function'
+            this[key] = typeof selector === "function"
                 ? selector.call(this)
                 : this.$(selector);
 
@@ -43,35 +50,11 @@ export default class UiService extends BaseComponent {
 
     }
 
-    defineElements() {
-
-        return {};
-
-    }
-
     /*
     |--------------------------------------------------------------------------
-    | EventBus
+    | Bus
     |--------------------------------------------------------------------------
     */
-
-    bindBusEvents() {
-
-        const events = this.busEvents?.() ?? {};
-
-        for (const [event, handler] of Object.entries(events)) {
-
-            if (typeof handler !== 'function') continue;
-
-            const listener = handler.bind(this);
-
-            this.eventBus.on(event, listener);
-
-            this._busListeners.push({event, listener});
-
-        }
-
-    }
 
     busEvents() {
 
@@ -79,31 +62,36 @@ export default class UiService extends BaseComponent {
 
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DOM Events
-    |--------------------------------------------------------------------------
-    */
+    bindBusEvents() {
 
-    bindDomEvents() {
+        for (const [event, handler] of Object.entries(this.busEvents())) {
 
-        const events = this.domEvents?.() ?? [];
-
-        for (const [element, event, handler] of events) {
-
-            if (!element || typeof handler !== 'function') {
-                continue;
-            }
+            if (typeof handler !== "function") continue;
 
             const listener = handler.bind(this);
 
-            element.addEventListener(event, listener);
+            this.eventBus.on(event, listener);
 
-            this._domListeners.push({element, event, listener});
+            this._busListeners.push({
+                event,
+                listener
+            });
 
         }
 
     }
+
+    emit(event, payload = {}) {
+
+        this.eventBus.emit(event, payload);
+
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DOM
+    |--------------------------------------------------------------------------
+    */
 
     domEvents() {
 
@@ -111,9 +99,53 @@ export default class UiService extends BaseComponent {
 
     }
 
+    bindDomEvents() {
+
+        for (const item of this.domEvents()) {
+
+            const [element, event, handler, options = false] = item;
+
+            if (!element) continue;
+
+            if (typeof handler !== "function") continue;
+
+            const listener = handler.bind(this);
+
+            element.addEventListener(event, listener, options);
+
+            this._domListeners.push({element, event, listener, options});
+
+        }
+
+    }
+
     /*
     |--------------------------------------------------------------------------
-    | LifeCycle
+    | Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    show(element) {
+
+        element?.classList.remove("is_hide");
+
+    }
+
+    hide(element) {
+
+        element?.classList.add("is_hide");
+
+    }
+
+    toggle(element, value) {
+
+        element?.classList.toggle("is_hide", !value);
+
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Lifecycle
     |--------------------------------------------------------------------------
     */
 
@@ -125,15 +157,24 @@ export default class UiService extends BaseComponent {
 
     destroy() {
 
-        for (const {event, listener} of this._busListeners) {
+        super.destroy();
 
-            this.eventBus.off(event, listener);
+        for (const item of this._busListeners) {
+
+            this.eventBus.off(
+                item.event,
+                item.listener
+            );
 
         }
 
-        for (const {element, event, listener} of this._domListeners) {
+        for (const item of this._domListeners) {
 
-            element.removeEventListener(event, listener);
+            item.element.removeEventListener(
+                item.event,
+                item.listener,
+                item.options
+            );
 
         }
 

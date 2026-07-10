@@ -22,7 +22,6 @@ export default class UploaderUi extends UiService {
     }
 
 
-
     defineElements() {
 
         return {
@@ -42,18 +41,15 @@ export default class UploaderUi extends UiService {
 
         return {
 
-            [Events.UPLOAD_SUCCESS]:
-                ({id, success, file}) => {
-                    this.updateUploadStatus(id, success, file);
-                },
+            [Events.UPLOAD_SUCCESS]: ({id, success, file}) => {
+                this.updateUploadStatus(id, success, file);
+            },
 
-            [Events.UPLOAD_COMPLETE]:
-                () => {
-                    this.finishUpload();
-                },
+            [Events.UPLOAD_COMPLETE]: () => {
+                this.finishUpload();
+            },
         };
     }
-
 
 
     domEvents() {
@@ -69,302 +65,134 @@ export default class UploaderUi extends UiService {
             [this.inputEl, 'change', this.changeFiles],
 
             [this.formEl, 'submit', this.submitUpload],
-            
+
             [this.messagesEl, 'click', this.removeFile],
-
         ];
-
     }
-
-
-
-
-
 
 
     openFileDialog() {
-
         this.inputEl.click();
 
     }
-
-
-
-    preventDefault(event) {
-
-        event.preventDefault();
-
-    }
-
-
 
 
     dropFiles(event) {
 
         event.preventDefault();
 
-        this.handleFiles(
-            event.dataTransfer.files
-        );
-
+        this.handleFiles(event.dataTransfer.files);
     }
-
-
-
 
 
     changeFiles(event) {
 
-
-        this.handleFiles(
-            event.target.files
-        );
-
+        this.handleFiles(event.target.files);
 
         event.target.value = '';
-
     }
-
-
-
 
 
     handleFiles(files = []) {
 
+        const normalized = this.normalizeFiles(files);
 
-        const normalized =
-            this.normalizeFiles(files);
+        const mimeResult = this.validateMime(normalized);
 
+        const sizeResult = this.validateSize(mimeResult.valid);
 
+        this.validFiles = sizeResult.valid;
 
-        const mimeResult =
-            this.validateMime(normalized);
-
-
-
-        const sizeResult =
-            this.validateSize(
-                mimeResult.valid
-            );
-
-
-
-        this.validFiles =
-            sizeResult.valid;
-
-
-
-        this.invalidFiles = {
-            ...mimeResult.invalid,
-            ...sizeResult.invalid
-        };
-
-
+        this.invalidFiles = {...mimeResult.invalid, ...sizeResult.invalid};
 
         this.syncState();
-
 
         this.renderPreview();
 
     }
 
-
-
-
-
-
-
     normalizeFiles(files) {
 
+        return Array.from(files).reduce((result, file) => {
 
-        return Array.from(files)
-            .reduce((result, file)=>{
+            const id = `fake_${uniqueString()}`;
 
+            result[id] = {...file, id};
 
-                const id =
-                    `fake_${uniqueString()}`;
-
-
-
-                result[id] = {
-                    ...file,
-                    id
-                };
-
-
-
-                return result;
-
-
-            },{});
-
-
+            return result;
+        }, {});
     }
-
-
-
-
-
-
 
 
     validateMime(files = {}) {
 
+        const allowed = this.config.get('upload.allowedMimes', [])
+            .map(item => item.toLowerCase());
 
-        const allowed =
-            this.config
-                .get('upload.allowedMimes', [])
-                .map(
-                    item=>item.toLowerCase()
-                );
+        if (!allowed.length) {
 
-
-
-        if(!allowed.length){
-
-            return {
-                valid: files,
-                invalid:{}
-            };
-
+            return {valid: files, invalid: {}};
         }
 
+        const valid = {};
+
+        const invalid = {};
+
+        Object.entries(files).forEach(([id, file]) => {
+
+            const mime = (file.type || '').toLowerCase();
+
+            if (allowed.includes(mime)) {
+
+                valid[id] = file;
+            } else {
+
+                invalid[id] = file;
+            }
+        });
+
+        return {valid, invalid};
+    }
 
 
+    validateSize(files = {}) {
+
+        const maxSize = this.config.get('upload.maxSize', null);
+
+        if (!maxSize) {
+
+            return {valid: files, invalid: {}};
+        }
 
         const valid = {};
 
         const invalid = {};
 
 
+        Object.entries(files).forEach(([id, file]) => {
 
-        Object.entries(files)
-            .forEach(([id,file])=>{
+            if (file.size <= maxSize) {
 
+                valid[id] = file;
+            } else {
 
-                const mime =
-                    (file.type || '')
-                        .toLowerCase();
+                invalid[id] = file;
+            }
+        });
 
-
-
-                if(allowed.includes(mime)){
-
-                    valid[id]=file;
-
-                }else{
-
-                    invalid[id]=file;
-
-                }
-
-
-            });
-
-
-
-        return {
-            valid,
-            invalid
-        };
-
-
+        return {valid, invalid};
     }
 
 
+    syncState() {
 
-
-
-
-
-    validateSize(files = {}) {
-
-
-        const maxSize =
-            this.config.get(
-                'upload.maxSize',
-                null
-            );
-
-
-
-        if(!maxSize){
-
-            return {
-                valid:files,
-                invalid:{}
-            };
-
-        }
-
-
-
-        const valid={};
-
-        const invalid={};
-
-
-
-        Object.entries(files)
-            .forEach(([id,file])=>{
-
-
-                if(file.size <= maxSize){
-
-                    valid[id]=file;
-
-                }else{
-
-                    invalid[id]=file;
-
-                }
-
-
-            });
-
-
-
-        return {
-            valid,
-            invalid
-        };
-
-
+        this.state.set('upload.files', this.validFiles);
     }
 
 
+    renderPreview() {
 
-
-
-
-
-
-    syncState(){
-
-
-        this.state.set(
-            'upload.files',
-            this.validFiles
-        );
-
-
-    }
-
-
-
-
-
-
-
-
-    renderPreview(){
-
-
-        if(!this.messagesEl){
-            return;
-        }
-
-
+        if (!this.messagesEl)  return;
 
         const invalid =
             Object.entries(this.invalidFiles)
@@ -375,7 +203,6 @@ export default class UploaderUi extends UiService {
                             false
                         )
                 );
-
 
 
         const valid =
@@ -389,7 +216,6 @@ export default class UploaderUi extends UiService {
                 );
 
 
-
         this.messagesEl.innerHTML =
             [
                 ...invalid,
@@ -399,21 +225,16 @@ export default class UploaderUi extends UiService {
     }
 
 
-
-
-
-
-
     renderItem(
-        [id,file],
+        [id, file],
         valid
-    ){
+    ) {
 
 
         return `
 
 <div
- class="upload-item ${valid?'valid-file':'invalid-file'}"
+ class="upload-item ${valid ? 'valid-file' : 'invalid-file'}"
  data-upload-preview
  data-file-id="${id}"
 >
@@ -490,14 +311,7 @@ data-remove-file="${id}">
     }
 
 
-
-
-
-
-
-
-
-    removeFile(event){
+    removeFile(event) {
 
 
         const button =
@@ -506,21 +320,18 @@ data-remove-file="${id}">
             );
 
 
-        if(!button){
+        if (!button) {
             return;
         }
-
 
 
         const id =
             button.dataset.removeFile;
 
 
-
         delete this.validFiles[id];
 
         delete this.invalidFiles[id];
-
 
 
         this.syncState();
@@ -536,18 +347,11 @@ data-remove-file="${id}">
     }
 
 
-
-
-
-
-
-
-
     updateUploadStatus(
         id,
         success,
         file
-    ){
+    ) {
 
 
         const item =
@@ -556,12 +360,9 @@ data-remove-file="${id}">
             );
 
 
-
-        if(!item){
+        if (!item) {
             return;
         }
-
-
 
 
         item.classList.toggle(
@@ -576,18 +377,15 @@ data-remove-file="${id}">
         );
 
 
-
-
         const bar =
             item.querySelector(
                 `[data-progress-bar="${CSS.escape(id)}"]`
             );
 
 
+        if (bar) {
 
-        if(bar){
-
-            bar.style.width='100%';
+            bar.style.width = '100%';
 
             bar.classList.toggle(
                 'success',
@@ -603,16 +401,13 @@ data-remove-file="${id}">
         }
 
 
-
-
         const status =
             item.querySelector(
                 `[data-upload-status="${CSS.escape(id)}"]`
             );
 
 
-
-        if(status){
+        if (status) {
 
             status.textContent =
                 success
@@ -627,21 +422,15 @@ data-remove-file="${id}">
     }
 
 
-
-
-
-
-
-    submitUpload(event){
+    submitUpload(event) {
 
 
         event.preventDefault();
 
 
-
-        if(
+        if (
             !Object.keys(this.validFiles).length
-        ){
+        ) {
 
             alert(
                 'No valid file selected.'
@@ -652,11 +441,10 @@ data-remove-file="${id}">
         }
 
 
-
         this.emit(
             Events.UPLOAD_SIGNAL,
             {
-                files:this.validFiles
+                files: this.validFiles
             }
         );
 
@@ -664,12 +452,7 @@ data-remove-file="${id}">
     }
 
 
-
-
-
-
-
-    finishUpload(){
+    finishUpload() {
 
 
         this.state.set(
@@ -679,7 +462,6 @@ data-remove-file="${id}">
 
 
     }
-
 
 
 }

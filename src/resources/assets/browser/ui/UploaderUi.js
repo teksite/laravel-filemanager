@@ -147,11 +147,13 @@ export default class UploaderUi extends UiService {
                 valid[id] = file;
             } else {
 
-                invalid['reason'] = 'invalid type file';
+                file.reason = 'invalid type';
 
                 invalid[id] = file;
             }
         });
+        console.log(invalid)
+
         return {valid, invalid};
     }
 
@@ -176,11 +178,11 @@ export default class UploaderUi extends UiService {
 
                 valid[id] = file;
             } else {
+                file.reason = `max size ${formatSize(maxSize)}`;
 
                 invalid[id] = file;
             }
         });
-
         return {valid, invalid};
     }
 
@@ -201,13 +203,12 @@ export default class UploaderUi extends UiService {
         const valid = Object.entries(this.validFiles)
             .map((item) => this.renderItem(item, true));
 
-
         this.messagesEl.innerHTML = [...invalid, ...valid].join('');
     }
 
 
     renderItem([id , file], valid) {
-        console.log(file)
+
         return `
             <div class="upload-item ${valid ? 'valid-file' : 'invalid-file'}" data-upload-preview data-file-id="${file.id}">
                 <div class="upload-file-info">
@@ -215,13 +216,17 @@ export default class UploaderUi extends UiService {
                      ${escapeHtml(file.name)}
                     <div class="info">
                         <div class="upload-progress"><div class="progress-bar" data-progress-bar="${file.id}"></div></div>
-                        <small data-upload-status="${file.id}">${valid ? 'ready to upload' : 'invalid file'}</small>
                     </div>
                 </div>
                 <div class="upload-file-action">
-                    <small>
-                        ${formatSize(file.size)}
-                    </small>
+                   <div>
+                        <small>
+                            ${formatSize(file.size)}
+                        </small>
+                        <small data-upload-status data-id="${file.id}">
+                            ${valid ? 'ready to upload' : (file?.reason ? `${file.reason}` : "invalid file")}
+                        </small>
+                   </div>
                     <button type="button" data-remove-file="${file.id}">
                         ×
                     </button>

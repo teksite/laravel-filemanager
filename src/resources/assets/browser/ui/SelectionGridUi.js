@@ -18,7 +18,6 @@ export default class SelectionGridUi extends UiService {
         return !!this.gridEl;
     }
 
-
     busEvents() {
 
         return {
@@ -41,7 +40,7 @@ export default class SelectionGridUi extends UiService {
         ];
     }
 
-
+    
     renderSelections() {
 
         const files = this.state.get("select.files", {});

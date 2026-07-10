@@ -1,69 +1,49 @@
-import {$} from "../helpers/dom.js";
+import UiService from "../Foundation/UiService.js";
 import Events from "../constants/events.js";
 
-export default class FilterUi {
+export default class FilterUi extends UiService {
 
-    constructor({elements = {}} = {}, options = {}, eventBus, stateManager) {
 
-        this.options = {...options}
+    defineElements() {
 
-        this.loadElements(elements);
+        return {
 
-        this.listeners = {};
+            mimesEl: "[data-mimeList]",
 
-        this.state = stateManager;
-
-        this.eventBus = eventBus;
-
-        this.bindUiEvents();
+            disksEl: "[data-diskList]",
+        };
     }
 
 
-    loadElements(elements) {
-        const mimesSelector = elements.mimesEl ?? '[data-mimeList]';
-        const disksSelector = elements.disksEl ?? '[data-diskList]';
-        this.mimesEl = $(mimesSelector);
-        this.disksEl = $(disksSelector);
-    }
+    domEvents() {
 
-    bindUiEvents() {
-        this.updateTypeFilter = this.updateTypeFilter.bind(this);
+        return [
 
-        this.updateDiskFilter = this.updateDiskFilter.bind(this);
+            [this.mimesEl, "change", this.updateTypeFilter],
 
-        this.mimesEl?.addEventListener('change', this.updateTypeFilter);
-
-        this.disksEl?.addEventListener('change', this.updateDiskFilter);
-
-
-    }
-
-    updateDiskFilter(e) {
-
-        const target = e.target;
-
-        const value = e.currentTarget.value || null;
-
-        this.state.set('load.disk', value);
-
-        this.eventBus.emit(Events.GRID_CLEAR, {value})
-    }
-
-    updateTypeFilter(e) {
-        const target = e.target;
-
-        const value = e.currentTarget.value || null;
-
-        this.state.set('load.type', value);
-
+            [this.disksEl, "change", this.updateDiskFilter],
+        ];
     }
 
 
-    destroy() {
+    updateDiskFilter(event) {
 
-        this.mimesEl?.removeEventListener('change', this.updateTypeFilter)
+        const value = event.currentTarget.value.trim() || null;
 
-        this.disksEl?.removeEventListener('change', this.updateDiskFilter)
+        if (value === this.state.get("load.disk", null)) return;
+
+        this.state.set("load.disk", value);
+
+        this.emit(Events.GRID_CLEAR, {value});
     }
 
+
+    updateTypeFilter(event) {
+
+        const value = event.currentTarget.value.trim() || null;
+
+        if (value === this.state.get("load.type", null)) return;
+
+        this.state.set("load.type", value);
+    }
 }

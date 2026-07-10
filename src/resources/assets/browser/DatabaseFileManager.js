@@ -124,6 +124,7 @@ export default class DatabaseFileManager {
                 }
             }],
 
+
             [GridUi, {
                 elements: {
                     gridEl: this.config.get('ui.gridSelector'),
@@ -132,15 +133,18 @@ export default class DatabaseFileManager {
                 loadingStyle: this.config.get('load.loadingStyle', 'block')
             }],
 
+
             [MoreButtonUi, {
                 elements: {
                     btnEl: this.config.get('ui.loadMoreSelector')
                 }
             }],
 
+
             [SelectService,
                 this.config.section('selection')
             ],
+
 
             [InfoUi, {
                 elements: {
@@ -171,17 +175,21 @@ export default class DatabaseFileManager {
                 }
             }],
 
+
             [UpdateService, {
                 url: this.config.get('api.updateUrl')
             }],
 
-            [DeleteService, {
-                url: this.config.get('api.deleteUrl')
-            }],
 
             [DeleteService, {
                 url: this.config.get('api.deleteUrl')
             }],
+
+
+            [DeleteService, {
+                url: this.config.get('api.deleteUrl')
+            }],
+
 
             [CounterUi, {
                 elements: {
@@ -189,9 +197,22 @@ export default class DatabaseFileManager {
                 }
             }],
 
+
+            [FilterUi, {
+                elements: {
+                    mimesEl: this.config.get('ui.mimesSelector'),
+                    disksEl: this.config.get('ui.disksSelector')
+                }
+            }],
+
+
+            [SelectionGridUi, {
+                elements: {
+                    gridEl: this.config.get('ui.selectionGridSelector')
+                }
+            }],
+
             /*
-
-
                         [
                             UploaderUi,
                             {
@@ -205,37 +226,6 @@ export default class DatabaseFileManager {
 
                             }
                         ],
-
-
-
-
-
-                        [
-                            FilterUi,
-                            {
-
-                                elements:{
-
-                                    mimesEl:
-                                        this.config.get(
-                                            'ui.mimesSelector'
-                                        ),
-
-
-                                    disksEl:
-                                        this.config.get(
-                                            'ui.disksSelector'
-                                        )
-
-                                }
-
-                            }
-                        ],
-
-
-
-
-
 
 
 
@@ -259,23 +249,7 @@ export default class DatabaseFileManager {
 
 
 
-                        [
-                            SelectionGridUi,
 
-                            {
-
-                                elements:{
-
-                                    gridEl:
-                                        this.config.get(
-                                            'ui.selectionGridSelector'
-                                        )
-
-                                }
-
-                            }
-
-                        ]
 
             */
         ];

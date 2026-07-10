@@ -1,45 +1,59 @@
-import {ServiceProvider} from "./ServiceProvider.js";
-import {$, $$} from "../helpers/dom.js";
+import ServiceProvider from "./ServiceProvider.js";
 
+export default class UiService extends ServiceProvider {
 
-class UiServices extends ServiceProvider {
-    constructor() {
+    constructor(app) {
 
-        super();
+        super(app);
 
-        this.$ = $;
-        
-        this.$$ = $$;
+        this._busListeners = [];
 
-        this._busListeners=[];
-
-        this._domListeners=[];
-
-        this._stateListeners=[];
-
+        this._domListeners = [];
 
         this.loadElements();
 
-        if(!this.shouldInitialize()) return;
+        if (!this.shouldInitialize()) return;
 
 
         this.bindBusEvents();
 
-        this.bindUiEvents();
+        this.bindDomEvents();
+
+        this.initialize?.();
+
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Elements
+    |--------------------------------------------------------------------------
+    */
 
     loadElements() {
 
-        const map = this.defineElements?.() ?? {};
+        const elements = this.defineElements?.() ?? {};
 
-        Object.entries(map).forEach(([key, selector]) => {
+        for (const [name, selector] of Object.entries(elements)) {
 
-            this[key] = this.$(selector);
+            this[name] = typeof selector === 'function'
+                ? selector.call(this)
+                : this.$(selector);
 
-        });
+        }
 
     }
 
+    defineElements() {
+
+        return {};
+
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | EventBus
+    |--------------------------------------------------------------------------
+    */
 
     bindBusEvents() {
 
@@ -47,23 +61,39 @@ class UiServices extends ServiceProvider {
 
         for (const [event, handler] of Object.entries(events)) {
 
-            const listener = (payload) => handler.call(this, payload);
+            if (typeof handler !== 'function') continue;
+
+            const listener = handler.bind(this);
 
             this.eventBus.on(event, listener);
 
             this._busListeners.push({event, listener});
 
         }
+
     }
 
+    busEvents() {
 
-    bindUiEvents() {
+        return {};
+
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DOM Events
+    |--------------------------------------------------------------------------
+    */
+
+    bindDomEvents() {
 
         const events = this.domEvents?.() ?? [];
 
         for (const [element, event, handler] of events) {
 
-            if (!element) continue;
+            if (!element || typeof handler !== 'function') {
+                continue;
+            }
 
             const listener = handler.bind(this);
 
@@ -75,39 +105,41 @@ class UiServices extends ServiceProvider {
 
     }
 
+    domEvents() {
+
+        return [];
+
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | LifeCycle
+    |--------------------------------------------------------------------------
+    */
 
     shouldInitialize() {
+
         return true;
-    }
 
-    defineElements() {
-        return {};
     }
-
-    busEvents() {
-        return {};
-    }
-
-    domEvents() {
-        return {};
-    }
-
 
     destroy() {
 
-        for (const item of this._busListeners) {
+        for (const {event, listener} of this._busListeners) {
 
-            this.eventBus.off(item.event, item.listener);
+            this.eventBus.off(event, listener);
 
         }
 
-        for (const item of this._domListeners) {
+        for (const {element, event, listener} of this._domListeners) {
 
-            item.element.removeEventListener(
-                item.event,
-                item.listener
-            );
+            element.removeEventListener(event, listener);
+
         }
+
+        this._busListeners.length = 0;
+
+        this._domListeners.length = 0;
 
     }
 

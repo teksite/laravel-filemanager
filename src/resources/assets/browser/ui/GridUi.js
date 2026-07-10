@@ -6,8 +6,6 @@ export default class GridUi {
 
     constructor({elements = {}} = {}, options = {}, eventBus, stateManager) {
 
-        this.options = {loadingStyle: 'overlay', ...options};
-
         this.loadElements(elements);
 
         if (!this.gridEl) return;

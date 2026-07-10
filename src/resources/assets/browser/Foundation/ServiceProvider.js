@@ -1,4 +1,6 @@
-export class ServiceProvider {
+import {$, $$} from "../helpers/dom.js";
+
+export default class ServiceProvider {
 
     constructor(app) {
 
@@ -14,7 +16,11 @@ export class ServiceProvider {
 
         this.errorBus = app.errorBus;
 
-        this.root = app.root;
+        this.root = app.root ?? document;
+
+        this.$ = (selector, root = this.root) => $(selector, root);
+
+        this.$$ = (selector, root = this.root) => $$(selector, root);
 
     }
 

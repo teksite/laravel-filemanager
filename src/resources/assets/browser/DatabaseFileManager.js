@@ -28,9 +28,11 @@ export default class DatabaseFileManager {
 
     constructor({config = {}, root = document} = {}) {
 
-        this.root =typeof root === "string" ? document.querySelector(root) : root;
+        this.root = typeof root === "string" ? document.querySelector(root) : root;
 
-        if (!this.root) {throw new Error("FileManager root element not found");}
+        if (!this.root) {
+            throw new Error("FileManager root element not found");
+        }
 
 
         this.config = new Config(config);
@@ -49,9 +51,9 @@ export default class DatabaseFileManager {
 
         this.request = new RequestService({
 
-            url:this.config.section('api'),
+            url: this.config.section('api'),
 
-            options:this.config.section('request')
+            options: this.config.section('request')
 
         }, this.errorBus);
 
@@ -73,336 +75,316 @@ export default class DatabaseFileManager {
     */
 
 
-    components(){
+    components() {
         return [
-/*
-            [
-                UploadService,{
+            /*
+                        [
+                            UploadService,{
 
-                    url:this.config.get(
-                        'api.uploadUrl'
-                    ),
+                                url:this.config.get(
+                                    'api.uploadUrl'
+                                ),
 
-                    elements:{
+                                elements:{
 
-                        formEl:this.config.get(
-                            'ui.uploadFormSelector'
-                        ),
+                                    formEl:this.config.get(
+                                        'ui.uploadFormSelector'
+                                    ),
 
-                        dropzoneEl:this.config.get(
-                            'ui.dropzoneSelector'
-                        ),
+                                    dropzoneEl:this.config.get(
+                                        'ui.dropzoneSelector'
+                                    ),
 
-                        inputEl:this.config.get(
-                            'ui.fileInputSelector'
-                        ),
+                                    inputEl:this.config.get(
+                                        'ui.fileInputSelector'
+                                    ),
 
-                        previewEl:this.config.get(
-                            'ui.uploadPreviewSelector'
-                        ),
+                                    previewEl:this.config.get(
+                                        'ui.uploadPreviewSelector'
+                                    ),
 
-                        diskSelectorEl:this.config.get(
-                            'ui.uploadDiskSelector'
-                        )
+                                    diskSelectorEl:this.config.get(
+                                        'ui.uploadDiskSelector'
+                                    )
 
-                    },
+                                },
 
-                    options:this.config.section(
-                        'upload'
-                    )
+                                options:this.config.section(
+                                    'upload'
+                                )
 
+                            }
+                        ],
+                 */
+            [LoadService, {
+                url: this.config.get('api.getUrl'),
+                options: {
+                    ...this.config.section('load'),
+                    ...this.config.section('filter')
                 }
-            ],
-     */
-            [
-                LoadService,
-                {
-                    url:this.config.get('api.getUrl'),
-                    options:{
-                        ...this.config.section('load'),
-                        ...this.config.section('filter')
-                    }
+            }],
 
-                }
+            [GridUi, {
+                elements: {
+                    gridEl: this.config.get('ui.gridSelector'),
+                    loadingEl: this.config.get('ui.loadingSelector')
+                },
+                loadingStyle: this.config.get('load.loadingStyle', 'block')
+            }
             ],
 
-/*
-            [
-                DeleteService,
-                {
+            /*
+                        [
+                            DeleteService,
+                            {
 
-                    url:this.config.get(
-                        'api.deleteUrl'
-                    )
+                                url:this.config.get(
+                                    'api.deleteUrl'
+                                )
 
-                }
-            ],
-
-
-            [
-                UpdateService,
-                {
-
-                    url:this.config.get(
-                        'api.updateUrl'
-                    )
-
-                }
-            ],
+                            }
+                        ],
 
 
+                        [
+                            UpdateService,
+                            {
 
-            [
-                SelectService,
+                                url:this.config.get(
+                                    'api.updateUrl'
+                                )
 
-                this.config.section(
-                    'selection'
-                )
-            ],
+                            }
+                        ],
 
 
 
-            [
-                UploaderUi,
-                {
+                        [
+                            SelectService,
 
-                    elements:{
-                        uploadPreviewSelector:
-                            this.config.get(
-                                'ui.uploadPreviewSelector'
+                            this.config.section(
+                                'selection'
                             )
-                    }
+                        ],
 
-                }
-            ],
 
 
+                        [
+                            UploaderUi,
+                            {
 
-            [
-                GridUi,
-                {
+                                elements:{
+                                    uploadPreviewSelector:
+                                        this.config.get(
+                                            'ui.uploadPreviewSelector'
+                                        )
+                                }
 
-                    elements:{
+                            }
+                        ],
 
-                        gridEl:
-                            this.config.get(
-                                'ui.gridSelector'
-                            ),
+            */
 
-                        loadingEl:
-                            this.config.get(
-                                'ui.loadingSelector'
-                            )
+            /*
 
-                    },
 
+                        [
+                            MoreBtnUi,
+                            {
 
-                    loadingStyle:
-                        this.config.get(
-                            'load.loadingStyle',
-                            'block'
-                        )
+                                elements:{
 
-                }
-            ],
+                                    btnEl:
+                                        this.config.get(
+                                            'ui.loadMoreSelector'
+                                        )
 
+                                }
 
+                            }
+                        ],
 
-            [
-                MoreBtnUi,
-                {
 
-                    elements:{
 
-                        btnEl:
-                            this.config.get(
-                                'ui.loadMoreSelector'
-                            )
 
-                    }
+                        [
+                            CounterUi,
+                            {
 
-                }
-            ],
+                                elements:{
 
+                                    counterEl:
+                                        this.config.get(
+                                            'ui.filesCounterSelector'
+                                        )
 
+                                }
 
+                            }
+                        ],
 
-            [
-                CounterUi,
-                {
 
-                    elements:{
 
-                        counterEl:
-                            this.config.get(
-                                'ui.filesCounterSelector'
-                            )
+                        [
+                            FilterUi,
+                            {
 
-                    }
+                                elements:{
 
-                }
-            ],
+                                    mimesEl:
+                                        this.config.get(
+                                            'ui.mimesSelector'
+                                        ),
 
 
+                                    disksEl:
+                                        this.config.get(
+                                            'ui.disksSelector'
+                                        )
 
-            [
-                FilterUi,
-                {
+                                }
 
-                    elements:{
+                            }
+                        ],
 
-                        mimesEl:
-                            this.config.get(
-                                'ui.mimesSelector'
-                            ),
 
 
-                        disksEl:
-                            this.config.get(
-                                'ui.disksSelector'
-                            )
 
-                    }
+                        [
+                            InfoUi,
+                            {
 
-                }
-            ],
+                                elements:{
 
 
+                                    baseInfoEl:
+                                        this.config.get(
+                                            'ui.baseInfoSelector'
+                                        ),
 
 
-            [
-                InfoUi,
-                {
+                                    filePreviewEl:
+                                        this.config.get(
+                                            'ui.filePreviewSelector'
+                                        ),
 
-                    elements:{
 
+                                    idInfoEl:
+                                        this.config.get(
+                                            'ui.idInfoSelector'
+                                        ),
 
-                        baseInfoEl:
-                            this.config.get(
-                                'ui.baseInfoSelector'
-                            ),
 
+                                    titleInfoEl:
+                                        this.config.get(
+                                            'ui.titleInfoSelector'
+                                        ),
 
-                        filePreviewEl:
-                            this.config.get(
-                                'ui.filePreviewSelector'
-                            ),
 
+                                    urlInfoEl:
+                                        this.config.get(
+                                            'ui.urlInfoSelector'
+                                        ),
 
-                        idInfoEl:
-                            this.config.get(
-                                'ui.idInfoSelector'
-                            ),
 
+                                    sizeInfoEl:
+                                        this.config.get(
+                                            'ui.sizeInfoSelector'
+                                        ),
 
-                        titleInfoEl:
-                            this.config.get(
-                                'ui.titleInfoSelector'
-                            ),
 
+                                    mimeInfoEl:
+                                        this.config.get(
+                                            'ui.mimeInfoSelector'
+                                        ),
 
-                        urlInfoEl:
-                            this.config.get(
-                                'ui.urlInfoSelector'
-                            ),
 
+                                    diskInfoEl:
+                                        this.config.get(
+                                            'ui.diskInfoSelector'
+                                        ),
 
-                        sizeInfoEl:
-                            this.config.get(
-                                'ui.sizeInfoSelector'
-                            ),
 
+                                    createdInfoEl:
+                                        this.config.get(
+                                            'ui.createdInfoSelector'
+                                        ),
 
-                        mimeInfoEl:
-                            this.config.get(
-                                'ui.mimeInfoSelector'
-                            ),
 
+                                    deleteBtnEl:
+                                        this.config.get(
+                                            'ui.deleteBtnSelector'
+                                        ),
 
-                        diskInfoEl:
-                            this.config.get(
-                                'ui.diskInfoSelector'
-                            ),
 
+                                    copyBtnEl:
+                                        this.config.get(
+                                            'ui.copyUrlBtnSelector'
+                                        ),
 
-                        createdInfoEl:
-                            this.config.get(
-                                'ui.createdInfoSelector'
-                            ),
 
+                                    openBtnEl:
+                                        this.config.get(
+                                            'ui.openUrlBtnSelector'
+                                        )
 
-                        deleteBtnEl:
-                            this.config.get(
-                                'ui.deleteBtnSelector'
-                            ),
+                                }
 
+                            }
+                        ],
 
-                        copyBtnEl:
-                            this.config.get(
-                                'ui.copyUrlBtnSelector'
-                            ),
 
 
-                        openBtnEl:
-                            this.config.get(
-                                'ui.openUrlBtnSelector'
-                            )
+                        [
+                            SelectionButtonUi,
 
-                    }
+                            {
 
-                }
-            ],
+                                elements:{
 
+                                    actionsEl:
+                                        this.config.get(
+                                            'ui.selectionButtonSelector'
+                                        )
 
+                                }
 
-            [
-                SelectionButtonUi,
+                            }
 
-                {
+                        ],
 
-                    elements:{
 
-                        actionsEl:
-                            this.config.get(
-                                'ui.selectionButtonSelector'
-                            )
 
-                    }
+                        [
+                            SelectionGridUi,
 
-                }
+                            {
 
-            ],
+                                elements:{
 
+                                    gridEl:
+                                        this.config.get(
+                                            'ui.selectionGridSelector'
+                                        )
 
+                                }
 
-            [
-                SelectionGridUi,
+                            }
 
-                {
+                        ]
 
-                    elements:{
-
-                        gridEl:
-                            this.config.get(
-                                'ui.selectionGridSelector'
-                            )
-
-                    }
-
-                }
-
-            ]
-
-*/
+            */
         ];
 
     }
 
 
-    boot(){
+    boot() {
 
         this.instances = this.components()
+
             .map(([Component, options]) => {
+
                 return this.register(Component, options);
             });
 
@@ -410,150 +392,89 @@ export default class DatabaseFileManager {
 
     }
 
-    register(Component, options = {}){
+    register(Component, options = {}) {
 
         return new Component(this, options);
-
     }
 
 
-    bindEvents(){
+    bindEvents() {
 
         this.handleSelection = this.handleSelection.bind(this);
 
         this.listen(Events.SELECTION_ON_CHOOSE, this.handleSelection);
-
     }
 
 
-    listen(event,callback){
+    listen(event, callback) {
 
         this.eventBus.on(event, callback);
 
         this._listeners.push({event, callback});
-
-
     }
 
 
-    handleSelection(){
+    handleSelection() {
 
+        const selection = this.instances.find(item => item instanceof SelectService);
 
-        const selection =
-            this.instances.find(
-                item => item instanceof SelectService
-            );
+        if (!selection) return;
 
+        const files = selection.returnSelections();
 
-        if(!selection) return;
-
-
-
-        const files =
-            selection.returnSelections();
-
-
-
-        this.emit(
-            Events.CHOOSE,
-            files
-        );
-
-
+        this.emit(Events.CHOOSE, files);
     }
 
 
-    emit(event,payload={}){
+    emit(event, payload = {}) {
 
-        this.eventBus.emit(
-            event,
-            payload
-        );
-
+        this.eventBus.emit(event, payload);
     }
 
 
+    on(event, callback) {
 
-    on(event,callback){
-
-        this.eventBus.on(
-            event,
-            callback
-        );
-
+        this.eventBus.on(event, callback);
 
         return this;
-
     }
 
 
+    off(event, callback) {
 
-    off(event,callback){
-
-        this.eventBus.off(
-            event,
-            callback
-        );
-
+        this.eventBus.off(event, callback);
 
         return this;
-
     }
 
 
+    once(event, callback) {
 
-    once(event,callback){
-
-
-        const wrapper = (...args)=>{
+        const wrapper = (...args) => {
 
             callback(...args);
 
-            this.off(
-                event,
-                wrapper
-            );
-
+            this.off(event, wrapper);
         };
 
-
-        this.on(
-            event,
-            wrapper
-        );
-
+        this.on(event, wrapper);
 
         return this;
 
     }
 
 
-    destroy(){
+    destroy() {
+        for (const item of this._listeners) {
 
-
-        for(const item of this._listeners){
-
-            this.eventBus.off(
-                item.event,
-                item.callback
-            );
-
+            this.eventBus.off(item.event, item.callback);
         }
 
-
-
-        for(const instance of this.instances){
-
+        for (const instance of this.instances) {
             instance.destroy?.();
 
         }
 
-
-
         this.instances.length = 0;
-
-
     }
-
-
 }

@@ -1,106 +1,82 @@
-import {$, $$} from "../helpers/dom.js";
 import Events from "../constants/events.js";
 import {renderMedia} from "../helpers/preview.js";
-
-export default class GridUi {
-
-    constructor({elements = {}} = {}, options = {}, eventBus, stateManager) {
-
-        this.loadElements(elements);
-
-        if (!this.gridEl) return;
-
-        this.listeners = {};
-
-        this.state = stateManager;
-
-        this.eventBus = eventBus;
+import UiService from "../Foundation/UiService.js";
 
 
-        this.bindBusEvents();
+export default class GridUi extends UiService {
 
-        this.bindUiEvents();
-    }
+    defineElements() {
 
-    loadElements(elements) {
+        return {
 
-        const gridSelector = elements.gridEl ?? '[data-grid]';
+            gridEl: this.config.get('ui.gridSelector', '[data-grid]'),
 
-        const loadingSelector = elements.loadingEl ?? '[data-loading]';
-
-
-        this.gridEl = $(gridSelector);
-
-        this.loadingEl = $(loadingSelector);
+            loadingEl: this.config.get('ui.loadingSelector', '[data-loading]')
+        };
     }
 
 
-    bindBusEvents() {
-        this.updateTitle = this.updateTitle.bind(this)
+    shouldInitialize() {
 
-        this.listeners = {
+        return Boolean(this.gridEl);
+    }
 
-            append: ({value}) => {
+
+    busEvents() {
+
+        return {
+
+            [Events.GRID_CLEAR]: () => {
+                this.emptyGrid();
+            },
+
+            'load.append': ({value}) => {
+
                 this.appendFile(value);
             },
 
-            prepend: ({file: value}) => {
-                this.prependFile(value);
-            },
+            'load.loading': ({value}) => {
 
-            toggleLoading: ({value}) => {
                 this.toggleLoading(value);
             },
 
-            remove: ({fileId}) => {
+            [Events.UPLOAD_SUCCESS]: ({file: value}) => {
+
+                this.prependFile(value);
+            },
+
+            [Events.FILE_DELETED]: ({fileId}) => {
+
                 this.removeFile(fileId);
             },
 
-            hideItem: ({fileId}) => {
-                this.hideItem(fileId);
-            },
+            [Events.FILE_DELETE_FAILED]: ({fileId}) => {
 
-
-            unHideItem: ({fileId}) => {
                 this.unHideItem(fileId);
             },
 
+            [Events.FILE_DELETE_SIGNAL]: ({fileId}) => {
 
-            updateTitle: ({fileId, title, file}) => {
-                this.updateTitle(fileId, title, file);
+                this.hideItem(fileId);
             },
 
-            emptyGrid: () => {
-                this.emptyGrid();
-            },
+            [Events.FILE_UPDATED_TITLE]:
+
+                ({fileId, title, file}) => {
+
+                    this.updateTitle(fileId, title, file);
+                }
         };
-
-
-        this.eventBus.on(Events.GRID_CLEAR, this.listeners.emptyGrid);
-
-        this.eventBus.on('load.append', this.listeners.append);
-
-        this.eventBus.on('load.loading', this.listeners.toggleLoading);
-
-        this.eventBus.on(Events.UPLOAD_SUCCESS, this.listeners.prepend);
-
-        this.eventBus.on(Events.FILE_DELETED, this.listeners.remove);
-
-        this.eventBus.on(Events.FILE_DELETE_FAILED, this.listeners.unHideItem);
-
-        this.eventBus.on(Events.FILE_DELETE_SIGNAL, this.listeners.hideItem);
-
-        this.eventBus.on(Events.FILE_UPDATED_TITLE, this.listeners.updateTitle);
-
     }
 
+    domEvents() {
 
-    bindUiEvents() {
+        return [
 
-        this.selectingAction = this.selectingAction.bind(this);
-        this.hideItem = this.hideItem.bind(this);
-
-        this.gridEl.addEventListener('click', this.selectingAction);
+            [
+                this.gridEl, 'click', this.selectingAction
+            ]
+        ];
     }
 
 
@@ -118,13 +94,17 @@ export default class GridUi {
         });
 
         this.gridEl.appendChild(fragment);
-        this.eventBus.emit(Events.GRID_UPDATED, {items, 'action': 'append file'})
+
+        this.eventBus.emit(Events.GRID_UPDATED, {items, action: 'append file'});
 
         this.state.set('load.append', {});
+
     }
 
 
     prependFile(items = {}) {
+
+        if (!items || Object.keys(items).length === 0) return;
 
         const fragment = document.createDocumentFragment();
 
@@ -136,7 +116,8 @@ export default class GridUi {
         });
 
         this.gridEl.prepend(fragment);
-        this.eventBus.emit(Events.GRID_UPDATED, {items, 'action': 'prepend file'})
+
+        this.eventBus.emit(Events.GRID_UPDATED, {items, action: 'prepend file'});
     }
 
 
@@ -144,21 +125,15 @@ export default class GridUi {
 
         if (!item?.id) return null;
 
-        if (this.gridEl.querySelector(`[data-media-card][data-id="${CSS.escape(item.id)}"]`)) {
-            return null;
-        }
+        const exists = this.gridEl.querySelector(`[data-media-card][data-id="${CSS.escape(item.id)}"]`);
+
+        if (exists) return null;
 
         const card = document.createElement('div');
 
         card.className = 'media-card';
 
-        card.dataset.mediaCard = '';
-
-        card.dataset.id = item.id;
-
-        card.dataset.disk = item.disk ?? '';
-
-        card.dataset.mime = item.mime_type ?? '';
+        Object.assign(card.dataset, {mediaCard: '', id: item.id, disk: item.disk ?? '', mime: item.mime_type ?? ''});
 
 
         const thumb = document.createElement('div');
@@ -179,15 +154,14 @@ export default class GridUi {
 
         if (!this.loadingEl) return;
 
-        value
-            ? this.loadingEl.classList.add('show')
-            : this.loadingEl.classList.remove('show');
-
+        this.loadingEl.classList.toggle('show', Boolean(value));
     }
 
 
     emptyGrid() {
+
         this.gridEl.innerHTML = '';
+
         this.eventBus.emit(Events.GRID_CLEARED, {});
     }
 
@@ -203,6 +177,7 @@ export default class GridUi {
         if (!fileId) return;
 
         this.state.set('select.current', fileId);
+
         this.eventBus.emit(Events.SELECTION_CLICK, {fileId});
     }
 
@@ -217,65 +192,52 @@ export default class GridUi {
     }
 
 
-    unHideItem(fileId) {
-
-        if (!fileId) return;
-
-        const card = this.gridEl.querySelector(`[data-media-card][data-id="${CSS.escape(fileId)}"]`);
-
-        if (card) card.style.display = 'block';
-        if (card) card.classList.remove( 'is_hidden');
-    }
-
     hideItem(fileId) {
 
-        if (!fileId) return;
+        const card = this.findCard(fileId);
 
-        const card = this.gridEl.querySelector(`[data-media-card][data-id="${CSS.escape(fileId)}"]`);
+        if (!card) return;
 
-        if (card) card.style.display = 'none';
-        if (card) card.classList.add( 'is_hidden');
+        card.hidden = true;
+
+        card.classList.add('is_hidden');
+    }
+
+
+    unHideItem(fileId) {
+
+
+        const card = this.findCard(fileId);
+
+
+        if (!card) return;
+
+        card.hidden = false;
+
+        card.classList.remove('is_hidden');
 
 
     }
+
+
+    findCard(fileId) {
+
+        if (!fileId) return null;
+
+        return this.gridEl.querySelector(`[data-media-card][data-id="${CSS.escape(fileId)}"]`);
+    }
+
 
     updateTitle(fileId, title, file) {
 
         if (!fileId) return;
 
+
         const newTitle = title ?? file?.title ?? file?.original_name ?? 'UNKNOWN';
 
-        if (!newTitle) return;
+        this.$$(`[data-id="${CSS.escape(fileId)}"] [data-item-name]`).forEach(item => {
 
-        $$(`[data-id="${fileId}"] [data-item-name]`)
-            .forEach(item => {
-                item.textContent = newTitle;
-            });
+            item.textContent = newTitle;
+        });
     }
-
-
-    destroy() {
-
-        this.eventBus.off('load.append', this.listeners.append);
-
-        this.eventBus.off('load.loading', this.listeners.toggleLoading);
-
-        this.eventBus.off(Events.UPLOAD_SUCCESS, this.listeners.prepend);
-
-
-        this.eventBus.off(Events.GRID_CLEAR, this.listeners.emptyGrid);
-
-        this.eventBus.off(Events.FILE_DELETED, this.listeners.remove);
-
-        this.eventBus.off(Events.FILE_DELETE_FAILED, this.listeners.unHideItem);
-
-        this.eventBus.on(Events.FILE_DELETE_SIGNAL, this.listeners.hideItem);
-
-        this.eventBus.off(Events.FILE_UPDATED_TITLE, this.listeners.updateTitle);
-
-        this.gridEl?.removeEventListener('click', this.selectingAction);
-
-
-    }
-
 }

@@ -40,7 +40,7 @@ export default class SelectionGridUi extends UiService {
         ];
     }
 
-    
+
     renderSelections() {
 
         const files = this.state.get("select.files", {});

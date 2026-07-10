@@ -212,6 +212,14 @@ export default class DatabaseFileManager {
                 }
             }],
 
+
+            [SelectionButtonUi, {
+                elements: {
+                    actionsEl: this.config.get('ui.selectionButtonSelector')
+                },
+                config:  this.config.section('selection')
+            }],
+
             /*
                         [
                             UploaderUi,
@@ -226,31 +234,6 @@ export default class DatabaseFileManager {
 
                             }
                         ],
-
-
-
-                        [
-                            SelectionButtonUi,
-
-                            {
-
-                                elements:{
-
-                                    actionsEl:
-                                        this.config.get(
-                                            'ui.selectionButtonSelector'
-                                        )
-
-                                }
-
-                            }
-
-                        ],
-
-
-
-
-
             */
         ];
 
@@ -258,16 +241,11 @@ export default class DatabaseFileManager {
 
 
     boot() {
-
-        this.instances = this.components()
-
-            .map(([Component, options]) => {
-
-                return this.register(Component, options);
+        this.instances = this.components().map(([Component, options]) => {
+                return this.register(Component, {...options});
             });
 
         this.bindEvents();
-
     }
 
     register(Component, options = {}) {
@@ -349,8 +327,8 @@ export default class DatabaseFileManager {
         }
 
         for (const instance of this.instances) {
-            instance.destroy?.();
 
+            instance.destroy?.();
         }
 
         this.instances.length = 0;

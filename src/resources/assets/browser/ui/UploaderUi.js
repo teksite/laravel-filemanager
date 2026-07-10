@@ -72,8 +72,8 @@ export default class UploaderUi extends UiService {
 
 
     openFileDialog() {
-        this.inputEl.click();
 
+        this.inputEl.click();
     }
 
 
@@ -109,7 +109,6 @@ export default class UploaderUi extends UiService {
         this.syncState();
 
         this.renderPreview();
-
     }
 
     normalizeFiles(files) {
@@ -119,8 +118,10 @@ export default class UploaderUi extends UiService {
         Object.entries(files).forEach(([id, item,]) => {
 
             const fileId = `fake_${uniqueString()}`;
-            item.id = fileId
-            return items[fileId] = item
+
+            item.id = fileId;
+
+            return items[fileId] = item;
         });
 
         return items;
@@ -131,10 +132,7 @@ export default class UploaderUi extends UiService {
         const allowed = this.config.get('upload.allowedMimes', [])
             .map(item => item.toLowerCase());
 
-        if (!allowed.length) {
-
-            return {valid: files, invalid: {}};
-        }
+        if (!allowed.length)  return {valid: files, invalid: {}};
 
         const valid = {};
 
@@ -148,6 +146,8 @@ export default class UploaderUi extends UiService {
 
                 valid[id] = file;
             } else {
+
+                invalid['reason'] = 'invalid type file';
 
                 invalid[id] = file;
             }
@@ -244,8 +244,7 @@ export default class UploaderUi extends UiService {
         }
 
 
-        const id =
-            button.dataset.removeFile;
+        const id = button.dataset.removeFile;
 
 
         delete this.validFiles[id];

@@ -18,6 +18,7 @@ const defaultConfig = {
 
     upload: {
         concurrency: 3,
+        size: 5000,
         chunkSize: 0,
         requestTimeout: 15000,
         allowedMimes: [],

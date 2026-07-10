@@ -1,55 +1,37 @@
-import {$} from "../helpers/dom.js";
+import UiService from "../Foundation/UiService.js";
 
-export default class CounterUi {
+export default class CounterUi extends UiService {
 
-    constructor({elements = {}} = {}, options = {}, eventBus, stateManager) {
+    defineElements() {
 
-        this.options = {...options};
+        return {
 
-        this.loadElements(elements);
-
-        this.listeners = {};
-
-        this.state = stateManager;
-
-        this.eventBus = eventBus;
-
-        this.bindBusEvents();
-
-    }
-
-    loadElements(elements) {
-
-        this.counterEl = $(elements.counterEl ?? '[data-file-counter]');
-    }
-
-    bindBusEvents() {
-
-        this.updateCounter = this.updateCounter.bind(this);
-
-        this.listeners = {
-            counting: () => {
-                this.updateCounter();
-            }
+            counterEl: this.options.elements?.counterEl ?? "[data-file-counter]",
         };
-
-        this.eventBus.on('load.files', this.listeners.counting);
     }
 
+    busEvents() {
+
+        return {
+
+            "load.files": this.updateCounter,
+        };
+    }
+
+    shouldInitialize() {
+
+        return Boolean(this.counterEl);
+    }
+
+    initialize() {
+
+        this.updateCounter();
+    }
 
     updateCounter() {
 
-        if (!this.counterEl) return;
-
-        const files = this.state.get('load.files', {}) ?? {};
+        const files = this.state.get("load.files", {});
 
         this.counterEl.textContent = Object.keys(files).length;
     }
-
-
-    destroy() {
-
-        this.eventBus.off('load.files', this.listeners.counting);
-    }
-
 }

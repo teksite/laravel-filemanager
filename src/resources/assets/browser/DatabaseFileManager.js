@@ -188,7 +188,7 @@ export default class DatabaseFileManager {
                     counterEl: this.config.get('ui.filesCounterSelector')
                 }
             }],
-            
+
             /*
 
 

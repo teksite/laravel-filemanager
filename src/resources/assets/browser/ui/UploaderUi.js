@@ -82,13 +82,16 @@ export default class UploaderUi extends UiService {
     }
 
     changeInputHandler(event) {
+
         this.updateSelectedFiles(event.target.files);
     }
 
     updateSelectedFiles(files) {
 
-        const revoked = this.revokeFiles(files)
+        const revoked = this.revokeFiles(files);
+
         const {validated, failed} = this.validateMimes(revoked);
+
         this.state.set('upload.files', validated);
 
         this.renderFileStatus(validated, failed);
@@ -107,24 +110,31 @@ export default class UploaderUi extends UiService {
     revokeFiles(files = {}) {
 
         return Object.values(files).reduce((acc, file) => {
-            const id = 'fake_' + uniqueString()
+
+            const id = 'fake_' + uniqueString();
+
             file.id = id;
+
             acc[id] = file;
+
             return acc;
         }, {});
     }
 
     validateMimes(files = {}) {
-        const Mimes = this.config.get('upload.allowedMimes', [])
+        const Mimes = this.config.get('upload.allowedMimes', []);
+
         if (!Mimes.length) return {validated: files};
 
         const allowedMimes = Mimes.map(mime => mime.toLowerCase());
+
         let validated = {}
 
         let failed = {}
 
         Object.entries(files).forEach(([id, file]) => {
             const filetType = (file.type).toLowerCase();
+
             return allowedMimes.includes(filetType)
                 ? validated[id] = file
                 : failed[id] = file
@@ -145,6 +155,21 @@ export default class UploaderUi extends UiService {
     }
 
     renderItem([id, file], status) {
+
+        const deleteItem =(event)=>{
+            console.log(event)
+            const removerBtn =event.target;
+            removerBtn.closest('[data-upload-preview]')?.remove();
+
+          if (status){
+              const next = this.get('upload.files' ,{});
+              delete next[id];
+
+              this.set('upload.files' ,{...next});
+          }
+
+
+        }
         return `
             <div class="upload-item ${status ? 'valid-file' : 'invalid-file'}" data-upload-preview data-file="${file.id}">
                 <div>
@@ -153,12 +178,12 @@ export default class UploaderUi extends UiService {
                       ${status ? `
                     <div class="upload-progress">
                         <div class="progress-bar" data-progress="${file.id}"></div>
-                    </div>` : ''}
+                    </div>` : '<div>file type error</div> onclick="deleteItem"'}
                     <small data-status="${file.id}" class="upload-status"></small>
                 </div>
                 <div>
                     <small>${formatSize(file.size ?? 0)}</small>
-                    <button type="button" data-remove="${file.id}">x</button>
+                    <button onclick="${(e)=>deleteItem(e)}" type="button" data-remove="${file.id}">x</button>
                 </div>
             </div>
         `;

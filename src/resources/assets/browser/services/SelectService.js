@@ -1,47 +1,33 @@
 import Events from "../constants/events.js";
+import BaseService from "../Foundation/BaseServices.js";
 
-export default class SelectService {
 
-    constructor(options = {}, eventBus, state) {
+export default class SelectService extends BaseService {
 
-        this.options = {...options};
+    constructor(app, options = {}) {
 
-        this.state = state;
-
-        this.eventBus = eventBus;
-
-        this.listeners = {};
-
-        this.bindEvents();
+        super(app, options);
     }
 
-
-    bindEvents() {
-
-        this.removeFromSelections = this.removeFromSelections.bind(this);
-
-        this.addToSelections = this.addToSelections.bind(this);
-
-        this.listeners = {
-            addToSelections: ({fileId}) => {
-                this.addToSelections(fileId)
+    busEvents() {
+        return {
+            [Events.SELECTION_CLICK]: ({fileId}) => {
+                this.addToSelections(fileId);
             },
-            removeFromSelections: ({fileId}) => {
-                this.removeFromSelections(fileId)
+
+            [Events.SELECTION_REMOVE_SIGNAL]: ({fileId}) => {
+                this.removeFromSelections(fileId);
+            },
+
+            [Events.FILE_DELETE_SIGNAL]: ({fileId}) => {
+                this.removeFromSelections(fileId);
             }
         };
-
-
-        this.eventBus.on(Events.SELECTION_CLICK, this.listeners.addToSelections);
-
-        this.eventBus.on(Events.SELECTION_REMOVE_SIGNAL, this.listeners.removeFromSelections);
-
-        this.eventBus.on(Events.FILE_DELETE_SIGNAL, this.listeners.removeFromSelections);
     }
 
-
     addToSelections(fileId) {
-        const {mode} = this.options;
+
+        if (!fileId) return;
 
         const files = this.state.get('load.files', {});
 
@@ -49,9 +35,13 @@ export default class SelectService {
 
         if (!selectedFile) return;
 
+
+        const mode = this.options.mode ?? 'single';
+
         const selected = this.state.get('select.files', {});
 
         const next = {...selected};
+
 
         if (next[fileId]) {
             delete next[fileId];
@@ -59,40 +49,52 @@ export default class SelectService {
             next[fileId] = selectedFile;
         }
 
-
         if (['multi', 'multiple'].includes(mode)) {
+
             this.state.set('select.files', next);
+
             return;
         }
 
         this.state.set('select.files', {[selectedFile.id]: selectedFile});
-
-
     }
 
-    removeFromSelections(fileId) {
-        const selections = this.state.get('select.files');
 
-        if (!selections) return;
+    removeFromSelections(fileId) {
+
+        if (!fileId) return;
+
+        const selections = this.state.get('select.files', {});
+
+        if (!selections || !selections[fileId]) return;
 
         const next = {...selections};
 
         delete next[fileId];
 
-        this.state.set('select.files', Object.keys(next).length ? next : {});
+        this.state.set('select.files', next);
 
-        this.eventBus.emit(Events.SELECTION_REMOVED , {fileId})
-
-
-
+        this.eventBus.emit(Events.SELECTION_REMOVED, {fileId});
     }
 
-    returnSelections() {
-        const files = this.state.get('select.files', {});
-        const {mode = 'single', expect = 'url'} = this.options;
 
-        const format = (file) => {
+    returnSelections() {
+
+        const files = this.state.get('select.files', {});
+
+        const values = Object.values(files);
+
+        if (values.length === 0) return null;
+
+        const mode = this.options.mode ?? 'single';
+
+        const expect = this.options.expect ?? 'url';
+
+
+        const format = file => {
+
             switch (expect) {
+
                 case 'id':
                     return file.id;
 
@@ -107,25 +109,12 @@ export default class SelectService {
                     return null;
             }
         };
-        const values = Object.values(files);
-
 
         if (['multi', 'multiple'].includes(mode)) {
+
             return values.map(format);
         }
 
-        return values.length ? format(values[0]) : null;
-
-    }
-
-
-    destroy() {
-
-        this.eventBus.off(Events.SELECTION_CLICK, this.listeners.addToSelections);
-
-        this.eventBus.off(Events.SELECTION_REMOVE_SIGNAL, this.listeners.removeFromSelections);
-
-        this.eventBus.off(Events.FILE_DELETE_SIGNAL, this.listeners.removeFromSelections);
-
+        return format(values[0]);
     }
 }

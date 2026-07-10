@@ -138,6 +138,40 @@ export default class DatabaseFileManager {
                 }
             }],
 
+            [SelectService,
+                this.config.section('selection')
+            ],
+
+            [InfoUi, {
+                elements: {
+
+                    baseInfoEl: this.config.get('ui.baseInfoSelector'),
+
+                    filePreviewEl: this.config.get('ui.filePreviewSelector'),
+
+                    idInfoEl: this.config.get('ui.idInfoSelector'),
+
+                    titleInfoEl: this.config.get('ui.titleInfoSelector'),
+
+                    urlInfoEl: this.config.get('ui.urlInfoSelector'),
+
+                    sizeInfoEl: this.config.get('ui.sizeInfoSelector'),
+
+                    mimeInfoEl: this.config.get('ui.mimeInfoSelector'),
+
+                    diskInfoEl: this.config.get('ui.diskInfoSelector'),
+
+                    createdInfoEl: this.config.get('ui.createdInfoSelector'),
+
+                    deleteBtnEl: this.config.get('ui.deleteBtnSelector'),
+
+                    copyBtnEl: this.config.get('ui.copyUrlBtnSelector'),
+
+                    openBtnEl: this.config.get('ui.openUrlBtnSelector')
+                }
+            }],
+
+
             /*
                         [
                             DeleteService,
@@ -164,13 +198,7 @@ export default class DatabaseFileManager {
 
 
 
-                        [
-                            SelectService,
 
-                            this.config.section(
-                                'selection'
-                            )
-                        ],
 
 
 
@@ -241,88 +269,7 @@ export default class DatabaseFileManager {
 
 
 
-                        [
-                            InfoUi,
-                            {
 
-                                elements:{
-
-
-                                    baseInfoEl:
-                                        this.config.get(
-                                            'ui.baseInfoSelector'
-                                        ),
-
-
-                                    filePreviewEl:
-                                        this.config.get(
-                                            'ui.filePreviewSelector'
-                                        ),
-
-
-                                    idInfoEl:
-                                        this.config.get(
-                                            'ui.idInfoSelector'
-                                        ),
-
-
-                                    titleInfoEl:
-                                        this.config.get(
-                                            'ui.titleInfoSelector'
-                                        ),
-
-
-                                    urlInfoEl:
-                                        this.config.get(
-                                            'ui.urlInfoSelector'
-                                        ),
-
-
-                                    sizeInfoEl:
-                                        this.config.get(
-                                            'ui.sizeInfoSelector'
-                                        ),
-
-
-                                    mimeInfoEl:
-                                        this.config.get(
-                                            'ui.mimeInfoSelector'
-                                        ),
-
-
-                                    diskInfoEl:
-                                        this.config.get(
-                                            'ui.diskInfoSelector'
-                                        ),
-
-
-                                    createdInfoEl:
-                                        this.config.get(
-                                            'ui.createdInfoSelector'
-                                        ),
-
-
-                                    deleteBtnEl:
-                                        this.config.get(
-                                            'ui.deleteBtnSelector'
-                                        ),
-
-
-                                    copyBtnEl:
-                                        this.config.get(
-                                            'ui.copyUrlBtnSelector'
-                                        ),
-
-
-                                    openBtnEl:
-                                        this.config.get(
-                                            'ui.openUrlBtnSelector'
-                                        )
-
-                                }
-
-                            }
-                        ],
 
 
 

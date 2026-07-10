@@ -25,7 +25,6 @@ export default class SelectionButtonUi extends UiService {
     domEvents() {
 
         return [
-
             [
                 this.chooseBtn, "click", this.handleChoose
             ]
@@ -35,8 +34,7 @@ export default class SelectionButtonUi extends UiService {
 
     createButton() {
 
-        const handleChoose =(event)=>
-        {
+        const handleChoose = (event) => {
 
             event.preventDefault();
 
@@ -50,7 +48,6 @@ export default class SelectionButtonUi extends UiService {
 
             this.state.set("select.current", null);
         }
-
 
 
         this.chooseBtn = this.actionsEl.querySelector("[data-choose-button]");
@@ -69,12 +66,9 @@ export default class SelectionButtonUi extends UiService {
 
         this.chooseBtn.textContent = "Choose";
 
-        this.chooseBtn.onclick=handleChoose;
+        this.chooseBtn.onclick = handleChoose;
 
         this.actionsEl.prepend(this.chooseBtn);
-
-
-
 
         this.emit(EVENTS.SELECTION_SELECT_BUTTON_MADE, {button: this.chooseBtn});
     }

@@ -7,13 +7,12 @@ import RequestService from "./core/RequestService.js";
 import defaultState from "./constants/defaults.js";
 import Events from "./constants/events.js";
 
-import UploadService from "./services/UploadService.js";
+// import UploadService from "./services/UploadService.js";
 import LoadService from "./services/LoadService.js";
 import DeleteService from "./services/DeleteService.js";
 import UpdateService from "./services/UpdateService.js";
 import SelectService from "./services/SelectService.js";
 
-import UploaderUi from "./ui/UploaderUi.js";
 import GridUi from "./ui/GridUi.js";
 import MoreButtonUi from "./ui/MoreButtonUi.js";
 import InfoUi from "./ui/InfoUi.js";
@@ -21,6 +20,7 @@ import CounterUi from "./ui/CounterUi.js";
 import FilterUi from "./ui/FilterUi.js";
 import SelectionButtonUi from "./ui/SelectionButtonUi.js";
 import SelectionGridUi from "./ui/SelectionGridUi.js";
+import UploaderUi from "./ui/UploaderUi.js";
 
 
 export default class DatabaseFileManager {
@@ -217,33 +217,42 @@ export default class DatabaseFileManager {
                 elements: {
                     actionsEl: this.config.get('ui.selectionButtonSelector')
                 },
-                config:  this.config.section('selection')
+                config: this.config.section('selection')
             }],
 
+
+            [UploaderUi, {
+                elements: {
+                    uploadPreviewSelector: this.config.get('ui.uploadPreviewSelector'),
+
+                    formEl: this.config.get('ui.uploadFormSelector'),
+
+                    dropzoneEl: this.config.get('ui.dropzoneSelector'),
+
+                    inputEl: this.config.get('ui.fileInputSelector'),
+
+                    previewEl: this.config.get('ui.uploadPreviewSelector'),
+
+                    diskSelectorEl: this.config.get('ui.uploadDiskSelector'),
+                },
+
+            }],
             /*
-                        [
-                            UploaderUi,
-                            {
 
-                                elements:{
-                                    uploadPreviewSelector:
-                                        this.config.get(
-                                            'ui.uploadPreviewSelector'
-                                        )
-                                }
-
-                            }
-                        ],
+                        [UploadService, {
+                            url: this.config.get('api.deleteUrl')
+                        }],
             */
-        ];
 
+
+        ];
     }
 
 
     boot() {
         this.instances = this.components().map(([Component, options]) => {
-                return this.register(Component, {...options});
-            });
+            return this.register(Component, {...options});
+        });
 
         this.bindEvents();
     }

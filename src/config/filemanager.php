@@ -59,7 +59,9 @@ return [
     |
     */
 
-    'allow_upload_types' => [],                       // Allowed mime types or extensions (empty = allow all)
+    'allow_upload_types' => [
+        'image/jpg'
+    ],                       // Allowed mime types or extensions (empty = allow all)
 
     'allow_upload_disks' =>
         ['public' ,'local', 's3', 's3-arvan_private', 's3-arvan_public',], //allowed disk to be upload to

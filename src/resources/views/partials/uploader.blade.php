@@ -2,7 +2,8 @@
 
     @if(count($allowedDisks))
         <span>Upload</span>
-        <form data-upload-form>
+        <form data-upload-form enctype="multipart/form-data" method="POST">
+
             <div class="upload-dropzone" data-dropzone>
                 <input name="file" type="file" hidden multiple data-file-input>
                 <div class="upload-content">
@@ -28,7 +29,7 @@
                     @endforeach
 
                 </select>
-                <button type="submit" class="upload-btn">
+                <button type="submit" class="upload-btn" data-upload-btn>
                     Upload
                 </button>
 

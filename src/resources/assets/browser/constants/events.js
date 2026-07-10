@@ -2,6 +2,7 @@ const EVENTS = Object.freeze({
 
 
     /* Upload */
+    UPLOAD_SIGNAL: 'upload:selected_remove',
     UPLOAD_SELECTED_REMOVE: 'upload:selected_remove',
     UPLOAD_SELECTED: 'upload:selected',
     UPLOAD_START: 'upload:start',

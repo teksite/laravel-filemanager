@@ -1,216 +1,131 @@
-import {$, escapeHtml} from "../helpers/dom.js";
-import Events from "../constants/events.js";
-import formatSize from "../helpers/formatSize.js";
-import {getMimeIcon} from "../helpers/mime.js";
+import UiService from "../Foundation/UiService.js";
+import events from "../constants/events.js";
 import {uniqueString} from "../helpers/general.js";
 
-export default class UploaderUi {
 
-    constructor({uploadPreviewSelector = null} = {}, eventBus, stateManager) {
+export default class UploaderUi extends UiService {
 
-        this.files = [];
-        this.eventBus = eventBus;
-        this.state = stateManager;
+    shouldInitialize() {
 
-        this.listeners = [];
-
-        const selector = uploadPreviewSelector ?? '[data-upload-preview]';
-
-        this.uploadPreviewEl = $(selector);
-
-        this.bindDomEvents();
-        this.bindBusEvents();
-
-        this.render();
+        return Boolean(this.formEl && this.dropzoneEl && this.inputEl);
     }
 
-    bindBusEvents() {
+
+    defineElements() {
+
+        return {
+
+            uploadPreviewSelector: this.config.get('ui.uploadPreviewSelector'),
+
+            formEl: this.config.get('ui.uploadFormSelector'),
+
+            dropzoneEl: this.config.get('ui.dropzoneSelector'),
+
+            inputEl: this.config.get('ui.fileInputSelector'),
+
+            previewEl: this.config.get('ui.uploadPreviewSelector'),
+
+            diskSelectorEl: this.config.get('ui.uploadDiskSelector'),
+        };
+    }
 
 
-        this.listeners = {
+    busEvents() {
+        return {
 
-            selected: ({files}) => {
-                this.files = files;
-                this.render();
-            },
+            /*    [Events.GRID_CLEAR]: () => {
+                    this.emptyGrid();
+                },
 
-            progress: ({file, percent}) => {
-                this.updatePreview(file, percent);
-            },
-
-            success: ({file}) => {
-                this.finishPreview(file, true);
-            },
-
-            failed: ({file}) => {
-                this.finishPreview(file, false);
-            },
-
-            complete: ({success, failed}) => {
-                this.competeUpload(success, failed);
-            }
+                'load.append': ({value}) => {
+                    this.appendFile(value);
+                },*/
 
         };
+    }
 
-        this.eventBus.on(Events.UPLOAD_SELECTED, this.listeners.selected);
+    domEvents() {
 
-        this.eventBus.on(Events.UPLOAD_PROGRESS, this.listeners.progress);
+        return [
+            [this.dropzoneEl, 'click', this.resolveClickOnZone],
 
-        this.eventBus.on(Events.UPLOAD_SUCCESS, this.listeners.success);
+            [this.dropzoneEl, 'dragover', this.dragOverHandler],
 
-        this.eventBus.on(Events.UPLOAD_FAILED, this.listeners.failed);
+            [this.dropzoneEl, 'drop', this.dropHandler],
 
-        this.eventBus.on(Events.UPLOAD_COMPLETE, this.listeners.complete);
+            [this.inputEl, 'change', this.changeInputHandler],
+
+            [this.formEl, 'submit', this.FormDefaultSubmit],
+        ];
 
     }
 
-    render() {
-        this.uploadPreviewEl.innerHTML = this.renderList(this.files);
+    resolveClickOnZone(event) {
+        this.inputEl.click();
     }
 
-    renderList(files) {
+    dragOverHandler(event) {
 
-        if (!files.length) return '';
-
-        return files
-            .map(file => this.renderPreviewItem(file))
-            .join('');
-
+        event.preventDefault();
     }
 
-    renderPreviewItem(file) {
+    dropHandler(event) {
 
-        const id = this.fileId(file);
-        const fileName = escapeHtml(file.name);
-        return `
-            <div class="upload-item" data-file="${id}">
-                <div>
-                    ${getMimeIcon(file.type)}
-                    ${fileName}
-                    <div class="upload-progress">
-                        <div class="progress-bar" data-progress="${id}"></div>
-                    </div>
-                    <small data-status="${id}" class="upload-status"></small>
-                </div>
-                <div>
-                    <small>${formatSize(file.size ?? 0)}</small>
-                    <button type="button" data-remove="${id}">x</button>
-                </div>
-            </div>
-        `;
+        event.preventDefault();
+
+        this.updateSelectedFiles(event.dataTransfer.files);
     }
 
-    bindDomEvents() {
-
-        this.uploadPreviewEl.addEventListener('click', e => {
-                const btn = e.target.closest('[data-remove]');
-                if (!btn) return;
-                this.remove(btn.dataset.remove);
-            }
-        );
+    changeInputHandler(event) {
+        this.updateSelectedFiles(event.target.files);
     }
 
-    remove(id) {
+    updateSelectedFiles(files) {
 
-        const item = this.uploadPreviewEl.querySelector(`[data-file="${id}"]`);
-
-        item?.remove();
-
-        this.files = this.files.filter(file => this.fileId(file) !== id);
-
-        this.state.set('upload.files', this.files);
+        const revoked = this.revokeFiles(files)
+        const {validated, failed} = this.validateMimes(revoked);
+        // this.state.set('upload.files', [...validatedFiles]);
 
     }
 
-    fileId(file) {
-        if (!file.__uploadId) {
-            Object.defineProperty(
-                file,
-                '__uploadId',
-                {
-                    value: uniqueString(),
-                    writable: false
-                }
-            );
-        }
-        return file.__uploadId;
-    }
+    FormDefaultSubmit(event) {
 
-    updatePreview(file, percent) {
+        console.log('FormDefaultSubmit', event);
 
-        const id = this.fileId(file);
-
-        const progressEl = this.uploadPreviewEl.querySelector(`[data-progress="${id}"]`);
-
-        if (!progressEl) return;
-
-        progressEl.style.width = `${percent}%`;
-
-        progressEl.textContent = `${percent}%`;
-
-    }
-
-    finishPreview(file, success = true) {
-
-        const id = this.fileId(file);
-
-        const progressEl = this.uploadPreviewEl.querySelector(`[data-progress="${id}"]`);
-
-        const statusEl = this.uploadPreviewEl.querySelector(`[data-status="${id}"]`);
-
-        const item = this.uploadPreviewEl.querySelector(`[data-file="${id}"]`);
-
-        if (!progressEl || !item) return;
-
-        progressEl.style.width = '100%';
-
-        if (success) {
-
-            progressEl.classList.add('success');
-
-            statusEl.textContent = 'Uploaded';
-
-        } else {
-
-            progressEl.classList.add('failed');
-
-            statusEl.textContent = 'Failed';
-        }
-
-
-        setTimeout(() => {
-            item.style.opacity = '0';
-            setTimeout(() => item.remove(), 300);
-        }, 5000);
-    }
-
-    competeUpload(success, failed) {
-
-        const old = this.uploadPreviewEl.querySelector('.upload-summary');
-        old?.remove();
-        const summary = document.createElement('div');
-
-        summary.className = 'upload-summary';
-
-        summary.innerHTML = `Upload complete<br>Success: ${success}<br>Failed: ${failed}`;
-
-        this.uploadPreviewEl.prepend(summary);
+        this.emit(events.UPLOAD_SIGNAL, {})
 
     }
 
 
-    destroy() {
+    revokeFiles(files = {}) {
 
-        this.eventBus.off(Events.UPLOAD_SELECTED, this.listeners.selected);
+        return Object.values(files).reduce((acc, file) => {
+            acc[uniqueString()] = file;
+            return acc;
+        }, {});
+    }
 
-        this.eventBus.off(Events.UPLOAD_PROGRESS, this.listeners.progress);
+    validateMimes(files = {}) {
+        console.log(this.config)
+        const Mimes = this.config.section('upload.allowedMimes', [])
+        if (!Mimes.length) return {validated:  files};
 
-        this.eventBus.off(Events.UPLOAD_SUCCESS, this.listeners.success);
-
-        this.eventBus.off(Events.UPLOAD_FAILED, this.listeners.failed);
-
-        this.eventBus.off(Events.UPLOAD_COMPLETE, this.listeners.complete);
+        Mimes.map(mime => mime.toLowerCase());
+        let validated = {}
+        //
+        // let failed = {}
+        //
+        // Object.entries(files).forEach(([id, file])=>{
+        //     if (Mimes.include((file.type).toLowerCase)){
+        //        return  validated[id]= file
+        //     }
+        //     return  failed[id]= file
+        // });
+        //
+        // console.log(validated , failed)
+return {validated , failed}
 
     }
+
 
 }

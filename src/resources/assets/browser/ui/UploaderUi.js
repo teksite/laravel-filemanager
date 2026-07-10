@@ -1,6 +1,9 @@
 import UiService from "../Foundation/UiService.js";
 import events from "../constants/events.js";
 import {uniqueString} from "../helpers/general.js";
+import {escapeHtml} from "../helpers/dom.js";
+import formatSize from "../helpers/formatSize.js";
+import {getMimeIcon} from "../helpers/mime.js";
 
 
 export default class UploaderUi extends UiService {
@@ -15,7 +18,9 @@ export default class UploaderUi extends UiService {
 
         return {
 
-            uploadPreviewSelector: this.config.get('ui.uploadPreviewSelector'),
+            messagesEl: this.config.get('ui.uploadMessagesSelector'),
+
+            uploadPreviewEl: this.config.get('ui.uploadPreviewSelector'),
 
             formEl: this.config.get('ui.uploadFormSelector'),
 
@@ -84,7 +89,9 @@ export default class UploaderUi extends UiService {
 
         const revoked = this.revokeFiles(files)
         const {validated, failed} = this.validateMimes(revoked);
-        // this.state.set('upload.files', [...validatedFiles]);
+        this.state.set('upload.files', validated);
+
+        this.renderFileStatus(validated, failed);
 
     }
 
@@ -100,32 +107,60 @@ export default class UploaderUi extends UiService {
     revokeFiles(files = {}) {
 
         return Object.values(files).reduce((acc, file) => {
-            acc[uniqueString()] = file;
+            const id = 'fake_' + uniqueString()
+            file.id = id;
+            acc[id] = file;
             return acc;
         }, {});
     }
 
     validateMimes(files = {}) {
-        console.log(this.config)
-        const Mimes = this.config.section('upload.allowedMimes', [])
-        if (!Mimes.length) return {validated:  files};
+        const Mimes = this.config.get('upload.allowedMimes', [])
+        if (!Mimes.length) return {validated: files};
 
-        Mimes.map(mime => mime.toLowerCase());
+        const allowedMimes = Mimes.map(mime => mime.toLowerCase());
         let validated = {}
-        //
-        // let failed = {}
-        //
-        // Object.entries(files).forEach(([id, file])=>{
-        //     if (Mimes.include((file.type).toLowerCase)){
-        //        return  validated[id]= file
-        //     }
-        //     return  failed[id]= file
-        // });
-        //
-        // console.log(validated , failed)
-return {validated , failed}
+
+        let failed = {}
+
+        Object.entries(files).forEach(([id, file]) => {
+            const filetType = (file.type).toLowerCase();
+            return allowedMimes.includes(filetType)
+                ? validated[id] = file
+                : failed[id] = file
+        });
+
+        return {validated, failed}
 
     }
 
 
+    renderFileStatus(validated = {}, failed = {}) {
+        if (!this.messagesEl) return;
+        let message = '';
+        message += Object.entries(failed).map(file => this.renderItem(file, false));
+        message += Object.entries(validated).map(file => this.renderItem(file, true));
+
+        this.messagesEl.innerHTML = message;
+    }
+
+    renderItem([id, file], status) {
+        return `
+            <div class="upload-item ${status ? 'valid-file' : 'invalid-file'}" data-upload-preview data-file="${file.id}">
+                <div>
+                    ${getMimeIcon(file.type)}
+                    ${escapeHtml(file.name)}
+                      ${status ? `
+                    <div class="upload-progress">
+                        <div class="progress-bar" data-progress="${file.id}"></div>
+                    </div>` : ''}
+                    <small data-status="${file.id}" class="upload-status"></small>
+                </div>
+                <div>
+                    <small>${formatSize(file.size ?? 0)}</small>
+                    <button type="button" data-remove="${file.id}">x</button>
+                </div>
+            </div>
+        `;
+    }
 }

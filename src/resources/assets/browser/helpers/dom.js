@@ -97,8 +97,17 @@ export function exists(el) {
 }
 
 
-export function escapeHtml(str) {
+export function escapeHtml(value = '') {
 
-    return str.replace(/[&<>"']/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[m]));
+    if (value === null || value === undefined) return '';
+
+
+    return String(value).replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;',
+    }[char]));
 
 }

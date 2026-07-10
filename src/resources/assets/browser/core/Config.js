@@ -20,7 +20,7 @@ const defaultConfig = {
         concurrency: 3,
         chunkSize: 0,
         requestTimeout: 15000,
-        allowedMimes: ['image/jpg'],
+        allowedMimes: [],
         allowedDisks: [],
     },
 

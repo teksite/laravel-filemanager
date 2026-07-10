@@ -60,7 +60,7 @@ return [
     */
 
     'allow_upload_types' => [
-        'image/jpg'
+        'Image/Jpeg' ,'Image/Jpg'
     ],                       // Allowed mime types or extensions (empty = allow all)
 
     'allow_upload_disks' =>

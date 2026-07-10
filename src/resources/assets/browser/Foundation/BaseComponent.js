@@ -1,6 +1,6 @@
 import {$, $$} from "../helpers/dom.js";
 
-export default class ServiceProvider {
+export default class BaseComponent {
 
     constructor(app) {
 

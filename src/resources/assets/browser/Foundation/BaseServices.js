@@ -1,6 +1,6 @@
-import ServiceProvider from "./ServiceProvider.js";
+import BaseComponent from "./BaseComponent.js";
 
-export default class UiService extends ServiceProvider {
+export default class UiService extends BaseComponent {
 
     constructor(app) {
 

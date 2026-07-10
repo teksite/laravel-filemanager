@@ -15,7 +15,7 @@ import SelectService from "./services/SelectService.js";
 
 import UploaderUi from "./ui/UploaderUi.js";
 import GridUi from "./ui/GridUi.js";
-import MoreBtnUi from "./ui/MoreBtnUi.js";
+import MoreButtonUi from "./ui/MoreButtonUi.js";
 import InfoUi from "./ui/InfoUi.js";
 import CounterUi from "./ui/CounterUi.js";
 import FilterUi from "./ui/FilterUi.js";
@@ -130,8 +130,13 @@ export default class DatabaseFileManager {
                     loadingEl: this.config.get('ui.loadingSelector')
                 },
                 loadingStyle: this.config.get('load.loadingStyle', 'block')
-            }
-            ],
+            }],
+
+            [MoreButtonUi, {
+                elements: {
+                    btnEl: this.config.get('ui.loadMoreSelector')
+                }
+            }],
 
             /*
                         [
@@ -188,21 +193,7 @@ export default class DatabaseFileManager {
             /*
 
 
-                        [
-                            MoreBtnUi,
-                            {
 
-                                elements:{
-
-                                    btnEl:
-                                        this.config.get(
-                                            'ui.loadMoreSelector'
-                                        )
-
-                                }
-
-                            }
-                        ],
 
 
 

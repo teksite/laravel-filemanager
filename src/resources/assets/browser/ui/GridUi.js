@@ -8,7 +8,6 @@ export default class GridUi extends UiService {
     defineElements() {
 
         return {
-
             gridEl: this.config.get('ui.gridSelector', '[data-grid]'),
 
             loadingEl: this.config.get('ui.loadingSelector', '[data-loading]')
@@ -31,48 +30,38 @@ export default class GridUi extends UiService {
             },
 
             'load.append': ({value}) => {
-
                 this.appendFile(value);
             },
 
             'load.loading': ({value}) => {
-
                 this.toggleLoading(value);
             },
 
             [Events.UPLOAD_SUCCESS]: ({file: value}) => {
-
                 this.prependFile(value);
             },
 
             [Events.FILE_DELETED]: ({fileId}) => {
-
                 this.removeFile(fileId);
             },
 
             [Events.FILE_DELETE_FAILED]: ({fileId}) => {
-
                 this.unHideItem(fileId);
             },
 
             [Events.FILE_DELETE_SIGNAL]: ({fileId}) => {
-
                 this.hideItem(fileId);
             },
 
-            [Events.FILE_UPDATED_TITLE]:
-
-                ({fileId, title, file}) => {
-
-                    this.updateTitle(fileId, title, file);
-                }
+            [Events.FILE_UPDATED_TITLE]: ({fileId, title, file}) => {
+                this.updateTitle(fileId, title, file);
+            }
         };
     }
 
     domEvents() {
 
         return [
-
             [
                 this.gridEl, 'click', this.selectingAction
             ]

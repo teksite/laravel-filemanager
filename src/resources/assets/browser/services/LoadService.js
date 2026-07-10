@@ -15,9 +15,8 @@ export default class LoadService extends Service {
             ...options
         };
 
-        if (this.options.getOnInit) {
-            this.initialize();
-        }
+        if (this.options.getOnInit) this.initialize();
+
     }
 
     async initialize() {

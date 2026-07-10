@@ -27,7 +27,7 @@ export default class DatabaseFileManager {
     constructor({config = {}} = {} , root) {
 
 
-        // this.config = new Config(config);
+        this.config = new Config(config);
         this.root = typeof root === 'string'
             ? document.querySelector(root)
             : root;

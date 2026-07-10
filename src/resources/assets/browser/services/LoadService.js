@@ -16,17 +16,15 @@ export default class LoadService extends Service {
         };
 
         if (this.options.getOnInit) {
-            initialize();
+            this.initialize();
         }
-
     }
 
-
     async initialize() {
+
         await this.sendRequest();
 
     }
-
 
     busEvents() {
 
@@ -38,13 +36,6 @@ export default class LoadService extends Service {
             'load.type': this.updateFilter,
         };
     }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Request
-    |--------------------------------------------------------------------------
-    */
 
 
     async sendRequest() {
@@ -73,7 +64,6 @@ export default class LoadService extends Service {
 
         const signal = this.controller.signal;
 
-
         const {data, error, success} = await this.safe(
             async () => {
                 this.state.set("load.loading", true);
@@ -92,122 +82,67 @@ export default class LoadService extends Service {
 
                 this.appendFiles(files);
 
-                console.log(files)
-
                 this.eventBus.emit(Events.FILES_RECEIVE, {files, meta, action: 'load more'});
 
-
+                return {files, meta}
             },
+
             (error) => {
+
                 if (error.name === 'AbortError') return;
 
                 this.errorBus?.emit?.(error);
 
                 this.eventBus.emit(Events.FILES_REQUEST_FAILED, error, {action: 'load more'});
             }, () => {
+
                 if (this.controller?.signal === signal) this.controller = null;
 
                 this.state.set("load.loading", false);
             }
         );
 
-
+        return {data, error, success};
     }
 
 
     appendFiles(files = []) {
 
+        const normalized = Array.isArray(files)
+            ? Object.fromEntries(files.map(file => [file.id, file]))
+            : files;
 
-        const normalized =
-            Array.isArray(files)
+        const pre = this.state.get("load.files", {});
 
-                ? Object.fromEntries(
-                    files.map(
-                        file => [
-                            file.id,
-                            file
-                        ]
-                    )
-                )
+        const next = {...pre, ...normalized};
 
-                : files;
+        this.state.set("load.files", next);
 
-
-        const current =
-            this.state.get(
-                "load.files",
-                {}
-            );
-
-
-        const updated = {
-            ...current,
-            ...normalized
-        };
-
-
-        this.state.set(
-            "load.files",
-            updated
-        );
-
-
-        this.state.set(
-            "load.append",
-            normalized
-        );
-
-
+        this.state.set("load.append", normalized);
     }
 
 
     async updateFilter() {
 
-
         this.abortRequest();
-
 
         this.reset();
 
-
         await this.sendRequest();
-
-
     }
 
 
     reset(files = {}) {
 
+        this.state.set('load.cursor', null);
 
-        this.state.set(
-            'load.cursor',
-            null
-        );
+        this.state.set('load.hasMore', true);
 
+        this.state.set('load.files', files);
 
-        this.state.set(
-            'load.hasMore',
-            true
-        );
+        this.state.set('load.append', {});
 
-
-        this.state.set(
-            'load.files',
-            files
-        );
-
-
-        this.state.set(
-            'load.append',
-            {}
-        );
-
-
-        this.eventBus.emit(
-            Events.GRID_CLEAR,
-            {}
-        );
-
+        this.eventBus.emit(Events.GRID_CLEAR, {});
     }
 
 
@@ -216,7 +151,6 @@ export default class LoadService extends Service {
         this.controller?.abort();
 
         this.controller = null;
-
     }
 
 
@@ -225,7 +159,6 @@ export default class LoadService extends Service {
         this.abortRequest();
 
         super.destroy();
-
     }
 
 

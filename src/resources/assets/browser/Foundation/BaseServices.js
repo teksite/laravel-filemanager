@@ -3,7 +3,6 @@ import BaseComponent from "./BaseComponent.js";
 
 export default class BaseService extends BaseComponent {
 
-
     constructor(app, options = {}) {
 
         super(app);
@@ -15,12 +14,12 @@ export default class BaseService extends BaseComponent {
         if (!this.shouldInitialize()) return;
 
         this.bindBusEvents();
-
     }
 
 
 
     busEvents(){
+
         return {};
     }
 
@@ -37,10 +36,7 @@ export default class BaseService extends BaseComponent {
                 this.eventBus.on(event, listener);
 
                 this._busListeners.push({event, listener});
-
             });
-
-
     }
 
 
@@ -48,23 +44,21 @@ export default class BaseService extends BaseComponent {
     emit(event,payload={}){
 
         this.eventBus.emit(event, payload);
-
     }
 
     on(event ,handler){
+
         if(typeof handler !== 'function') return;
 
         const listener = handler.bind(this);
 
         this.eventBus.on(event, listener);
-
     }
 
 
     shouldInitialize(){
 
         return true;
-
     }
 
     destroy(){
@@ -72,16 +66,11 @@ export default class BaseService extends BaseComponent {
         for(const {event, listener} of this._busListeners){
 
             this.eventBus.off(event, listener);
-
         }
 
         this._busListeners.length=0;
 
-
+        super.destroy();
     }
-
-
-
-
 
 }

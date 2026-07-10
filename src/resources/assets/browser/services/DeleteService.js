@@ -3,7 +3,7 @@ import handler from "../helpers/handler.js";
 
 export default class DeleteService {
 
-    constructor({url, options = {}}, eventBus, state, requestService, errorService) {
+    constructor(app , {url, options = {}}, eventBus, state, requestService, errorService) {
 
         this.options = {
             endpoint: url ?? '/api/filemanager',

@@ -1,4 +1,5 @@
 import {$, $$} from "../helpers/dom.js";
+import handler from "../helpers/handler.js";
 
 export default class BaseComponent {
 
@@ -13,6 +14,7 @@ export default class BaseComponent {
         this.request = app.request;
 
         this.eventBus = app.eventBus;
+
 
         this.errorBus = app.errorBus;
 
@@ -46,6 +48,17 @@ export default class BaseComponent {
     nextFrame(callback) {
 
         requestAnimationFrame(callback);
+    }
+
+
+    async safe(resolve, reject = null, final = null) {
+
+        return handler({
+            resolve,
+            reject,
+            final
+        });
+
     }
 
     destroy() {

@@ -5,11 +5,13 @@ import ErrorService from "./core/ErrorService.js";
 import RequestService from "./core/RequestService.js";
 
 import defaultState from "./constants/defaults.js";
+import Events from "./constants/events.js";
 
 import UploadService from "./services/UploadService.js";
 import LoadService from "./services/LoadService.js";
 import DeleteService from "./services/DeleteService.js";
 import UpdateService from "./services/UpdateService.js";
+import SelectService from "./services/SelectService.js";
 
 import UploaderUi from "./ui/UploaderUi.js";
 import GridUi from "./ui/GridUi.js";
@@ -17,236 +19,541 @@ import MoreBtnUi from "./ui/MoreBtnUi.js";
 import InfoUi from "./ui/InfoUi.js";
 import CounterUi from "./ui/CounterUi.js";
 import FilterUi from "./ui/FilterUi.js";
-import SelectService from "./services/SelectService.js";
 import SelectionButtonUi from "./ui/SelectionButtonUi.js";
 import SelectionGridUi from "./ui/SelectionGridUi.js";
-import Events from "./constants/events.js";
+
 
 export default class DatabaseFileManager {
 
-    constructor({config = {}} = {} , root) {
+
+    constructor({config = {}, root = document} = {}) {
+
+        this.root =typeof root === "string" ? document.querySelector(root) : root;
+
+        if (!this.root) {throw new Error("FileManager root element not found");}
 
 
         this.config = new Config(config);
+
         this.root = typeof root === 'string'
             ? document.querySelector(root)
             : root;
 
-        this.config = new Config({
-            ...config,
-            root:this.root
-        });
 
         this.eventBus = new EventEmitter();
+
         this.errorBus = new ErrorService();
+
         this.state = new StateManager(this.eventBus, defaultState);
 
+
         this.request = new RequestService({
-            url: this.config.section('api'),
-            options: this.config.section('request'),
+
+            url:this.config.section('api'),
+
+            options:this.config.section('request')
+
         }, this.errorBus);
 
-        this.initializeUploader();
-        this.initializeGrid();
-        this.initializeInspector();
-        this.initializeSelection();
 
+        this.instances = [];
+
+        this._listeners = [];
+
+        this.boot();
+
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Components Registry
+    |--------------------------------------------------------------------------
+    */
+
+
+    components(){
+        return [
+/*
+            [
+                UploadService,{
+
+                    url:this.config.get(
+                        'api.uploadUrl'
+                    ),
+
+                    elements:{
+
+                        formEl:this.config.get(
+                            'ui.uploadFormSelector'
+                        ),
+
+                        dropzoneEl:this.config.get(
+                            'ui.dropzoneSelector'
+                        ),
+
+                        inputEl:this.config.get(
+                            'ui.fileInputSelector'
+                        ),
+
+                        previewEl:this.config.get(
+                            'ui.uploadPreviewSelector'
+                        ),
+
+                        diskSelectorEl:this.config.get(
+                            'ui.uploadDiskSelector'
+                        )
+
+                    },
+
+                    options:this.config.section(
+                        'upload'
+                    )
+
+                }
+            ],
+     */
+            [
+                LoadService,
+                {
+                    url:this.config.get('api.getUrl'),
+                    options:{
+                        ...this.config.section('load'),
+                        ...this.config.section('filter')
+                    }
+
+                }
+            ],
+
+/*
+            [
+                DeleteService,
+                {
+
+                    url:this.config.get(
+                        'api.deleteUrl'
+                    )
+
+                }
+            ],
+
+
+            [
+                UpdateService,
+                {
+
+                    url:this.config.get(
+                        'api.updateUrl'
+                    )
+
+                }
+            ],
+
+
+
+            [
+                SelectService,
+
+                this.config.section(
+                    'selection'
+                )
+            ],
+
+
+
+            [
+                UploaderUi,
+                {
+
+                    elements:{
+                        uploadPreviewSelector:
+                            this.config.get(
+                                'ui.uploadPreviewSelector'
+                            )
+                    }
+
+                }
+            ],
+
+
+
+            [
+                GridUi,
+                {
+
+                    elements:{
+
+                        gridEl:
+                            this.config.get(
+                                'ui.gridSelector'
+                            ),
+
+                        loadingEl:
+                            this.config.get(
+                                'ui.loadingSelector'
+                            )
+
+                    },
+
+
+                    loadingStyle:
+                        this.config.get(
+                            'load.loadingStyle',
+                            'block'
+                        )
+
+                }
+            ],
+
+
+
+            [
+                MoreBtnUi,
+                {
+
+                    elements:{
+
+                        btnEl:
+                            this.config.get(
+                                'ui.loadMoreSelector'
+                            )
+
+                    }
+
+                }
+            ],
+
+
+
+
+            [
+                CounterUi,
+                {
+
+                    elements:{
+
+                        counterEl:
+                            this.config.get(
+                                'ui.filesCounterSelector'
+                            )
+
+                    }
+
+                }
+            ],
+
+
+
+            [
+                FilterUi,
+                {
+
+                    elements:{
+
+                        mimesEl:
+                            this.config.get(
+                                'ui.mimesSelector'
+                            ),
+
+
+                        disksEl:
+                            this.config.get(
+                                'ui.disksSelector'
+                            )
+
+                    }
+
+                }
+            ],
+
+
+
+
+            [
+                InfoUi,
+                {
+
+                    elements:{
+
+
+                        baseInfoEl:
+                            this.config.get(
+                                'ui.baseInfoSelector'
+                            ),
+
+
+                        filePreviewEl:
+                            this.config.get(
+                                'ui.filePreviewSelector'
+                            ),
+
+
+                        idInfoEl:
+                            this.config.get(
+                                'ui.idInfoSelector'
+                            ),
+
+
+                        titleInfoEl:
+                            this.config.get(
+                                'ui.titleInfoSelector'
+                            ),
+
+
+                        urlInfoEl:
+                            this.config.get(
+                                'ui.urlInfoSelector'
+                            ),
+
+
+                        sizeInfoEl:
+                            this.config.get(
+                                'ui.sizeInfoSelector'
+                            ),
+
+
+                        mimeInfoEl:
+                            this.config.get(
+                                'ui.mimeInfoSelector'
+                            ),
+
+
+                        diskInfoEl:
+                            this.config.get(
+                                'ui.diskInfoSelector'
+                            ),
+
+
+                        createdInfoEl:
+                            this.config.get(
+                                'ui.createdInfoSelector'
+                            ),
+
+
+                        deleteBtnEl:
+                            this.config.get(
+                                'ui.deleteBtnSelector'
+                            ),
+
+
+                        copyBtnEl:
+                            this.config.get(
+                                'ui.copyUrlBtnSelector'
+                            ),
+
+
+                        openBtnEl:
+                            this.config.get(
+                                'ui.openUrlBtnSelector'
+                            )
+
+                    }
+
+                }
+            ],
+
+
+
+            [
+                SelectionButtonUi,
+
+                {
+
+                    elements:{
+
+                        actionsEl:
+                            this.config.get(
+                                'ui.selectionButtonSelector'
+                            )
+
+                    }
+
+                }
+
+            ],
+
+
+
+            [
+                SelectionGridUi,
+
+                {
+
+                    elements:{
+
+                        gridEl:
+                            this.config.get(
+                                'ui.selectionGridSelector'
+                            )
+
+                    }
+
+                }
+
+            ]
+
+*/
+        ];
+
+    }
+
+
+    boot(){
+
+        this.instances = this.components()
+            .map(([Component, options]) => {
+                return this.register(Component, options);
+            });
 
         this.bindEvents();
+
     }
 
+    register(Component, options = {}){
 
-    /* -----------------------------------------------------------------
-     | Upload
-     |----------------------------------------------------------------- */
-
-    initializeUploader() {
-
-        this.uploadService = new UploadService({
-            url: this.config.get('api.uploadUrl'),
-            elements: {
-                formEl: this.config.get('ui.uploadFormSelector'),
-                dropzoneEl: this.config.get('ui.dropzoneSelector'),
-                inputEl: this.config.get('ui.fileInputSelector'),
-                previewEl: this.config.get('ui.uploadPreviewSelector'),
-                diskSelectorEl: this.config.get('ui.uploadDiskSelector'),
-            },
-            options: this.config.section('upload'),
-
-        }, this.eventBus, this.state, this.errorBus);
-
-
-        this.uploaderUi = new UploaderUi({
-
-            uploadPreviewSelector: this.config.get('ui.uploadPreviewSelector')
-
-        }, this.eventBus, this.state);
-    }
-
-
-    /* -----------------------------------------------------------------
-     | Loader
-     |----------------------------------------------------------------- */
-
-    initializeGrid() {
-
-        this.loadService = new LoadService({
-            url: this.config.get('api.getUrl'),
-            options: {...this.config.section('load'), ...this.config.section('filter')},
-        }, this.eventBus, this.state, this.request, this.errorBus);
-
-
-        this.gridUi = new GridUi({
-            elements: {
-                gridEl: this.config.get('ui.gridSelector'),
-                loadingEl: this.config.get('ui.loadingSelector'),
-            }
-        }, {
-            loadingStyle: this.config.get('load.loadingStyle', 'block')
-        }, this.eventBus, this.state);
-
-
-        this.moreBtnUi = new MoreBtnUi({
-            btnEl: this.config.get('ui.loadMoreSelector')
-        }, this.eventBus, this.state);
-
-
-        this.counterUi = new CounterUi({
-            elements: {
-                counterEl: this.config.get('ui.filesCounterSelector'),
-            }
-        }, {}, this.eventBus, this.state);
-
-
-        this.counterUi = new FilterUi({
-            elements: {
-                mimesEl: this.config.get('ui.mimesSelector'),
-                disksEl: this.config.get('ui.disksSelector'),
-            }
-        }, {}, this.eventBus, this.state);
-
+        return new Component(this, options);
 
     }
 
 
-    /* -----------------------------------------------------------------
-     | File Inspector
-     |----------------------------------------------------------------- */
+    bindEvents(){
 
-    initializeInspector() {
-
-        this.updateService = new UpdateService({
-            url: this.config.get('api.updateUrl'),
-        }, this.eventBus, this.state, this.request, this.errorBus);
-
-
-        this.deleteService = new DeleteService({
-            url: this.config.get('api.deleteUrl'),
-        }, this.eventBus, this.state, this.request, this.errorBus);
-
-
-        this.infoUi = new InfoUi({
-
-            elements: {
-
-                baseInfoEl: this.config.get('ui.baseInfoSelector'),
-                filePreviewEl: this.config.get('ui.filePreviewSelector'),
-
-                idInfoEl: this.config.get('ui.idInfoSelector'),
-                titleInfoEl: this.config.get('ui.titleInfoSelector'),
-                urlInfoEl: this.config.get('ui.urlInfoSelector'),
-                sizeInfoEl: this.config.get('ui.sizeInfoSelector'),
-                mimeInfoEl: this.config.get('ui.mimeInfoSelector'),
-                diskInfoEl: this.config.get('ui.diskInfoSelector'),
-                createdInfoEl: this.config.get('ui.createdInfoSelector'),
-
-                deleteBtnEl: this.config.get('ui.deleteBtnSelector'),
-                copyBtnEl: this.config.get('ui.copyUrlBtnSelector'),
-                openBtnEl: this.config.get('ui.openUrlBtnSelector'),
-            }
-        }, {}, this.eventBus, this.state);
-    }
-
-
-    /* -----------------------------------------------------------------
-     | Selection
-     |----------------------------------------------------------------- */
-
-
-    initializeSelection() {
-        this.selectionService = new SelectService(
-            this.config.section('selection'), this.eventBus, this.state);
-
-        this.selectionUi = new SelectionButtonUi({
-            elements: {
-                actionsEl: this.config.get('ui.selectionButtonSelector'),
-            }
-        }, this.config.section('selection'), this.eventBus, this.state);
-
-        this.selectionGridUi = new SelectionGridUi({
-            elements: {
-                gridEl: this.config.get('ui.selectionGridSelector'),
-            }
-        }, this.config.section('selection'), this.eventBus, this.state);
-
-
-    }
-
-
-    destroy() {
-
-        [
-            this.selectionService,
-            this.uploadService,
-            this.loadService,
-            this.updateService,
-            this.deleteService,
-
-            this.selectionUi,
-            this.uploaderUi,
-            this.gridUi,
-            this.moreBtnUi,
-            this.counterUi,
-            this.infoUi,
-            this.selectionGridUi,
-
-        ].forEach(instance => instance?.destroy?.());
-    }
-
-
-    bindEvents() {
         this.handleSelection = this.handleSelection.bind(this);
 
-        this.eventBus.on(Events.SELECTION_ON_CHOOSE, this.handleSelection);
-    }
-
-    handleSelection() {
-        const files = this.selectionService.returnSelections();
-
-        this.eventBus.emit(Events.CHOOSE, files);
+        this.listen(Events.SELECTION_ON_CHOOSE, this.handleSelection);
 
     }
 
 
-    on(event, callback) {
+    listen(event,callback){
+
         this.eventBus.on(event, callback);
-        return this;
+
+        this._listeners.push({event, callback});
+
+
     }
 
-    off(event, callback) {
-        this.eventBus.off(event, callback);
-        return this;
+
+    handleSelection(){
+
+
+        const selection =
+            this.instances.find(
+                item => item instanceof SelectService
+            );
+
+
+        if(!selection) return;
+
+
+
+        const files =
+            selection.returnSelections();
+
+
+
+        this.emit(
+            Events.CHOOSE,
+            files
+        );
+
+
     }
 
-    once(event, callback) {
-        const wrapper = (...args) => {
+
+    emit(event,payload={}){
+
+        this.eventBus.emit(
+            event,
+            payload
+        );
+
+    }
+
+
+
+    on(event,callback){
+
+        this.eventBus.on(
+            event,
+            callback
+        );
+
+
+        return this;
+
+    }
+
+
+
+    off(event,callback){
+
+        this.eventBus.off(
+            event,
+            callback
+        );
+
+
+        return this;
+
+    }
+
+
+
+    once(event,callback){
+
+
+        const wrapper = (...args)=>{
+
             callback(...args);
-            this.off(event, wrapper);
+
+            this.off(
+                event,
+                wrapper
+            );
+
         };
 
-        this.on(event, wrapper);
+
+        this.on(
+            event,
+            wrapper
+        );
+
 
         return this;
+
     }
+
+
+    destroy(){
+
+
+        for(const item of this._listeners){
+
+            this.eventBus.off(
+                item.event,
+                item.callback
+            );
+
+        }
+
+
+
+        for(const instance of this.instances){
+
+            instance.destroy?.();
+
+        }
+
+
+
+        this.instances.length = 0;
+
+
+    }
+
 
 }

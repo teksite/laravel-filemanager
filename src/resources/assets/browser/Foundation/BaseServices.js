@@ -1,6 +1,8 @@
 import BaseComponent from "./BaseComponent.js";
 
-export default class Service extends BaseComponent {
+
+export default class BaseService extends BaseComponent {
+
 
     constructor(app, options = {}) {
 
@@ -14,55 +16,72 @@ export default class Service extends BaseComponent {
 
         this.bindBusEvents();
 
-        this.initialize?.();
     }
 
-    busEvents() {
 
+
+    busEvents(){
         return {};
+    }
+
+
+    bindBusEvents(){
+        const events = this.busEvents?.() ?? {};
+
+        Object.entries(events).forEach(([event,handler])=>{
+
+                if(typeof handler !== 'function') return;
+
+                const listener = handler.bind(this);
+
+                this.eventBus.on(event, listener);
+
+                this._busListeners.push({event, listener});
+
+            });
+
 
     }
 
-    bindBusEvents() {
 
-        for (const [event, handler] of Object.entries(this.busEvents())) {
 
-            if (typeof handler !== "function") continue;
-
-            const listener = handler.bind(this);
-
-            this.eventBus.on(event, listener);
-
-            this._busListeners.push({event, listener});
-
-        }
-
-    }
-
-    emit(event, payload = {}) {
+    emit(event,payload={}){
 
         this.eventBus.emit(event, payload);
 
     }
 
-    shouldInitialize() {
+    on(event ,handler){
+        if(typeof handler !== 'function') return;
+
+        const listener = handler.bind(this);
+
+        this.eventBus.on(event, listener);
+
+    }
+
+
+    shouldInitialize(){
 
         return true;
 
     }
 
-    destroy() {
+    destroy(){
 
-        super.destroy();
+        for(const {event, listener} of this._busListeners){
 
-        for (const item of this._busListeners) {
-
-            this.eventBus.off(item.event, item.listener);
+            this.eventBus.off(event, listener);
 
         }
 
-        this._busListeners.length = 0;
+        this._busListeners.length=0;
+
 
     }
+
+
+
+
 
 }

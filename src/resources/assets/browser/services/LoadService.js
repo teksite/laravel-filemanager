@@ -1,83 +1,88 @@
 import Events from "../constants/events.js";
-import handler from "../helpers/handler.js";
-import ErrorService from "../core/ErrorService.js";
+import Service from "../Foundation/BaseServices.js";
 
-export default class LoadService {
 
-    constructor({url, options = {}}, eventBus, state, requestService, errorService) {
+export default class LoadService extends Service {
+
+
+    constructor(app, {url, options = {}},) {
+        super(app);
 
         this.options = {
             endpoint: url ?? "/api/filemanager",
             getOnInit: true,
+            perPage: 25,
             ...options
         };
 
-        this.state = state;
-
-        this.eventBus = eventBus;
-
-        this.request = requestService;
-
-        this.errorBus = ErrorService;
-
-        this.bindEvents();
-
-        if (this.options.getOnInit) this.sendRequest();
-
-
-        this.controller = null;
-
+        if (this.options.getOnInit) {
+            initialize();
+        }
 
     }
 
 
-    bindEvents() {
-
-        this.updateFilter = this.updateFilter.bind(this);
-
-        this.sendRequest = this.sendRequest.bind(this);
-
-        this.eventBus.on(Events.FILES_NEED_MORE, this.sendRequest);
-
-        this.eventBus.on('load.disk', this.updateFilter);
-
-        this.eventBus.on('load.type', this.updateFilter);
+    async initialize() {
+        await this.sendRequest();
 
     }
+
+
+    busEvents() {
+
+        return {
+            [Events.FILES_NEED_MORE]: this.sendRequest,
+
+            'load.disk': this.updateFilter,
+
+            'load.type': this.updateFilter,
+        };
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Request
+    |--------------------------------------------------------------------------
+    */
 
 
     async sendRequest() {
 
-
         if (this.state.get("load.loading")) return;
 
-        const hasMore = this.state.get("load.hasMore", true);
+        if (!this.state.get("load.hasMore", true)) return;
 
-        const cursor = this.state.get("load.cursor", null);
-
-        if (!hasMore) return;
+        this.abortRequest();
 
         this.controller = new AbortController();
+
+        const params = {
+
+            cursor: this.state.get("load.cursor", null),
+
+            disk: this.state.get("load.disk", null),
+
+            mime_type: this.state.get("load.type", null),
+
+            per_page: this.options.perPage,
+
+            user_id: this.options.userId ?? null,
+
+        };
+
         const signal = this.controller.signal;
 
 
-        const params = {
-            cursor: cursor,
-            disk: this.state.get('load.disk', null),
-            mime_type: this.state.get('load.type', null),
-            per_page: this.options.perPage ?? 25,
-            user_id: this.options.userId ?? null,
-        };
-
-        await handler({
-
-            resolve: async () => {
-
+        const {data, error, success} = await this.safe(
+            async () => {
                 this.state.set("load.loading", true);
 
                 this.eventBus.emit(Events.FILES_REQUEST, {...params, action: 'load more'});
 
-                const response = await this.request.getFiles(params);
+                const response = await this.request.getFiles(params, {signal});
+
+                if (signal.aborted) return;
 
                 const {files = [], meta = {}} = response;
 
@@ -87,88 +92,141 @@ export default class LoadService {
 
                 this.appendFiles(files);
 
-                this.eventBus.emit(Events.FILES_RECEIVE, {files, meta, action: 'load more'});
-            },
+                console.log(files)
 
-            reject: async (error) => {
+                this.eventBus.emit(Events.FILES_RECEIVE, {files, meta, action: 'load more'});
+
+
+            },
+            (error) => {
+                if (error.name === 'AbortError') return;
 
                 this.errorBus?.emit?.(error);
 
                 this.eventBus.emit(Events.FILES_REQUEST_FAILED, error, {action: 'load more'});
-
-                throw error;
-            },
-
-            final: () => {
-                if (this.controller?.signal === signal) {
-                    this.controller = null;
-                }
+            }, () => {
+                if (this.controller?.signal === signal) this.controller = null;
 
                 this.state.set("load.loading", false);
             }
+        );
 
-        });
+
     }
 
 
     appendFiles(files = []) {
 
-        const normalizedFiles = Array.isArray(files)
-            ? Object.fromEntries(files.map(file => [file.id, file]))
-            : files;
 
-        const currentFiles = this.state.get("load.files", {});
+        const normalized =
+            Array.isArray(files)
 
-        const updatedFiles = {...currentFiles, ...normalizedFiles};
+                ? Object.fromEntries(
+                    files.map(
+                        file => [
+                            file.id,
+                            file
+                        ]
+                    )
+                )
+
+                : files;
 
 
-        this.state.set("load.files", updatedFiles);
+        const current =
+            this.state.get(
+                "load.files",
+                {}
+            );
 
-        this.state.set("load.append", normalizedFiles);
+
+        const updated = {
+            ...current,
+            ...normalized
+        };
+
+
+        this.state.set(
+            "load.files",
+            updated
+        );
+
+
+        this.state.set(
+            "load.append",
+            normalized
+        );
+
+
     }
 
 
     async updateFilter() {
 
-        if (this.state.get('load.loading')) return;
+
+        this.abortRequest();
+
 
         this.reset();
 
+
         await this.sendRequest();
 
+
     }
+
 
     reset(files = {}) {
 
-        this.state.set('load.loading', false);
 
-        this.state.set('load.cursor', null);
+        this.state.set(
+            'load.cursor',
+            null
+        );
 
-        this.state.set('load.hasMore', true);
 
-        this.state.set('load.files', files);
+        this.state.set(
+            'load.hasMore',
+            true
+        );
 
-        this.state.set('load.append', {});
 
-        this.eventBus.emit(Events.GRID_CLEAR, {})
+        this.state.set(
+            'load.files',
+            files
+        );
 
+
+        this.state.set(
+            'load.append',
+            {}
+        );
+
+
+        this.eventBus.emit(
+            Events.GRID_CLEAR,
+            {}
+        );
 
     }
 
 
-    stop() {
+    abortRequest() {
 
-        this.eventBus.off(Events.FILES_NEED_MORE, this.sendRequest);
+        this.controller?.abort();
 
-        this.eventBus.off(Events.load.disk, this.updateFilter);
+        this.controller = null;
 
-        this.eventBus.off(Events.load.type, this.updateFilter);
     }
 
 
     destroy() {
 
-        this.stop();
+        this.abortRequest();
+
+        super.destroy();
 
     }
+
+
 }

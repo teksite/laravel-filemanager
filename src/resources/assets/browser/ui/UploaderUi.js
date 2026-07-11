@@ -213,6 +213,15 @@ export default class UploaderUi extends UiService {
     finishUpload() {
 
         this.state.set('upload.uploading', false);
+
+        this.messagesEl?.children &&
+        [...this.messagesEl.children].forEach((item, index) => {
+            setTimeout(() => {
+
+                item.remove();
+
+            }, 3000 + (500 *  index));
+        });
     }
 
 

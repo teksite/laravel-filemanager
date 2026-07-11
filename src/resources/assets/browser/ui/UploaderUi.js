@@ -60,8 +60,13 @@ export default class UploaderUi extends UiService {
             },
 
 
-            [Events.UPLOAD_SUCCESS]: ({response, file ,success, error}) => {
-                this.revealSingleUploadResult(response, file ,success, error)
+            [Events.UPLOAD_SUCCESS]: ({response, file, success, error}) => {
+                this.revealSingleUploadResult(response, file, success, error)
+            },
+
+
+            [Events.UPLOAD_FAILED]: ({response, file, success, error}) => {
+                this.revealSingleUploadResult(response, file, success, error)
             },
 
             'upload.uploading': () => {
@@ -310,6 +315,8 @@ export default class UploaderUi extends UiService {
 
         const messageBoxEl = progressBarEl?.closest('[data-upload-preview]');
 
+        const uploadStatusEl = messageBoxEl?.querySelector('[data-upload-status]');
+
         if (progressBarEl) {
 
             progressBarEl.style.width = percent + "%!important"
@@ -318,29 +325,28 @@ export default class UploaderUi extends UiService {
         }
 
 
-        if (messageBoxEl) {
+        if (messageBoxEl) messageBoxEl.classList.remove('valid-file', 'invalid-file');
 
-            messageBoxEl.classList.remove('valid-file', 'invalid-file')
-        }
+        if (uploadStatusEl) uploadStatusEl.textContent = 'uploading ...'
+
 
     }
 
 
-    revealSingleUploadResult(response, file ,success, error) {
+    revealSingleUploadResult(response, file, success, error) {
 
         const progressBarEl = this.$(`[data-progress-bar='${file.id}']`);
 
         const messageBoxEl = progressBarEl?.closest('[data-upload-preview]');
 
-        if (progressBarEl) {
+        const uploadStatusEl =messageBoxEl?.querySelector('[data-upload-status]');
 
-            progressBarEl.classList.add(success ? 'success' : 'failed');
-        }
 
-        if (messageBoxEl) {
-            console.log(error)
-            messageBoxEl.classList.add(success ? 'valid-file' : 'invalid-file')
-        }
+        if (progressBarEl) progressBarEl.classList.add(success ? 'success' : 'failed');
+
+        if (messageBoxEl) messageBoxEl.classList.add(success ? 'valid-file' : 'invalid-file')
+
+        if (uploadStatusEl) uploadStatusEl.textContent = success ? 'succeed' : error
 
 
     }

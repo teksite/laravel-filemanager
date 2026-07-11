@@ -104,8 +104,8 @@ export default class UploadService extends BaseService {
                             this.eventBus?.emit(Events.UPLOAD_FAILED, {
                                 response: null,
                                 file,
-                                success: true,
-                                error:err
+                                success: false,
+                                error: err
                             });
                         })
                         .finally(() => {

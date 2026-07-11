@@ -183,15 +183,32 @@ export default class GridUi extends UiService {
 
         if (!fileId) return;
 
-        (fileId === (this.state.get('select.current', null)) ?? null)
+        const preId = this.state.get('select.current', null);
 
+        fileId === preId
             ? this.state.set('select.current', null)
-
             : this.state.set('select.current', fileId);
 
         this.eventBus.emit(Events.SELECTION_CLICK, {fileId});
+
+        this.renderSelectEffect();
     }
 
+    renderSelectEffect() {
+
+        const filedId = this.state.get('select.current', null)
+
+        this.gridEl?.querySelectorAll('.media-card.current-file').forEach(card => {
+
+            card.classList.remove('current-file')
+        });
+
+        if (!filedId) return;
+
+        this.gridEl
+            ?.querySelector(`[data-media-card][data-id='${filedId}']`)
+            ?.classList.add('current-file');
+    }
 
     removeFile(fileId) {
 
@@ -217,17 +234,13 @@ export default class GridUi extends UiService {
 
     unHideItem(fileId) {
 
-
         const card = this.findCard(fileId);
-
 
         if (!card) return;
 
         card.hidden = false;
 
         card.classList.remove('is_hidden');
-
-
     }
 
 

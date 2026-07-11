@@ -214,13 +214,13 @@ export default class UploaderUi extends UiService {
 
         this.state.set('upload.uploading', false);
 
-        this.messagesEl?.children &&
-        [...this.messagesEl.children].forEach((item, index) => {
+        this.messagesEl?.children && [...this.messagesEl.children].forEach((item, index) => {
+
             setTimeout(() => {
 
                 item.remove();
 
-            }, 3000 + (500 *  index));
+            }, 3000 + (500 * index));
         });
     }
 
@@ -311,7 +311,6 @@ export default class UploaderUi extends UiService {
 
             return false;
         }
-
         return true;
     }
 

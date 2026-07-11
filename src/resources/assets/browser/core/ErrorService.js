@@ -123,7 +123,7 @@ export default class ErrorService {
 
         container.prepend(el);
 
-        setTimeout(() => el.remove(), 5000);
+        setTimeout(() => el.remove(), 7500);
     }
 
     /**

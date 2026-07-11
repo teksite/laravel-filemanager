@@ -5,13 +5,13 @@ export default class UploadService extends BaseService {
 
     initialize() {
 
-        this.queue = {};
+        this.queue = [];
 
         this.requestSet = new Set();
 
         this._abort = false;
 
-        this.active = 0
+        this.activeUploads = 0
     }
 
     busEvents() {
@@ -28,12 +28,11 @@ export default class UploadService extends BaseService {
 
         if (this.state.get('upload.uploading', false)) return;
 
-        this.queue = this.state.get('upload.files', {});
+        this.queue = Array.from(Object.values(this.state.get('upload.files', {})));
 
         const disk = this.state.get('upload.disk');
 
-
-        if (this.queueLength() === 0) {
+        if (this.queue.length === 0) {
 
             this.errorBus?.emit(new Error('Please select files first'), {context: 'upload_empty'});
 
@@ -50,9 +49,7 @@ export default class UploadService extends BaseService {
 
         return new Promise(resolve => {
 
-            const arrayFile = Array.from(Object.values(this.queue));
-
-            const next = () => {
+            const processQueue = () => {
 
                 if (this._abort) {
 
@@ -61,7 +58,7 @@ export default class UploadService extends BaseService {
                     return;
                 }
 
-                if (arrayFile.length === 0 && this.active === 0) {
+                if (this.queue.length === 0 && this.activeUploads === 0) {
 
                     this.eventBus?.emit(Events.UPLOAD_COMPLETE, this.results);
 
@@ -72,11 +69,11 @@ export default class UploadService extends BaseService {
                     return;
                 }
 
-                while (this.active < this.options.concurrency && arrayFile.length) {
+                while (this.activeUploads < this.options.concurrency && this.queue.length) {
 
-                    const file = arrayFile.shift();
+                    const file = this.queue.shift();
 
-                    this.active++;
+                    this.activeUploads++;
 
                     this.uploadFile(file, disk, onProgress)
                         .then(res => {
@@ -110,13 +107,13 @@ export default class UploadService extends BaseService {
                         })
                         .finally(() => {
 
-                            this.active--;
+                            this.activeUploads--;
 
-                            next();
+                            processQueue();
                         });
                 }
             };
-            next();
+            processQueue();
         });
 
     }
@@ -204,7 +201,7 @@ export default class UploadService extends BaseService {
         );
     }
 
-    stop() {
+    cancel() {
 
         this._abort = true;
 
@@ -216,7 +213,7 @@ export default class UploadService extends BaseService {
 
         this.requestSet.clear();
 
-        this.active = 0;
+        this.activeUploads = 0;
 
         this.results = {success: 0, failed: 0};
 
@@ -236,14 +233,14 @@ export default class UploadService extends BaseService {
 
         this.state.set('upload.files', {});
 
-        // this.state.set('upload.uploading', false);
+        this.state.set('upload.uploading', false);
 
     }
 
 
     destroy() {
 
-        this.stop();
+        this.cancel();
 
         super.destroy()
     }

@@ -76,7 +76,7 @@ export default class UploaderUi extends UiService {
 
             [this.dropzoneEl, 'drop', this.dropFiles],
 
-            [this.inputEl, 'change', this.changeFiles],
+            [this.inputEl, 'change', this.changeInputHandler],
 
             [this.formEl, 'submit', this.submitUpload],
 
@@ -88,11 +88,25 @@ export default class UploaderUi extends UiService {
     }
 
 
+
+    changeDiskHandler() {
+
+        const value = this.diskEl.value;
+
+        if (!this.validateDisk(value)) {
+
+            this.diskEl.value = this.disk;
+        }
+
+        this.state.set('upload.disk', value);
+
+        this.disk = value;
+    }
+
     openFileDialog() {
 
         this.inputEl.click();
     }
-
 
     dropFiles(event) {
 
@@ -101,8 +115,7 @@ export default class UploaderUi extends UiService {
         this.handleFiles(event.dataTransfer.files);
     }
 
-
-    changeFiles(event) {
+    changeInputHandler(event) {
 
         this.handleFiles(event.target.files);
 
@@ -127,6 +140,62 @@ export default class UploaderUi extends UiService {
         this.renderPreview();
     }
 
+    updateUploadStatus(id, success, file) {
+
+        const item = this.messagesEl?.querySelector(`[data-file-id="${CSS.escape(id)}"]`);
+
+        if (!item) return;
+
+        item.classList.toggle('valid-file', success);
+
+        item.classList.toggle('invalid-file', !success);
+
+        const bar = item.querySelector(`[data-progress-bar="${CSS.escape(id)}"]`);
+
+        bar.classList.add('finish')
+
+        bar.classList.add(success ? 'success' : 'failed');
+
+        const status = item.querySelector(`[data-upload-action-box="${CSS.escape(id)}"]`);
+
+        if (status) status.textContent = success ? 'Uploaded' : 'Failed';
+    }
+
+
+
+    submitUpload(event) {
+
+        event.preventDefault();
+
+        const disk = this.state.get('upload.disk', null);
+
+        if (!this.validateDisk(disk)) return;
+
+        this.emit(Events.UPLOAD_SIGNAL, {files: this.validFiles, disk});
+
+    }
+
+    handleUploadingStage() {
+
+        const state = this.state.get('upload.loading', false);
+
+        state ? this.formEl.disabled = true : this.formEl.disabled = false;
+
+        state ? this.formEl.classList.add('is-hidden') : this.formEl.classList.remove('is-hidden');
+    }
+
+    finishUpload() {
+
+        this.state.set('upload.loading', false);
+    }
+
+
+
+    syncState() {
+
+        this.state.set('upload.files', this.validFiles);
+    }
+
     normalizeFiles(files) {
 
         let items = {}
@@ -142,6 +211,7 @@ export default class UploaderUi extends UiService {
 
         return items;
     }
+
 
 
     validateByMimetype(files = {}) {
@@ -172,7 +242,6 @@ export default class UploaderUi extends UiService {
         return {valid, invalid};
     }
 
-
     validateBySize(files = {}) {
 
         const maxSize = this.config.get('upload.maxSize', null);
@@ -201,11 +270,18 @@ export default class UploaderUi extends UiService {
         return {valid, invalid};
     }
 
+    validateDisk(disk) {
 
-    syncState() {
+        if (![...this.config.get('upload.allowedDisks')].includes(disk)) {
 
-        this.state.set('upload.files', this.validFiles);
+            alert(`No valid disk (${disk}) selected.`);
+
+            return false;
+        }
+
+        return true;
     }
+
 
 
     renderPreview() {
@@ -220,7 +296,6 @@ export default class UploaderUi extends UiService {
 
         this.messagesEl.innerHTML = [...invalid, ...valid].join('');
     }
-
 
     renderItem([id, file], valid) {
 
@@ -249,7 +324,6 @@ export default class UploaderUi extends UiService {
             </div>`;
     }
 
-
     removeMessage(event) {
 
         const button = event.target.closest('[data-remove-message]');
@@ -265,82 +339,6 @@ export default class UploaderUi extends UiService {
         this.syncState();
 
         button.closest('[data-upload-preview]')?.remove();
-    }
-
-
-    updateUploadStatus(id, success, file) {
-
-        const item = this.messagesEl?.querySelector(`[data-file-id="${CSS.escape(id)}"]`);
-
-        if (!item) return;
-
-        item.classList.toggle('valid-file', success);
-
-        item.classList.toggle('invalid-file', !success);
-
-        const bar = item.querySelector(`[data-progress-bar="${CSS.escape(id)}"]`);
-
-        bar.classList.add('finish')
-
-        bar.classList.add(success ? 'success' : 'failed');
-
-        const status = item.querySelector(`[data-upload-action-box="${CSS.escape(id)}"]`);
-
-        if (status) status.textContent = success ? 'Uploaded' : 'Failed';
-    }
-
-
-    changeDiskHandler() {
-
-        const value = this.diskEl.value;
-
-        if (!this.validateDisk(value)) {
-
-            this.diskEl.value = this.disk;
-        }
-
-        this.state.set('upload.disk', value);
-
-        this.disk = value;
-    }
-
-    validateDisk(disk) {
-
-        if (![...this.config.get('upload.allowedDisks')].includes(disk)) {
-
-            alert(`No valid disk (${disk}) selected.`);
-
-            return false;
-        }
-
-        return true;
-    }
-
-
-    submitUpload(event) {
-
-        event.preventDefault();
-
-        const disk = this.state.get('upload.disk', null);
-
-        if (!this.validateDisk(disk)) return;
-
-        this.emit(Events.UPLOAD_SIGNAL, {files: this.validFiles, disk});
-
-    }
-
-    handleUploadingStage() {
-
-        const state = this.state.get('upload.loading', false);
-
-        state ? this.formEl.disabled = true : this.formEl.disabled = false;
-
-        state ? this.formEl.classList.add('is-hidden') : this.formEl.classList.remove('is-hidden');
-    }
-
-    finishUpload() {
-
-        this.state.set('upload.loading', false);
     }
 
 

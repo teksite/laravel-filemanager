@@ -28,8 +28,6 @@ export default class UploadServiceCopy {
             failed: 0
         };
 
-        this.requests = new Set();
-        this._abort = false;
 
         this.loadElements(elements);
         this.bindUI();

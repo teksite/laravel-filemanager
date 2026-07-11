@@ -1,68 +1,53 @@
-import {$} from "../helpers/dom.js";
 import Events from "../constants/events.js";
 import BaseService from "../Foundation/BaseServices.js";
 
-export default class UploadService extends BaseService{
+export default class UploadService extends BaseService {
+
+    initialize() {
+
+        this.queue = {};
+
+        this.requestSet = new Set();
+
+        this._abort = false;
+    }
 
     busEvents() {
 
         return {
-
             [Events.UPLOAD_SIGNAL]: this.startUploading,
-
         };
     }
 
     isUploading() {
-        return this.state.get('upload.uploading' , false);
+
+        return this.state.get('upload.uploading', false);
     }
+
+    toggleLoadingStatus(status = false) {
+        this.state.set('upload.uploading', status);
+    }
+
 
     async startUploading(onProgress = null) {
 
         if (this.isUploading()) return;
 
+        this.queue = this.state.get('upload.files', {});
 
-        this.files = this.state.get('upload.files', {})
+        const disk = this.state.get('upload.disk');
 
+        if (!Object.keys(this.queue).length) {
 
-         = selectedFiles;
-
-        if (!selectedFiles.length) {
             this.errorService?.emit(new Error('Please select files first'), {context: 'upload_empty'});
-            alert('Please select files first')
+
+            alert('Please select files first');
+
             return;
         }
 
-        const selectedDisk = this.diskSelectorEl?.value ?? null;
 
-        if (!this.validatingDisk(selectedDisk)) {
-            this.errorService?.emit(new Error('Invalid disk selected'), {context: 'upload_disk', disk: selectedDisk});
-            alert('Please a correct disk to upload')
-            return;
-        }
-
-        this.queue = [];
-
-        for (const file of selectedFiles) {
-            if (!this.validatingMime(file)) {
-
-                this.results.failed++;
-
-                this.errorService?.emit(new Error(`File type not allowed: ${file.name}`), {
-                        context: 'upload_mime',
-                        file: file.name,
-                        mime: file.type
-                    }
-                );
-                continue;
-            }
-            this.queue.push(file);
-        }
-
-        if (!this.queue.length) return;
-
-
-        this.results = {success: 0, failed: this.results.failed};
+        this.results = {success: 0, failed: 0};
 
         this._abort = false;
 
@@ -71,46 +56,53 @@ export default class UploadService extends BaseService{
             const next = () => {
 
                 if (this._abort) {
+
                     resolve(this.results);
+
                     return;
                 }
 
                 if (this.queue.length === 0 && this.active === 0) {
-                    this.eventBus?.emit(Events.UPLOAD_COMPLETE, this.results);
-                    resolve(this.results);
-                    this.reset();
 
+                    this.eventBus?.emit(Events.UPLOAD_COMPLETE, this.results);
+
+                    resolve(this.results);
+
+                    this.reset();
 
                     return;
                 }
-                this.toggleLoadingStatus(false)
+
+                this.toggleLoadingStatus(true);
 
                 while (this.active < this.options.concurrency && this.queue.length) {
 
                     const file = this.queue.shift();
+
                     this.active++;
 
-                    this.uploadFile(file, selectedDisk, onProgress)
-                        .then(res => {
-                            this.results.success++;
-                            const file = res.file;
-                            this.eventBus?.emit(Events.UPLOAD_SUCCESS,
-                                {
-                                    response: res,
-                                    file: {
-                                        [file.id]: file
-                                    }
-                                });
-                        })
-                        .catch(err => {
-                            this.results.failed++;
-                            this.errorService?.emit(err, {context: 'upload', file: file.name});
-                            this.eventBus?.emit(Events.UPLOAD_FAILED, {file, error: err});
-                        })
-                        .finally(() => {
-                            this.active--;
-                            next();
-                        });
+                    this.uploadFile(file, disk, onProgress).then(res => {
+
+                        this.results.success++;
+
+                        const uploadedFile = res.file;
+
+                        this.eventBus?.emit(Events.UPLOAD_SUCCESS, {response: uploadedFile, file: {[file.id]: file}});
+
+                    }).catch(err => {
+
+                        this.results.failed++;
+
+                        this.errorService?.emit(err, {context: 'upload', file: {[file.id]: file}});
+
+                        this.eventBus?.emit(Events.UPLOAD_FAILED, {response: err, file: {[file.id]: file}});
+
+                    }).finally(() => {
+
+                        this.active--;
+
+                        next();
+                    });
                 }
             };
             next();
@@ -120,8 +112,7 @@ export default class UploadService extends BaseService{
 
     uploadFile(file, disk, onProgress) {
 
-        return new Promise(
-            (resolve, reject) => {
+        return new Promise((resolve, reject) => {
 
                 const xhr = new XMLHttpRequest();
 
@@ -130,6 +121,7 @@ export default class UploadService extends BaseService{
                 form.append('file', file);
 
                 if (disk) {
+
                     form.append('disk', disk);
                 }
 
@@ -137,12 +129,13 @@ export default class UploadService extends BaseService{
 
                 xhr.timeout = this.options.requestTimeout;
 
-                this.requests.add(xhr);
+                this.requestSet.add(xhr);
 
-                xhr.upload.onprogress = e => {
-                    if (!e.lengthComputable) return;
+                xhr.upload.onprogress = event => {
 
-                    const percent = Math.round((e.loaded / e.total) * 100);
+                    if (!event.lengthComputable) return;
+
+                    const percent = Math.round((event.loaded / event.total) * 100);
 
                     const payload = {file, percent};
 
@@ -153,34 +146,44 @@ export default class UploadService extends BaseService{
 
                 xhr.onload = () => {
 
-                    this.requests.delete(xhr);
+                    this.requestSet.delete(xhr);
 
                     try {
                         const res = JSON.parse(xhr.responseText);
+
                         if (xhr.status >= 200 && xhr.status < 300) {
+
                             resolve(res.data ?? res);
+
                         } else {
                             //Todo add response 422 403
                             reject(new Error(`HTTP error | status ${xhr.status}`));
                         }
                     } catch {
+
                         reject(new Error('Invalid response'));
                     }
 
                 };
 
                 xhr.onerror = () => {
-                    this.requests.delete(xhr);
+
+                    this.requestSet.delete(xhr);
+
                     reject(new Error('Network error'));
                 };
 
                 xhr.ontimeout = () => {
-                    this.requests.delete(xhr);
+
+                    this.requestSet.delete(xhr);
+
                     reject(new Error('Upload timeout'));
                 };
 
                 xhr.onabort = () => {
-                    this.requests.delete(xhr);
+
+                    this.requestSet.delete(xhr);
+
                     reject(new Error('Upload aborted'));
                 };
 
@@ -197,25 +200,28 @@ export default class UploadService extends BaseService{
         this.queue = [];
 
         this.requests.forEach(
+
             xhr => xhr.abort()
         );
-        this.requests.clear();
+
+        this.requestSet.clear();
 
         this.active = 0;
 
-        this.results = {
-            success: 0,
-            failed: 0
-        };
+        this.results = {success: 0, failed: 0};
 
     }
 
 
     reset() {
-        this.toggleLoadingStatus(false)
+        this.toggleLoadingStatus(false);
+
         this.results = {success: 0, failed: 0};
-        this.files = [];
-        this.state.set('upload.files', [])
+
+        this.files = {};
+
+        this.state.set('upload.files', {});
+
     }
 
 

@@ -24,7 +24,7 @@ export default class UploadService extends BaseService {
 
     async startUploading() {
 
-        let onProgress = null
+        let onProgress = null;
 
         if (this.state.get('upload.uploading', false)) return;
 
@@ -45,6 +45,8 @@ export default class UploadService extends BaseService {
         this.results = {success: 0, failed: 0};
 
         this._abort = false;
+
+        this.state.set('upload.uploading' ,true);
 
         return new Promise(resolve => {
 
@@ -69,9 +71,6 @@ export default class UploadService extends BaseService {
 
                     return;
                 }
-
-                this.state.set('upload.uploading', true);
-
 
                 while (this.active < this.options.concurrency && arrayFile.length) {
 
@@ -98,7 +97,7 @@ export default class UploadService extends BaseService {
 
                             this.results.failed++;
 
-                            this.errorService?.emit(err, {context: 'upload', file: {[file.id]: file}});
+                            this.errorBus?.emit(err, {context: 'upload', file: {[file.id]: file}});
 
                             this.eventBus?.emit(Events.UPLOAD_FAILED, {response: err, file: {[file.id]: file}});
 
@@ -231,13 +230,13 @@ export default class UploadService extends BaseService {
 
     reset() {
 
-        this.state.set('upload.uploading', false)
-
         this.results = {success: 0, failed: 0};
 
         this.files = {};
 
         this.state.set('upload.files', {});
+
+        // this.state.set('upload.uploading', false);
 
     }
 

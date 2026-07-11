@@ -36,9 +36,10 @@
                 </button>
 
             </div>
-            <div class="upload-files" data-upload-preview></div>
-            <div class="upload-messages" data-messages></div>
+
         </form>
+        <div class="upload-files" data-upload-preview></div>
+        <div class="upload-messages" data-messages></div>
 
     @endif
 

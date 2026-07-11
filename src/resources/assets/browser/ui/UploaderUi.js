@@ -16,11 +16,9 @@ export default class UploaderUi extends UiService {
 
     initialize() {
 
-        this.validFiles = {};
+        this.acceptedFiles = {};
 
-        this.invalidFiles = {};
-
-        this.invalidFiles = {};
+        this.rejectedFiles = {};
 
 
         const preChosenDisk = this.diskEl.value;
@@ -28,6 +26,10 @@ export default class UploaderUi extends UiService {
         this.state.set('upload.disk', preChosenDisk);
 
         this.disk = preChosenDisk;
+
+        this.formElView = this.formEl.innerHTML
+
+
     }
 
 
@@ -56,17 +58,17 @@ export default class UploaderUi extends UiService {
             },
 
             [Events.UPLOAD_PROGRESS]: ({file, percent}) => {
-                this.showProgress(file, percent)
+                this.updateProgress(file, percent)
             },
 
 
             [Events.UPLOAD_SUCCESS]: ({response, file, success, error}) => {
-                this.revealSingleUploadResult(response, file, success, error)
+                this.showUploadResult(response, file, success, error)
             },
 
 
             [Events.UPLOAD_FAILED]: ({response, file, success, error}) => {
-                this.revealSingleUploadResult(response, file, success, error)
+                this.showUploadResult(response, file, success, error)
             },
 
             'upload.uploading': () => {
@@ -90,7 +92,7 @@ export default class UploaderUi extends UiService {
 
             [this.formEl, 'submit', this.submitUpload],
 
-            [this.messagesEl, 'click', this.removeMessage],
+            [this.messagesEl, 'click', this.removeFileItem],
 
             [this.diskEl, 'change', this.changeDiskHandler],
         ];
@@ -120,32 +122,72 @@ export default class UploaderUi extends UiService {
 
         event.preventDefault();
 
-        this.handleFiles(event.dataTransfer.files);
+        this.prepareUploadFiles(event.dataTransfer.files);
     }
 
     changeInputHandler(event) {
 
-        this.handleFiles(event.target.files);
+        this.prepareUploadFiles(event.target.files);
 
         event.target.value = '';
     }
 
 
-    handleFiles(files = []) {
+    prepareUploadFiles(files = []) {
 
-        const normalized = this.normalizeFiles(files);
+        const normalized = this.prepareFiles(files);
 
-        const mimeResult = this.validateByMimetype(normalized);
+        const mimeResult = this.filterByMimeType(normalized);
 
-        const sizeResult = this.validateBySize(mimeResult.valid);
+        const sizeResult = this.filterBySize(mimeResult.valid);
 
-        this.validFiles = sizeResult.valid;
+        this.acceptedFiles = sizeResult.valid;
 
-        this.invalidFiles = {...mimeResult.invalid, ...sizeResult.invalid};
+        this.rejectedFiles = {...mimeResult.invalid, ...sizeResult.invalid};
 
         this.syncState();
 
-        this.renderPreview();
+        this.renderFileList();
+    }
+
+
+    renderWaiting() {
+        return `<div class="upload-dropzone" data-uoloader-waitng>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 120" width="220" height="180">
+    <defs>
+        <g id="file">
+            <rect x="-12" y="-16" width="24" height="32" rx="3" fill="#ffffff" stroke="#4F8EF7" stroke-width="2"/>
+            <polyline points="4,-16 12,-8 12,-16" fill="none" stroke="#4F8EF7" stroke-width="2"/>
+        </g>
+    </defs>
+    <g fill="#4F8EF7">
+        <circle cx="90" cy="55" r="18"/>
+        <circle cx="110" cy="42" r="24"/>
+        <circle cx="135" cy="55" r="18"/>
+        <rect x="80" y="55" width="65" height="22" rx="11"/>
+    </g>
+    <path d="M112 95V55" stroke="#4F8EF7" stroke-width="4" stroke-linecap="round"/>
+    <polyline points="102 65 112 53 122 65" fill="none" stroke="#4F8EF7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <use href="#file">
+        <animateTransform attributeName="transform" type="translate" values="40 150;112 88;112 60" dur="2.4s" begin="0s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.8;1" dur="2.4s" repeatCount="indefinite"/>
+    </use>
+    <use href="#file">
+        <animateTransform attributeName="transform" type="translate" values="70 150;112 88;112 60" dur="2.4s" begin=".45s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.8;1" dur="2.4s" begin=".45s" repeatCount="indefinite"/>
+    </use>
+    <use href="#file">
+        <animateTransform attributeName="transform" type="translate" values="100 150;112 88;112 60" dur="2.4s" begin=".9s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.8;1" dur="2.4s" begin=".9s" repeatCount="indefinite"/>
+    </use>
+</svg>
+</div>`
+    }
+
+    renderForm(isLoading) {
+        this.formEl.innerHTML = isLoading
+            ? this.renderWaiting()
+            : this.formElView;
     }
 
 
@@ -157,31 +199,29 @@ export default class UploaderUi extends UiService {
 
         if (!this.validateDisk(disk)) return;
 
-        this.emit(Events.UPLOAD_SIGNAL, {files: this.validFiles, disk, event});
+        this.emit(Events.UPLOAD_SIGNAL, {files: this.acceptedFiles, disk, event});
 
     }
 
     handleUploadingStage() {
 
-        const state = this.state.get('upload.loading', false);
+        const state = this.state.get('upload.uploading', false);
 
-        state ? this.formEl.disabled = true : this.formEl.disabled = false;
-
-        state ? this.formEl.classList.add('is-hidden') : this.formEl.classList.remove('is-hidden');
+        this.renderForm(state);
     }
 
     finishUpload() {
 
-        this.state.set('upload.loading', false);
+        this.state.set('upload.uploading', false);
     }
 
 
     syncState() {
 
-        this.state.set('upload.files', this.validFiles);
+        this.state.set('upload.files', this.acceptedFiles);
     }
 
-    normalizeFiles(files) {
+    prepareFiles(files) {
 
         let items = {}
 
@@ -198,7 +238,7 @@ export default class UploaderUi extends UiService {
     }
 
 
-    validateByMimetype(files = {}) {
+    filterByMimeType(files = {}) {
         const allowed = this.config.get('upload.allowedMimes', [])
             .map(item => item.toLowerCase());
 
@@ -217,7 +257,7 @@ export default class UploaderUi extends UiService {
                 valid[id] = file;
             } else {
 
-                file.reason = 'invalid type';
+                file.error = 'invalid type';
 
                 invalid[id] = file;
             }
@@ -226,7 +266,7 @@ export default class UploaderUi extends UiService {
         return {valid, invalid};
     }
 
-    validateBySize(files = {}) {
+    filterBySize(files = {}) {
 
         const maxSize = this.config.get('upload.maxSize', null);
 
@@ -246,7 +286,7 @@ export default class UploaderUi extends UiService {
 
                 valid[id] = file;
             } else {
-                file.reason = `max size ${formatSize(maxSize)}`;
+                file.error = `max size ${formatSize(maxSize)}`;
 
                 invalid[id] = file;
             }
@@ -267,23 +307,23 @@ export default class UploaderUi extends UiService {
     }
 
 
-    renderPreview() {
+    renderFileList() {
 
         if (!this.messagesEl) return;
 
-        const invalid = Object.entries(this.invalidFiles)
-            .map((item) => this.renderItem(item, false));
+        const invalid = Object.entries(this.rejectedFiles)
+            .map((item) => this.renderFileItem(item, false));
 
-        const valid = Object.entries(this.validFiles)
-            .map((item) => this.renderItem(item, true));
+        const valid = Object.entries(this.acceptedFiles)
+            .map((item) => this.renderFileItem(item, true));
 
         this.messagesEl.innerHTML = [...invalid, ...valid].join('');
     }
 
-    renderItem([id, file], valid) {
+    renderFileItem([id, file], valid) {
 
         return `
-            <div class="upload-item ${valid ? 'valid-file' : 'invalid-file'}" data-upload-preview data-file-id="${file.id}">
+            <div class="upload-item ${valid ? 'is-success' : 'is-error'}" data-upload-preview data-file-id="${file.id}">
                 <div class="upload-file-info">
                      ${getMimeIcon(file.type)}
                      ${escapeHtml(file.name)}
@@ -297,7 +337,7 @@ export default class UploaderUi extends UiService {
                             ${formatSize(file.size)}
                         </small>
                         <small data-upload-status data-id="${file.id}">
-                            ${valid ? 'ready to upload' : (file?.reason ? `${file.reason}` : "invalid file")}
+                            ${valid ? 'ready to upload' : (file?.reason ? `${file.error}` : "invalid file")}
                         </small>
                    </div>
                     <button type="button" data-remove-message="${file.id}">
@@ -308,7 +348,7 @@ export default class UploaderUi extends UiService {
     }
 
 
-    showProgress(file, percent) {
+    updateProgress(file, percent) {
 
         const progressBarEl = this.$(`[data-progress-bar='${file.id}']`);
 
@@ -318,13 +358,13 @@ export default class UploaderUi extends UiService {
 
         if (progressBarEl) {
 
-            progressBarEl.style.width = percent + "%!important"
+            progressBarEl.style.setProperty("width", `${percent}%`, "important");
 
             if (percent == 100) progressBarEl.classList.add('completed')
         }
 
 
-        if (messageBoxEl) messageBoxEl.classList.remove('valid-file', 'invalid-file');
+        if (messageBoxEl) messageBoxEl.classList.remove('is-success', 'is-error');
 
         if (uploadStatusEl) uploadStatusEl.textContent = 'uploading ...'
 
@@ -332,25 +372,25 @@ export default class UploaderUi extends UiService {
     }
 
 
-    revealSingleUploadResult(response, file, success, error) {
+    showUploadResult(response, file, success, error) {
 
         const progressBarEl = this.$(`[data-progress-bar='${file.id}']`);
 
         const messageBoxEl = progressBarEl?.closest('[data-upload-preview]');
 
-        const uploadStatusEl =messageBoxEl?.querySelector('[data-upload-status]');
+        const uploadStatusEl = messageBoxEl?.querySelector('[data-upload-status]');
 
 
         if (progressBarEl) progressBarEl.classList.add(success ? 'success' : 'failed');
 
-        if (messageBoxEl) messageBoxEl.classList.add(success ? 'valid-file' : 'invalid-file')
+        if (messageBoxEl) messageBoxEl.classList.add(success ? 'is-success' : 'is-error')
 
         if (uploadStatusEl) uploadStatusEl.textContent = success ? 'succeed' : error
 
 
     }
 
-    removeMessage(event) {
+    removeFileItem(event) {
 
         const button = event.target.closest('[data-remove-message]');
 
@@ -358,9 +398,9 @@ export default class UploaderUi extends UiService {
 
         const id = button.dataset.removeMessage;
 
-        delete this.validFiles[id];
+        delete this.acceptedFiles[id];
 
-        delete this.invalidFiles[id];
+        delete this.rejectedFiles[id];
 
         this.syncState();
 

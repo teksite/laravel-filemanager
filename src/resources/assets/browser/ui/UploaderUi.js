@@ -23,11 +23,11 @@ export default class UploaderUi extends UiService {
         this.invalidFiles = {};
 
 
-        const value = this.diskEl.value;
+        const preChosenDisk = this.diskEl.value;
 
-        this.state.set('upload.disk', value);
+        this.state.set('upload.disk', preChosenDisk);
 
-        this.disk = value;
+        this.disk = preChosenDisk;
     }
 
 
@@ -92,8 +92,7 @@ export default class UploaderUi extends UiService {
 
             [this.messagesEl, 'click', this.removeMessage],
 
-
-            [this.diskSelectorEl, 'change', this.changeDiskHandler],
+            [this.diskEl, 'change', this.changeDiskHandler],
         ];
     }
 

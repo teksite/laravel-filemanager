@@ -32,9 +32,10 @@ export default class UploadService extends BaseService {
 
         const disk = this.state.get('upload.disk');
 
+
         if (this.queueLength() === 0) {
 
-            this.errorService?.emit(new Error('Please select files first'), {context: 'upload_empty'});
+            this.errorBus?.emit(new Error('Please select files first'), {context: 'upload_empty'});
 
             alert('Please select files first');
 

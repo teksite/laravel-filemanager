@@ -7,17 +7,20 @@ export default class UploadService extends BaseService{
     busEvents() {
 
         return {
-            [Events.UPLOAD_SIGNAL]: this.sendRequest,
+
+            [Events.UPLOAD_SIGNAL]: this.startUploading,
 
         };
     }
 
+    isUploading() {
+        return this.state.get('upload.uploading' , false);
+    }
 
+    async startUploading(onProgress = null) {
 
-    async start(onProgress = null) {
-        if (this.isUploading()) {
-            return;
-        }
+        if (this.isUploading()) return;
+
 
         const selectedFiles = this.state.get('upload.files', [])
 

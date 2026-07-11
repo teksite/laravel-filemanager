@@ -313,9 +313,7 @@ export default class UploadServiceCopy {
     }
 
 
-    isUploading() {
-        return this.state.get('upload.uploading') ?? false;
-    }
+
 
     reset() {
         this.toggleLoadingStatus(false)

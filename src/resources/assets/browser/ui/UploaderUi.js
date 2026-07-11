@@ -59,6 +59,9 @@ export default class UploaderUi extends UiService {
             [Events.UPLOAD_COMPLETE]: () => {
                 this.finishUpload();
             },
+            'upload.uploading': () => {
+                this.handleUploadingStage();
+            },
         };
     }
 
@@ -320,14 +323,19 @@ export default class UploaderUi extends UiService {
 
         const disk = this.state.get('upload.disk', null);
 
-        if (!this.validateDisk(disk)) {
-            return;
-        }
+        if (!this.validateDisk(disk)) return;
 
         this.emit(Events.UPLOAD_SIGNAL, {files: this.validFiles, disk});
 
     }
 
+    handleUploadingStage() {
+
+        const state = this.state.get('upload.loading', false);
+
+        state ? this.formEl.disabled = true : this.formEl.disabled = false;
+        state ? this.formEl.classList.add('is-hidden') : this.formEl.classList.remove('is-hidden');
+    }
 
     finishUpload() {
 

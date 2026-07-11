@@ -37,8 +37,8 @@ export default class GridUi extends UiService {
                 this.toggleLoading(value);
             },
 
-            [Events.UPLOAD_SUCCESS]: ({file: value}) => {
-                this.prependFile(value);
+            [Events.UPLOAD_SUCCESS]: ({response}) => {
+                this.prependFile(response);
             },
 
             [Events.FILE_DELETED]: ({fileId}) => {
@@ -91,7 +91,25 @@ export default class GridUi extends UiService {
     }
 
 
-    prependFile(items = {}) {
+    prependFile(item) {
+
+        if (!item) return;
+
+        this.updateLoadedFiles({prepend: item})
+
+        const fragment = document.createDocumentFragment();
+
+        const card = this.renderCard(item);
+
+        if (card) fragment.appendChild(card);
+
+        this.gridEl.prepend(fragment);
+
+        this.eventBus.emit(Events.GRID_UPDATED, {items: item, action: 'prepend file'});
+
+    }
+
+    prependManyFile(items) {
 
         if (!items || Object.keys(items).length === 0) return;
 
@@ -232,5 +250,18 @@ export default class GridUi extends UiService {
 
             item.textContent = newTitle;
         });
+    }
+
+    updateLoadedFiles({prepend = {}, append = {}}) {
+
+        const oldFiles = this.state.get('load.files');
+
+        const prependFie = prepend?.id ? {[prepend.id]: prepend} : {}
+
+        const appendFie = append?.id ? {[append.id]: append} : {}
+
+        const next = {...prependFie, ...oldFiles, ...appendFie}
+
+        this.state.set('load.files', next);
     }
 }

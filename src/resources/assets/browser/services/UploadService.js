@@ -83,10 +83,10 @@ export default class UploadService extends BaseService {
 
                             this.results.success++;
 
-                            const uploadedFile = res.file;
+                           const {file : newFile , success} =res;
 
                             this.eventBus?.emit(Events.UPLOAD_SUCCESS, {
-                                response: uploadedFile,
+                                response: newFile,
                                 file,
                                 success: true,
                                 error: null

@@ -6,9 +6,7 @@
         @include('filemanager::partials.header')
         @include('filemanager::partials.grid')
        <div>
-           <div class="loader-buttons">
-               <button role="button" type="button" class="loadMoreBtn" data-load-more>{{__('load more')}}</button>
-           </div>
+           @include('filemanager::partials.loader')
            @include('filemanager::partials.footer')
        </div>
 

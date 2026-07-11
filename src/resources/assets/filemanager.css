@@ -18,6 +18,8 @@
     --radius-sm: 10px;
     --shadow: 0 10px 30px rgba(0, 0, 0, .08);
     --transition: .2s ease;
+    --select: #00163c87;
+    --select-ligt: #00163c87;
 }
 
 /* =========================
@@ -33,6 +35,10 @@
     padding: 20px;
     background: var(--bg-overlay);
     backdrop-filter: blur(6px);
+}
+
+.filemanager .is-hidden {
+    display: none !important;
 }
 
 /* =========================
@@ -60,6 +66,11 @@
 
 .filemanager .card-list {
     position: relative;
+    min-height: 400px;
+    height: 400px;
+    max-height: 400px;
+    overflow-y: scroll;
+    padding: 16px;
 }
 
 .filemanager .media-container > * {
@@ -219,18 +230,64 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    background: #f5f5f5;
+    background: #ffefdd;
     border-radius: 10px;
 }
 
-.filemanager .upload-progress {
+
+.filemanager .upload-item .upload-file-action {
+    width: fit-content;
+    min-width: fit-content;
+    display: flex;
+    gap: 8px
+
+}
+
+
+.filemanager .upload-item .upload-file-action div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px
+
+}
+
+.filemanager .upload-item .info {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px
+}
+
+.filemanager .upload-item.is-success {
+    background-color: #e0ffe0;
+    color: #004c55;
+    border: 1px solid #004c55;
+}
+
+.filemanager .upload-item.is-errors {
+    background-color: #ffe0e0;
+    color: #740101;
+    border: 1px solid #740101;
+
+}
+
+.filemanager .upload-item .upload-file-info {
     width: 100%;
+}
+
+.filemanager .upload-progress {
+    width: calc(100% - 100px);
     height: 6px;
     margin-top: 5px;
     background: #ddd;
     border-radius: 10px;
     overflow: hidden;
 }
+
+.filemanager .upload-progress .progress-bar.completed {
+    width: 100%;
+}
+
 
 .filemanager .upload-progress span {
     display: block;
@@ -279,18 +336,32 @@
 /* =========================
    LOADER
 ========================= */
+.filemanager .loader-section {
+    display: flex;
+    margin-top: 8px;
+    min-height: 35px;
+}
+
 .filemanager .loader {
     background: rgb(83 135 182 / 50%);
     backdrop-filter: blur(6px);
-    position: absolute;
-    z-index: 1000;
     color: #ffffff;
-    right: 0;
-    left: 0;
-    bottom: 0;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    padding: 8px;
+    text-align: center;
+}
+
+.filemanager .loadMoreBtn {
+    min-width: fit-content;
+    width: 100px;
+
+}
+
+.filemanager .loader.show {
+    display: block;
 }
 
 /* =========================
@@ -328,28 +399,12 @@
 ========================= */
 .filemanager .media-grid {
     grid-area: content;
-    padding: 16px;
-    height: 400px;
-    max-height: 400px;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
+    height: 100%;
     display: grid;
     grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
     grid-auto-rows: 160px;
     gap: 14px;
     align-content: start;
-}
-
-.filemanager .media-card {
-    width: 100%;
-
-    height: 100%;
-    border-radius: var(--radius-md);
-    background: #fff;
-    border: 1px solid var(--border);
-    overflow: hidden;
-    user-select: none;
 }
 
 
@@ -381,7 +436,13 @@
     overflow: hidden;
     cursor: pointer;
     transition: var(--transition);
+    user-select: none;
 }
+
+.filemanager .media-card.current-file {
+    border-color: var(--select);
+}
+
 
 .filemanager .media-card:hover {
     transform: translateY(-3px);
@@ -446,9 +507,6 @@
     z-index: 10;
 }
 
-.filemanager .footer .loader-buttons, .filemanager .footer .action-button {
-    min-width: fit-content;
-}
 
 /* =========================
    BUTTONS
@@ -499,13 +557,14 @@
     position: relative;
 }
 
-.filemanager  .selected-item img,
-.filemanager  .selected-item video,
-.filemanager  .selected-item audio{
+.filemanager .selected-item img,
+.filemanager .selected-item video,
+.filemanager .selected-item audio {
     width: 100%;
     height: 100%;
 }
-.filemanager  .selected-item button.selected-item-delete-btn {
+
+.filemanager .selected-item button.selected-item-delete-btn {
     color: var(--danger);
     position: absolute;
     top: 0;
@@ -598,19 +657,16 @@
    Upload Result and Preview
 ========================= */
 
-.filemanager .upload-progress {
-    width: 100%;
-    height: 8px;
-    background: #ddd;
-    overflow: hidden;
-    border-radius: 6px;
-}
 
 .filemanager .progress-bar {
-    width: 0;
+    width: 5px;
     height: 100%;
     transition: width .3s ease;
-    background: #4a90e2;
+    background: #d69518;
+}
+
+.filemanager .progress-bar.finish {
+    width: 100% !important;
 }
 
 .filemanager .progress-bar.success {
@@ -669,3 +725,5 @@
             repeat(auto-fill, minmax(130px, 1fr));
     }
 }
+
+

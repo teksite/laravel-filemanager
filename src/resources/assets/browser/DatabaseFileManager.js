@@ -203,6 +203,7 @@ export default class DatabaseFileManager {
 
             [UploadService, {
                 url: this.config.get('api.updateUrl'),
+                ...this.config.section('upload'),
             }],
 
 

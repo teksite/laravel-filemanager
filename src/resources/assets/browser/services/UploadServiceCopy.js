@@ -169,22 +169,22 @@ export default class UploadServiceCopy {
                     this.uploadFile(file, selectedDisk, onProgress)
                         .then(res => {
                             this.results.success++;
+
                             const file = res.file;
-                            this.eventBus?.emit(Events.UPLOAD_SUCCESS,
-                                {
-                                    response: res,
-                                    file: {
-                                        [file.id]: file
-                                    }
-                                });
+
+                            this.eventBus?.emit(Events.UPLOAD_SUCCESS, {response: res, file: {[file.id]: file}});
                         })
                         .catch(err => {
                             this.results.failed++;
+
                             this.errorService?.emit(err, {context: 'upload', file: file.name});
+
                             this.eventBus?.emit(Events.UPLOAD_FAILED, {file, error: err});
                         })
                         .finally(() => {
+
                             this.active--;
+
                             next();
                         });
                 }

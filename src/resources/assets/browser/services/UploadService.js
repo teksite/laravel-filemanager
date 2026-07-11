@@ -10,6 +10,8 @@ export default class UploadService extends BaseService {
         this.requestSet = new Set();
 
         this._abort = false;
+
+        this.active = 0
     }
 
     busEvents() {
@@ -19,25 +21,18 @@ export default class UploadService extends BaseService {
         };
     }
 
-    isUploading() {
 
-        return this.state.get('upload.uploading', false);
-    }
+    async startUploading() {
 
-    toggleLoadingStatus(status = false) {
-        this.state.set('upload.uploading', status);
-    }
+        let onProgress = null
 
-
-    async startUploading(onProgress = null) {
-
-        if (this.isUploading()) return;
+        if (this.state.get('upload.uploading', false)) return;
 
         this.queue = this.state.get('upload.files', {});
 
         const disk = this.state.get('upload.disk');
 
-        if (!Object.keys(this.queue).length) {
+        if (this.queueLength() === 0) {
 
             this.errorService?.emit(new Error('Please select files first'), {context: 'upload_empty'});
 
@@ -46,12 +41,13 @@ export default class UploadService extends BaseService {
             return;
         }
 
-
         this.results = {success: 0, failed: 0};
 
         this._abort = false;
 
         return new Promise(resolve => {
+
+            const arrayFile = Array.from(Object.values(this.queue));
 
             const next = () => {
 
@@ -62,7 +58,7 @@ export default class UploadService extends BaseService {
                     return;
                 }
 
-                if (this.queue.length === 0 && this.active === 0) {
+                if (arrayFile.length === 0 && this.active === 0) {
 
                     this.eventBus?.emit(Events.UPLOAD_COMPLETE, this.results);
 
@@ -73,36 +69,44 @@ export default class UploadService extends BaseService {
                     return;
                 }
 
-                this.toggleLoadingStatus(true);
+                this.state.set('upload.uploading', true);
 
-                while (this.active < this.options.concurrency && this.queue.length) {
 
-                    const file = this.queue.shift();
+
+                while (this.active < this.options.concurrency && arrayFile.length) {
+
+                    const file = arrayFile.shift();
 
                     this.active++;
 
-                    this.uploadFile(file, disk, onProgress).then(res => {
+                    this.uploadFile(file, disk, onProgress)
+                        .then(res => {
 
-                        this.results.success++;
+                            this.results.success++;
 
-                        const uploadedFile = res.file;
+                            const uploadedFile = res.file;
 
-                        this.eventBus?.emit(Events.UPLOAD_SUCCESS, {response: uploadedFile, file: {[file.id]: file}});
+                            this.eventBus?.emit(Events.UPLOAD_SUCCESS, {
+                                response: uploadedFile,
+                                file: {[file.id]: file}
+                            });
 
-                    }).catch(err => {
+                        })
+                        .catch(err => {
 
-                        this.results.failed++;
+                            this.results.failed++;
 
-                        this.errorService?.emit(err, {context: 'upload', file: {[file.id]: file}});
+                            this.errorService?.emit(err, {context: 'upload', file: {[file.id]: file}});
 
-                        this.eventBus?.emit(Events.UPLOAD_FAILED, {response: err, file: {[file.id]: file}});
+                            this.eventBus?.emit(Events.UPLOAD_FAILED, {response: err, file: {[file.id]: file}});
 
-                    }).finally(() => {
+                        })
+                        .finally(() => {
 
-                        this.active--;
+                            this.active--;
 
-                        next();
-                    });
+                            next();
+                        });
                 }
             };
             next();
@@ -125,7 +129,7 @@ export default class UploadService extends BaseService {
                     form.append('disk', disk);
                 }
 
-                xhr.open('POST', this.options.endpoint);
+                xhr.open('POST', this.options.url);
 
                 xhr.timeout = this.options.requestTimeout;
 
@@ -199,8 +203,7 @@ export default class UploadService extends BaseService {
 
         this.queue = [];
 
-        this.requests.forEach(
-
+        this.requestSet.forEach(
             xhr => xhr.abort()
         );
 
@@ -212,9 +215,15 @@ export default class UploadService extends BaseService {
 
     }
 
+    queueLength() {
+
+        return Object.keys(this.queue).length;
+    }
+
 
     reset() {
-        this.toggleLoadingStatus(false);
+
+        this.state.set('upload.uploading', false)
 
         this.results = {success: 0, failed: 0};
 

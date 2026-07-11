@@ -5,6 +5,7 @@ namespace Teksite\FileManager\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
+use function Aws\map;
 
 class ApiUploadFileRequest  extends BaseApiRequest
 {
@@ -69,7 +70,9 @@ class ApiUploadFileRequest  extends BaseApiRequest
     protected function checkAllowedMimeTypes(Validator $validator): void
     {
         if ($validator->errors()->isNotEmpty()) return;
-        $allowedTypes = config('filemanager.allow_upload_types', []);
+        $allowedTypes = config('filemanager.allow_upload_types', []) ?? [];
+
+        $allowedTypes=array_map('strtolower', $allowedTypes);
 
         if (count($allowedTypes) === 0) return;
         $file = $this->file('file');

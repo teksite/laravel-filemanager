@@ -171,7 +171,7 @@ export default class UploaderUi extends UiService {
 
         if (!this.validateDisk(disk)) return;
 
-        this.emit(Events.UPLOAD_SIGNAL, {files: this.validFiles, disk});
+        this.emit(Events.UPLOAD_SIGNAL, {files: this.validFiles, disk , event});
 
     }
 

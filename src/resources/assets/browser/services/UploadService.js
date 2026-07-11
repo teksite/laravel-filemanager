@@ -22,9 +22,10 @@ export default class UploadService extends BaseService{
         if (this.isUploading()) return;
 
 
-        const selectedFiles = this.state.get('upload.files', [])
+        this.files = this.state.get('upload.files', {})
 
-        this.files = selectedFiles;
+
+         = selectedFiles;
 
         if (!selectedFiles.length) {
             this.errorService?.emit(new Error('Please select files first'), {context: 'upload_empty'});
@@ -208,17 +209,6 @@ export default class UploadService extends BaseService{
         };
 
     }
-
-
-    validatingDisk(disk) {
-
-        const disks = this.options.allowedDisks;
-
-        if (!disks.length) return true;
-
-        return disks.includes(disk);
-    }
-
 
 
     reset() {

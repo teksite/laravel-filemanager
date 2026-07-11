@@ -81,10 +81,10 @@ export default class DatabaseFileManager {
 
             [LoadService, {
                 url: this.config.get('api.getUrl'),
-                options: {
-                    ...this.config.section('load'),
-                    ...this.config.section('filter')
-                }
+
+                ...this.config.section('load'),
+                ...this.config.section('filter')
+
             }],
 
 

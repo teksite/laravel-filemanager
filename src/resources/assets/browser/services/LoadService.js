@@ -5,23 +5,8 @@ import Service from "../Foundation/BaseServices.js";
 export default class LoadService extends Service {
 
 
-    constructor(app, {url, options = {}},) {
-        super(app);
-
-        this.options = {
-            endpoint: url ?? "/api/filemanager",
-            getOnInit: true,
-            perPage: 25,
-            ...options
-        };
-
-        if (this.options.getOnInit) this.initialize();
-
-    }
-
-    async initialize() {
-
-        await this.sendRequest();
+    initialize() {
+        if (this.options.getOnInit) this.sendRequest();
     }
 
     busEvents() {

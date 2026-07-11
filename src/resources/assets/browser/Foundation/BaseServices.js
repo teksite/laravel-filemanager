@@ -14,6 +14,8 @@ export default class BaseService extends BaseComponent {
         if (!this.shouldInitialize()) return;
 
         this.bindBusEvents();
+
+        this.initialize?.();
     }
 
 

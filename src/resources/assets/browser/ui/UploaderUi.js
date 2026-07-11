@@ -334,6 +334,7 @@ export default class UploaderUi extends UiService {
         const state = this.state.get('upload.loading', false);
 
         state ? this.formEl.disabled = true : this.formEl.disabled = false;
+
         state ? this.formEl.classList.add('is-hidden') : this.formEl.classList.remove('is-hidden');
     }
 

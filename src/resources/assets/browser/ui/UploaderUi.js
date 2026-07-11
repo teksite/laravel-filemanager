@@ -59,6 +59,11 @@ export default class UploaderUi extends UiService {
             [Events.UPLOAD_COMPLETE]: () => {
                 this.finishUpload();
             },
+
+            [Events.UPLOAD_PROGRESS]: ({file, percent}) => {
+                this.showProgress(file, percent)
+            },
+
             'upload.uploading': () => {
                 this.handleUploadingStage();
             },
@@ -86,7 +91,6 @@ export default class UploaderUi extends UiService {
             [this.diskSelectorEl, 'change', this.changeDiskHandler],
         ];
     }
-
 
 
     changeDiskHandler() {
@@ -162,7 +166,6 @@ export default class UploaderUi extends UiService {
     }
 
 
-
     submitUpload(event) {
 
         event.preventDefault();
@@ -171,7 +174,7 @@ export default class UploaderUi extends UiService {
 
         if (!this.validateDisk(disk)) return;
 
-        this.emit(Events.UPLOAD_SIGNAL, {files: this.validFiles, disk , event});
+        this.emit(Events.UPLOAD_SIGNAL, {files: this.validFiles, disk, event});
 
     }
 
@@ -188,7 +191,6 @@ export default class UploaderUi extends UiService {
 
         this.state.set('upload.loading', false);
     }
-
 
 
     syncState() {
@@ -211,7 +213,6 @@ export default class UploaderUi extends UiService {
 
         return items;
     }
-
 
 
     validateByMimetype(files = {}) {
@@ -283,7 +284,6 @@ export default class UploaderUi extends UiService {
     }
 
 
-
     renderPreview() {
 
         if (!this.messagesEl) return;
@@ -322,6 +322,35 @@ export default class UploaderUi extends UiService {
                     </button>
                 </div>
             </div>`;
+    }
+
+
+    showProgress(file, percent) {
+
+        const progressBarEl = this.$(`[data-progress-bar='${file.id}']`);
+
+        if (progressBarEl) progressBarEl.classList.add('completed')
+
+    }
+
+
+    revealSingleUploadResult(file, success) {
+
+        const progressBarEl = this.$(`[data-progress-bar='${file.id}']`);
+
+        const messageBoxEl = progressBarEl?.closest('[data-upload-preview]');
+
+        if (progressBarEl) {
+            progressBarEl.classList.add(success ? 'success' : 'failed');
+        }
+
+        if (messageBoxEl){
+
+            messageBoxEl.classList.add(success ? 'valid-file' : 'invalid');
+        }
+
+
+
     }
 
     removeMessage(event) {

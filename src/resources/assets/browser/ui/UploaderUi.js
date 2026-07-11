@@ -66,7 +66,7 @@ export default class UploaderUi extends UiService {
 
             [this.formEl, 'submit', this.submitUpload],
 
-            [this.messagesEl, 'click', this.removeFile],
+            [this.messagesEl, 'click', this.removeMessage],
         ];
     }
 
@@ -97,10 +97,9 @@ export default class UploaderUi extends UiService {
 
         const normalized = this.normalizeFiles(files);
 
-        console.log(normalized)
-        const mimeResult = this.validateMime(normalized);
+        const mimeResult = this.validateByMimetype(normalized);
 
-        const sizeResult = this.validateSize(mimeResult.valid);
+        const sizeResult = this.validateBySize(mimeResult.valid);
 
         this.validFiles = sizeResult.valid;
 
@@ -128,7 +127,7 @@ export default class UploaderUi extends UiService {
     }
 
 
-    validateMime(files = {}) {
+    validateByMimetype(files = {}) {
         const allowed = this.config.get('upload.allowedMimes', [])
             .map(item => item.toLowerCase());
 
@@ -152,13 +151,12 @@ export default class UploaderUi extends UiService {
                 invalid[id] = file;
             }
         });
-        console.log(invalid)
 
         return {valid, invalid};
     }
 
 
-    validateSize(files = {}) {
+    validateBySize(files = {}) {
 
         const maxSize = this.config.get('upload.maxSize', null);
 
@@ -227,7 +225,7 @@ export default class UploaderUi extends UiService {
                             ${valid ? 'ready to upload' : (file?.reason ? `${file.reason}` : "invalid file")}
                         </small>
                    </div>
-                    <button type="button" data-remove-file="${file.id}">
+                    <button type="button" data-remove-message="${file.id}">
                         ×
                     </button>
                 </div>
@@ -235,13 +233,13 @@ export default class UploaderUi extends UiService {
     }
 
 
-    removeFile(event) {
+    removeMessage(event) {
 
-        const button = event.target.closest('[data-remove-file]');
+        const button = event.target.closest('[data-remove-message]');
 
         if (!button) return;
 
-        const id = button.dataset.removeFile;
+        const id = button.dataset.removeMessage;
 
         delete this.validFiles[id];
 
@@ -271,17 +269,11 @@ export default class UploaderUi extends UiService {
 
         const status = item.querySelector(`[data-upload-action-box="${CSS.escape(id)}"]`);
 
-
-        if (status) {
-            status.textContent = success ? 'Uploaded' : 'Failed';
-        }
-
-
+        if (status) status.textContent = success ? 'Uploaded' : 'Failed';
     }
 
 
     submitUpload(event) {
-
 
         event.preventDefault();
 
@@ -299,26 +291,14 @@ export default class UploaderUi extends UiService {
         }
 
 
-        this.emit(
-            Events.UPLOAD_SIGNAL,
-            {
-                files: this.validFiles
-            }
-        );
-
+        this.emit(Events.UPLOAD_SIGNAL, {files: this.validFiles});
 
     }
 
 
     finishUpload() {
 
-
-        this.state.set(
-            'upload.loading',
-            false
-        );
-
-
+        this.state.set('upload.loading', false);
     }
 
 

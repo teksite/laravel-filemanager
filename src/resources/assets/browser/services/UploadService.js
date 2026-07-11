@@ -72,7 +72,6 @@ export default class UploadService extends BaseService {
                 this.state.set('upload.uploading', true);
 
 
-
                 while (this.active < this.options.concurrency && arrayFile.length) {
 
                     const file = arrayFile.shift();
@@ -88,7 +87,9 @@ export default class UploadService extends BaseService {
 
                             this.eventBus?.emit(Events.UPLOAD_SUCCESS, {
                                 response: uploadedFile,
-                                file: {[file.id]: file}
+                                file,
+                                success: true,
+                                error: null
                             });
 
                         })
@@ -100,6 +101,12 @@ export default class UploadService extends BaseService {
 
                             this.eventBus?.emit(Events.UPLOAD_FAILED, {response: err, file: {[file.id]: file}});
 
+                            this.eventBus?.emit(Events.UPLOAD_FAILED, {
+                                response: null,
+                                file,
+                                success: true,
+                                error:err
+                            });
                         })
                         .finally(() => {
 

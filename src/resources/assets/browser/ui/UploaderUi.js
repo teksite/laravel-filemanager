@@ -51,17 +51,17 @@ export default class UploaderUi extends UiService {
     busEvents() {
 
         return {
-
-            [Events.UPLOAD_SUCCESS]: ({id, success, file}) => {
-                this.updateUploadStatus(id, success, file);
-            },
-
             [Events.UPLOAD_COMPLETE]: () => {
                 this.finishUpload();
             },
 
             [Events.UPLOAD_PROGRESS]: ({file, percent}) => {
                 this.showProgress(file, percent)
+            },
+
+
+            [Events.UPLOAD_SUCCESS]: ({response, file ,success, error}) => {
+                this.revealSingleUploadResult(response, file ,success, error)
             },
 
             'upload.uploading': () => {
@@ -142,27 +142,6 @@ export default class UploaderUi extends UiService {
         this.syncState();
 
         this.renderPreview();
-    }
-
-    updateUploadStatus(id, success, file) {
-
-        const item = this.messagesEl?.querySelector(`[data-file-id="${CSS.escape(id)}"]`);
-
-        if (!item) return;
-
-        item.classList.toggle('valid-file', success);
-
-        item.classList.toggle('invalid-file', !success);
-
-        const bar = item.querySelector(`[data-progress-bar="${CSS.escape(id)}"]`);
-
-        bar.classList.add('finish')
-
-        bar.classList.add(success ? 'success' : 'failed');
-
-        const status = item.querySelector(`[data-upload-action-box="${CSS.escape(id)}"]`);
-
-        if (status) status.textContent = success ? 'Uploaded' : 'Failed';
     }
 
 
@@ -329,26 +308,39 @@ export default class UploaderUi extends UiService {
 
         const progressBarEl = this.$(`[data-progress-bar='${file.id}']`);
 
-        if (progressBarEl) progressBarEl.classList.add('completed')
+        const messageBoxEl = progressBarEl?.closest('[data-upload-preview]');
+
+        if (progressBarEl) {
+
+            progressBarEl.style.width = percent + "%!important"
+
+            if (percent == 100) progressBarEl.classList.add('completed')
+        }
+
+
+        if (messageBoxEl) {
+
+            messageBoxEl.classList.remove('valid-file', 'invalid-file')
+        }
 
     }
 
 
-    revealSingleUploadResult(file, success) {
+    revealSingleUploadResult(response, file ,success, error) {
 
         const progressBarEl = this.$(`[data-progress-bar='${file.id}']`);
 
         const messageBoxEl = progressBarEl?.closest('[data-upload-preview]');
 
         if (progressBarEl) {
+
             progressBarEl.classList.add(success ? 'success' : 'failed');
         }
 
-        if (messageBoxEl){
-
-            messageBoxEl.classList.add(success ? 'valid-file' : 'invalid');
+        if (messageBoxEl) {
+            console.log(error)
+            messageBoxEl.classList.add(success ? 'valid-file' : 'invalid-file')
         }
-
 
 
     }

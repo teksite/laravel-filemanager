@@ -21,6 +21,7 @@ import FilterUi from "./ui/FilterUi.js";
 import SelectionButtonUi from "./ui/SelectionButtonUi.js";
 import SelectionGridUi from "./ui/SelectionGridUi.js";
 import UploaderUi from "./ui/UploaderUi.js";
+import UploadService from "./services/UploadService.js";
 
 
 export default class DatabaseFileManager {
@@ -77,45 +78,7 @@ export default class DatabaseFileManager {
 
     components() {
         return [
-            /*
-                        [
-                            UploadService,{
 
-                                url:this.config.get(
-                                    'api.uploadUrl'
-                                ),
-
-                                elements:{
-
-                                    formEl:this.config.get(
-                                        'ui.uploadFormSelector'
-                                    ),
-
-                                    dropzoneEl:this.config.get(
-                                        'ui.dropzoneSelector'
-                                    ),
-
-                                    inputEl:this.config.get(
-                                        'ui.fileInputSelector'
-                                    ),
-
-                                    previewEl:this.config.get(
-                                        'ui.uploadPreviewSelector'
-                                    ),
-
-                                    diskSelectorEl:this.config.get(
-                                        'ui.uploadDiskSelector'
-                                    )
-
-                                },
-
-                                options:this.config.section(
-                                    'upload'
-                                )
-
-                            }
-                        ],
-                 */
             [LoadService, {
                 url: this.config.get('api.getUrl'),
                 options: {
@@ -237,12 +200,10 @@ export default class DatabaseFileManager {
                 },
 
             }],
-            /*
 
-                        [UploadService, {
-                            url: this.config.get('api.deleteUrl')
-                        }],
-            */
+            [UploadService, {
+                url: this.config.get('api.updateUrl'),
+            }],
 
 
         ];

@@ -19,6 +19,15 @@ export default class UploaderUi extends UiService {
         this.validFiles = {};
 
         this.invalidFiles = {};
+
+        this.invalidFiles = {};
+
+
+        const value = this.diskEl.value;
+
+        this.state.set('upload.disk', value);
+
+        this.disk = value;
     }
 
 
@@ -33,6 +42,8 @@ export default class UploaderUi extends UiService {
             dropzoneEl: this.config.get('ui.dropzoneSelector'),
 
             inputEl: this.config.get('ui.fileInputSelector'),
+
+            diskEl: this.config.get('ui.uploadDiskSelector'),
         };
     }
 
@@ -67,6 +78,9 @@ export default class UploaderUi extends UiService {
             [this.formEl, 'submit', this.submitUpload],
 
             [this.messagesEl, 'click', this.removeMessage],
+
+
+            [this.diskSelectorEl, 'change', this.changeDiskHandler],
         ];
     }
 
@@ -273,25 +287,44 @@ export default class UploaderUi extends UiService {
     }
 
 
+    changeDiskHandler() {
+
+        const value = this.diskEl.value;
+
+        if (!this.validateDisk(value)) {
+
+            this.diskEl.value = this.disk;
+        }
+
+        this.state.set('upload.disk', value);
+
+        this.disk = value;
+    }
+
+    validateDisk(disk) {
+
+        if (![...this.config.get('upload.allowedDisks')].includes(disk)) {
+
+            alert(`No valid disk (${disk}) selected.`);
+
+            return false;
+        }
+
+        return true;
+    }
+
+
     submitUpload(event) {
 
         event.preventDefault();
 
+        const disk = this.state.get('upload.disk', null);
 
-        if (
-            !Object.keys(this.validFiles).length
-        ) {
-
-            alert(
-                'No valid file selected.'
-            );
-
+        if (!this.validateDisk(disk)) {
             return;
-
         }
 
-
-        this.emit(Events.UPLOAD_SIGNAL, {files: this.validFiles});
+        this.emit(Events.UPLOAD_SIGNAL, {files: this.validFiles, disk});
 
     }
 

@@ -22,7 +22,6 @@ export default class LoadService extends Service {
     async initialize() {
 
         await this.sendRequest();
-
     }
 
     busEvents() {

@@ -10,12 +10,12 @@ export default class StateManager {
 
     getDefaultState() {
         return {
-
-
             select: {
                 current: null,
                 files: {},
             },
+
+
             load: {
                 files: {},
                 append: {},
@@ -25,7 +25,6 @@ export default class StateManager {
                 hasMore: true,
 
                 cursor: null,
-
                 disk: null,
                 type: null,
             },
@@ -34,8 +33,11 @@ export default class StateManager {
                 active: 0,
                 queue: 0,
                 progress: 0,
-                files: [],
-                uploading: false
+
+                files: {},
+
+                uploading: false,
+                disk: null,
             },
 
             edit: {

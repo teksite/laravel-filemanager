@@ -1,100 +1,18 @@
 import {$} from "../helpers/dom.js";
 import Events from "../constants/events.js";
+import BaseService from "../Foundation/BaseServices.js";
 
-export default class UploadService {
+export default class UploadService extends BaseService{
 
-    constructor({url, elements = {}, options = {}}, eventBus, state, errorService) {
+    busEvents() {
 
-        this.options = {
-            endpoint: url ?? '/api/filemanager',
-            concurrency: 3,
-            requestTimeout: 15000,
-            allowedMimes: [],
-            allowedDisks: [],
-            ...options
-        };
-        this.handlers = [];
-
-        this.eventBus = eventBus;
-        this.state = state;
-        this.errorService = errorService;
-
-        this.files = [];
-        this.queue = [];
-        this.active = 0;
-
-        this.results = {
-            success: 0,
-            failed: 0
-        };
-
-        this.requests = new Set();
-        this._abort = false;
-
-        this.loadElements(elements);
-        this.bindUI();
-    }
-
-    loadElements(elements) {
-
-        this.formEl = $(elements.formEl ?? '[data-upload-form]');
-
-        this.dropzoneEl = $(elements.dropzoneEl ?? '[data-dropzone]');
-
-        this.inputEl = $(elements.inputEl ?? '[data-file-input]');
-
-        this.previewEl = $(elements.previewEl ?? '[data-upload-preview]');
-
-        this.diskSelectorEl = $(elements.diskSelectorEl ?? '[data-upload-disk]');
-    }
-
-    bindUI() {
-
-        if (!this.formEl || !this.dropzoneEl || !this.inputEl) return;
-
-        this.dropzoneEl.onclick = () => {
-            this.inputEl.click();
-        };
-
-        this.handlers = {
-
-            click: () => {
-                this.inputEl.click();
-            },
-
-            change: (e) => {
-                this.setFiles([...e.target.files]);
-            },
-
-            submit: (e) => {
-                e.preventDefault();
-                this.start();
-            },
-
-            drop: (e) => {
-                e.preventDefault();
-                this.setFiles([...e.dataTransfer.files]);
-            }
+        return {
+            [Events.UPLOAD_SIGNAL]: this.sendRequest,
 
         };
-
-        this.dropzoneEl.addEventListener('click', this.handlers.click);
-
-        this.inputEl.addEventListener('change', this.handlers.change);
-
-        this.formEl.addEventListener('submit', this.handlers.submit);
-
-        this.dropzoneEl.addEventListener('drop', this.handlers.drop);
-    }
-
-    setFiles(files = []) {
-        this.files = files;
-        this.state.set('upload.files', files);
-        this.eventBus?.emit(Events.UPLOAD_SELECTED, {files});
     }
 
 
-    /*===== Upload Process ======*/
 
     async start(onProgress = null) {
         if (this.isUploading()) {
@@ -298,24 +216,7 @@ export default class UploadService {
         return disks.includes(disk);
     }
 
-    validatingMime(file) {
 
-        const mimes = this.options.allowedMimes;
-
-        if (!mimes.length) return true;
-
-        return mimes.includes(file.type);
-    }
-
-
-    toggleLoadingStatus(status = false) {
-        this.state.set('upload.uploading', status);
-    }
-
-
-    isUploading() {
-        return this.state.get('upload.uploading') ?? false;
-    }
 
     reset() {
         this.toggleLoadingStatus(false)
@@ -329,13 +230,6 @@ export default class UploadService {
 
         this.stop();
 
-        this.dropzoneEl?.removeEventListener('click', this.handlers.click);
-
-        this.inputEl?.removeEventListener('change', this.handlers.change);
-
-        this.formEl?.removeEventListener('submit', this.handlers.submit);
-
-        this.dropzoneEl?.removeEventListener('drop', this.handlers.drop);
-
+        super.destroy()
     }
 }

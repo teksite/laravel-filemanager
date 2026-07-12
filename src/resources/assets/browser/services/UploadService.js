@@ -219,11 +219,6 @@ export default class UploadService extends BaseService {
 
     }
 
-    queueLength() {
-
-        return Object.keys(this.queue).length;
-    }
-
 
     reset() {
 
@@ -234,7 +229,6 @@ export default class UploadService extends BaseService {
         this.state.set('upload.files', {});
 
         this.state.set('upload.uploading', false);
-
     }
 
 

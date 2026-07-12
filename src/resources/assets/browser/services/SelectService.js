@@ -21,6 +21,10 @@ export default class SelectService extends BaseService {
 
             [Events.FILE_DELETE_SIGNAL]: ({fileId}) => {
                 this.removeFromSelections(fileId);
+            },
+
+            [Events.SELECTION_REMOVED]: ({fileId}) => {
+                this.removeCurrentFile(fileId);
             }
         };
     }
@@ -75,6 +79,15 @@ export default class SelectService extends BaseService {
         this.state.set('select.files', next);
 
         this.eventBus.emit(Events.SELECTION_REMOVED, {fileId});
+    }
+
+
+    removeCurrentFile(fileId) {
+        const currentId = this.state.get('select.current', null);
+        console.log(fileId)
+        console.log(currentId)
+
+        if (fileId === currentId) this.state.set('select.current', null);
     }
 
 

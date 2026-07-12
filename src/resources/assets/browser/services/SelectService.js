@@ -83,7 +83,7 @@ export default class SelectService extends BaseService {
 
 
     removeCurrentFile(fileId) {
-        
+
         const currentId = this.state.get('select.current', null);
 
         if (fileId === currentId) this.state.set('select.current', null);

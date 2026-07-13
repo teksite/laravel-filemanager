@@ -516,147 +516,302 @@ All other JavaScript options are optional and may be customized to fit your appl
 
 ---
 
-## FRONTEND
+## Frontend
 
-### configs
+The package includes a lightweight JavaScript library for interacting with the File Manager.
 
-```js
+---
+
+### Configuration
+
+`initFileManager()` accepts a configuration object. Every option is optional unless otherwise noted.
+
+```javascript
 {
     api: {
-        baseUrl: '',
-        getUrl: '/api/filemanager',
-        uploadUrl: '/api/filemanager',
-        deleteUrl: '/api/filemanager',
-        updateUrl: '/api/filemanager'
+        baseUrl: "",
+        getUrl: "/api/filemanager",
+        uploadUrl: "/api/filemanager",
+        deleteUrl: "/api/filemanager",
+        updateUrl: "/api/filemanager"
     },
+
     request: {
         timeout: 15000,
         selectedDisk: null,
         selectedType: null,
         firstRequest: true
     },
+
     upload: {
         concurrency: 3,
         size: 5000,
         chunkSize: 0,
         requestTimeout: 15000,
         allowedMimes: [],
-        allowedDisks: [],
+        allowedDisks: []
     },
-    load: {
-         perPage: 25,
-        cursorName: 'cursor',
-        userId: null,
 
+    load: {
+        perPage: 25,
+        cursorName: "cursor",
+        userId: null,
         selectedDisk: null,
         selectedType: null,
-        getOnInit: true,
+        getOnInit: true
     },
+
     log: {
         debug: false,
-        toServer: true,
+        toServer: false,
         serverUrl: null
     },
 
     selection: {
-        mode: 'multi', //single: only one file | multi,multiple : multi file
-        expect: 'url',  //url , id files,object |null : disable
+        mode: "multi",
+        expect: "url"
     },
+
     debounce: {
         delay: 300
     },
+
     ui: {
-        mainSelector: '.filemanager',
-        /* loader ui*/
-        gridSelector: '[data-grid]',
-        loadingSelector: '[data-loading]',
-        loadMoreSelector: '[data-load-more]',
-        mimesSelector: '[data-mimeList]',
-        disksSelector: '[data-diskList]',
-        filesCounterSelector: '[data-file-counter]',
-            
-        /* aside ui*/
-        baseInfoSelector: '[data-aside]',
-        filePreviewSelector: '[data-preview]',
-        idInfoSelector: '[data-id]',
-        titleInfoSelector: '[data-title]',
-        urlInfoSelector: '[data-url]',
-        sizeInfoSelector: '[data-size]',
-        mimeInfoSelector: '[data-mime]',
-        diskInfoSelector: '[data-disk]',
-        createdInfoSelector: '[data-created]',
-        deleteBtnSelector: '[data-delete]',
-        openUrlBtnSelector: '[data-open]',
-        copyUrlBtnSelector: '[data-copy]',
+        mainSelector: ".filemanager",
 
-        /* footer */
-        selectionButtonSelector: '[data-actions-sec]',
-        selectionGridSelector: '[data-selected-list]',
+        /* Grid */
+        gridSelector: "[data-grid]",
+        loadingSelector: "[data-loading]",
+        loadMoreSelector: "[data-load-more]",
+        mimesSelector: "[data-mimeList]",
+        disksSelector: "[data-diskList]",
+        filesCounterSelector: "[data-file-counter]",
 
-        /* uploader ui*/
-        uploadFormSelector: '[data-upload-form]',
-        dropzoneSelector: '[data-dropzone]',
-        fileInputSelector: '[data-file-input]',
-        uploadDiskSelector: '[data-upload-disk]',
-        uploadPreviewSelector: '[data-upload-preview]',
-        uploadMessagesSelector: '[data-messages]',
+        /* Sidebar */
+        baseInfoSelector: "[data-aside]",
+        filePreviewSelector: "[data-preview]",
+        idInfoSelector: "[data-id]",
+        titleInfoSelector: "[data-title]",
+        urlInfoSelector: "[data-url]",
+        sizeInfoSelector: "[data-size]",
+        mimeInfoSelector: "[data-mime]",
+        diskInfoSelector: "[data-disk]",
+        createdInfoSelector: "[data-created]",
+        deleteBtnSelector: "[data-delete]",
+        openUrlBtnSelector: "[data-open]",
+        copyUrlBtnSelector: "[data-copy]",
+
+        /* Footer */
+        selectionButtonSelector: "[data-actions-sec]",
+        selectionGridSelector: "[data-selected-list]",
+
+        /* Upload */
+        uploadFormSelector: "[data-upload-form]",
+        dropzoneSelector: "[data-dropzone]",
+        fileInputSelector: "[data-file-input]",
+        uploadDiskSelector: "[data-upload-disk]",
+        uploadPreviewSelector: "[data-upload-preview]",
+        uploadMessagesSelector: "[data-messages]"
     }
 }
-
-
 ```
 
-### Use
+---
 
-Triggered when the user selects one or more files.
+#### Configuration Reference
 
-```js
+##### `api`
 
+Configure the package API endpoints.
+
+| Option | Description |
+|---------|-------------|
+| `baseUrl` | Base URL used for all API requests. |
+| `getUrl` | Endpoint used to retrieve files. |
+| `uploadUrl` | Endpoint used to upload files. |
+| `deleteUrl` | Endpoint used to delete files. |
+| `updateUrl` | Endpoint used to update file metadata. |
+
+---
+
+##### `request`
+
+General request settings.
+
+| Option | Description |
+|---------|-------------|
+| `timeout` | Request timeout in milliseconds. |
+| `selectedDisk` | Initial selected storage disk. |
+| `selectedType` | Initial selected MIME type filter. |
+| `firstRequest` | Automatically perform the first request when initialized. |
+
+---
+
+##### `upload`
+
+Upload behavior.
+
+| Option | Description |
+|---------|-------------|
+| `concurrency` | Maximum simultaneous uploads. |
+| `size` | Maximum upload size (KB). |
+| `chunkSize` | Chunk upload size. Set `0` to disable chunk uploads. |
+| `requestTimeout` | Upload request timeout in milliseconds. |
+| `allowedMimes` | Allowed MIME types. |
+| `allowedDisks` | Allowed destination disks. |
+
+---
+
+##### `load`
+
+Controls how files are loaded.
+
+| Option | Description |
+|---------|-------------|
+| `perPage` | Number of files loaded per request. |
+| `userId` | Load files belonging to a specific user. |
+| `selectedDisk` | Default disk filter. |
+| `selectedType` | Default MIME filter. |
+| `getOnInit` | Automatically load files after initialization. |
+
+---
+
+##### `selection`
+
+Controls file selection.
+
+| Option | Description |
+|---------|-------------|
+| `mode` | `single` or `multi`. |
+| `expect` | Returned value when a file is selected. Supported values: `url`, `id`, `object`, or `null` to disable selection. |
+
+---
+
+##### `debounce`
+
+Debounce configuration.
+
+| Option | Description |
+|---------|-------------|
+| `delay` | Delay in milliseconds before executing debounced actions. |
+
+---
+
+##### `log`
+
+Debugging options.
+
+| Option | Description |
+|---------|-------------|
+| `debug` | Enables console debugging. |
+| `toServer` | Sends logs to a remote server. |
+| `serverUrl` | Endpoint used for remote logging. |
+
+---
+
+##### `ui`
+
+Contains all DOM selectors used by the package.
+
+Override these values if your HTML structure differs from the default browser component.
+
+---
+
+### Usage
+
+```javascript
 document.addEventListener("DOMContentLoaded", () => {
 
     const fm = initFileManager({
-        config: 
-            {
+        config: {
+
             load: {
-                disks: [null , 'public','s3'],
-                types: [null , 'video' ,'image/jpeg' , 'image/png' ],
                 perPage: 25,
+                disks: [null, "public", "s3"],
+                types: [null, "video", "image/jpeg", "image/png"]
             },
+
             upload: {
-                 allowedMimes: ['image/png','imgae/jpg' ,'video/mp4'],
-                 allowedDisks: ['public','s3'],
+                allowedMimes: [
+                    "image/png",
+                    "image/jpeg",
+                    "video/mp4"
+                ],
+
+                allowedDisks: [
+                    "public",
+                    "s3"
+                ]
             },
+
             selection: {
-                mode: 'single', //single: only one file | multi,multiple : array of files
-                expect: 'url',  //url, id files,object  | null : disable selection
-            },
-            // Additional configuration...
+                mode: "single",
+                expect: "url"
             }
-    }, "filemanager-1");
+
+        }
+    }, "filemanager-2");
+
     fm.on("choose", (files) => {
         console.log(files);
     });
 
 });
-
-
 ```
-
-### Events
-
-The browser emits events that you can listen for.
-
-```js
-   fm.on("choose", (files) => {
-        console.log(files);
-    });
-```
-
-
-
 
 ---
 
+#### Events
+
+The File Manager emits several events that you can subscribe to.
+
+##### `choose`
+
+Triggered whenever the user selects one or more files.
+
+```javascript
+fm.on("choose", (files) => {
+    console.log(files);
+});
+```
+
+###### Parameters
+
+| Name | Description |
+|------|-------------|
+| `files` | The selected file or an array of selected files depending on the configured selection mode. |
+
+When `selection.mode` is:
+
+- `single` → `files` contains a single value.
+- `multi` → `files` contains an array of values.
+
+The returned value depends on the `selection.expect` option:
+
+| Value | Returns |
+|--------|---------|
+| `"url"` | File URL(s) |
+| `"id"` | Database ID(s) |
+| `"object"` | Complete file object(s) |
+| `null` | Selection is disabled |
+
+
+# What's Next?
+
+Here's what I'm currently working on:
+
+- Report frontend errors to a configurable backend endpoint.
+- Add a logging service (store logs locally or send them to a remote endpoint).
+- Create a File Explorer to manage filesystem disks independently of the database.
+
+And much more...
+
+**Coming soon 🙂**
+---
+
+
+
+>You can use the backend endpoints to build your own frontend file browse
 
 # Support
 

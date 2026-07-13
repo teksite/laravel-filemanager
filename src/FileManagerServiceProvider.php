@@ -44,8 +44,8 @@ class FileManagerServiceProvider extends ServiceProvider
         ], ['filemanager', 'filemanager-config']);
 
         $this->publishes([
-            __DIR__.'/resources/assets/browser/browser.min.js' => public_path('vendor/filemanager/browser.min.js'),
-            __DIR__.'/resources/assets/browser/browser.min.css' => public_path('vendor/filemanager/browser.min.css'),
+            __DIR__.'/resources/assets/dist/browser.min.js' => public_path('vendor/filemanager/browser.min.js'),
+            __DIR__.'/resources/assets/dist/browser.min.css' => public_path('vendor/filemanager/browser.min.css'),
         ], 'filemanager-assets');
 
     }

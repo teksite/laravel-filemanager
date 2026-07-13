@@ -1,4 +1,4 @@
-<link crossorigin="anonymous" media="all" rel="stylesheet" href="/assets/app.css">
+<link crossorigin="anonymous" media="all" rel="stylesheet" href="{{asset('/vendor/filemanager/browser.min.css')}}">
 <div class="filemanager" id="fileManagerRoot">
     <section class="media-container" data-fm>
         @include('filemanager::partials.uploader')
@@ -14,8 +14,7 @@
 </div>
 
 <script type="module">
-    import initFileManager
-        from "{{ Vite::asset('packages/teksite/laravel-filemanager/src/resources/assets/browser/browser.js') }}";
+    import initFileManager from "{{ asset('/vendor/filemanager/browser.min.js') }}";
 
     document.addEventListener('DOMContentLoaded', () => {
         const fm = initFileManager({

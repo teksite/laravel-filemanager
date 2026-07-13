@@ -400,6 +400,91 @@ Returns the package's browser interface via the API route.
 Returns the package's browser interface via the web route.
 
 
+## component and view
+
+### Browser view
+
+The package includes a ready-to-use browser interface for managing uploaded files.
+
+You can render it using the provided Blade view:
+
+```php
+$disks = config('filemanager.disk_list', []);
+
+$mimes = config('filemanager.type_list', []);
+
+$allowedDisks = config('filemanager.allow_upload_disks', []);
+
+$allowedTypes = config('filemanager.allow_upload_types', []);
+
+return view('filemanager::browser', compact(
+    'disks',
+    'mimes',
+    'allowedDisks',
+    'allowedTypes'
+));
+```
+
+### Required Variables
+
+The following variables **must** be passed to the view:
+
+| Variable | Description |
+|----------|-------------|
+| `$disks` | Available storage disks shown in the browser filter. |
+| `$mimes` | Available MIME type filters. |
+| `$allowedDisks` | Disks that users are allowed to upload files to. |
+| `$allowedTypes` | Allowed MIME types for file uploads. |
+
+These values should normally come directly from your `config/filemanager.php` file.
+
+> **Important**
+>
+> These four variables are required for the frontend and backend to work correctly together. The browser uses them to build filters, validate uploads, and synchronize with the package's API.
+
+All other frontend customizations are optional. You are free to modify the surrounding layout, styling, or integrate the browser into your own interface as long as these required variables are provided.
+
+
+
+### using DB browser component
+to get a DB browser use can use the following view, the parameter which are passed are optional
+
+```php
+
+<link crossorigin="anonymous" media="all" rel="stylesheet" href="/vendor/filemanager/browser/browser.min.css">
+
+<x-filemanager::browser />
+
+<script type="module">
+    import initFileManager from "/vendor/filemanager/browser/browser.min.js";
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const fm = initFileManager({
+            config:
+                {
+                    load: {
+                        disks:@js($disks),
+                        types:@js($mimes),
+                        perPage: {{$perPage}}
+                    },
+                    upload: {
+                        allowedMimes: @js($allowedTypes),
+                        allowedDisks: @js($allowedDisks)
+                    } , //rest of the config you want 
+                }
+        } , 'filemanager-1');
+        fm.on('choose', files => {
+            console.log(files);
+        });
+    });
+
+</script>
+
+
+```
+`$disks, $mimesm, $allowedDisksm,$allowedTypes` pass this parameter from config file to front end and backend work perfectly with together, all other frontend are optional and can be manipulated optionally
+
+
 ## FRONTEND
 the form end configuration in manipulate from what is stored in config file 
 or use can use other config

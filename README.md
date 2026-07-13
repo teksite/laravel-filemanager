@@ -399,6 +399,7 @@ Returns the package's browser interface via the API route.
 
 Returns the package's browser interface via the web route.
 
+---
 
 ## component and view
 
@@ -444,59 +445,215 @@ These values should normally come directly from your `config/filemanager.php` fi
 
 All other frontend customizations are optional. You are free to modify the surrounding layout, styling, or integrate the browser into your own interface as long as these required variables are provided.
 
+---
 
+### Component
 
-### using DB browser component
-to get a DB browser use can use the following view, the parameter which are passed are optional
+The package also provides a reusable Blade component that can be embedded anywhere in your application.
 
-```php
+First, include the package assets:
 
-<link crossorigin="anonymous" media="all" rel="stylesheet" href="/vendor/filemanager/browser/browser.min.css">
+```html
+<link
+    rel="stylesheet"
+    href="/vendor/filemanager/browser/browser.min.css"
+    crossorigin="anonymous"
+    media="all"
+>
+```
 
+Then render the component:
+
+```blade
 <x-filemanager::browser />
+```
 
+Finally, initialize it with JavaScript:
+
+```html
 <script type="module">
-    import initFileManager from "/vendor/filemanager/browser/browser.min.js";
+import initFileManager from "/vendor/filemanager/browser/browser.min.js";
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const fm = initFileManager({
-            config:
-                {
-                    load: {
-                        disks:@js($disks),
-                        types:@js($mimes),
-                        perPage: {{$perPage}}
-                    },
-                    upload: {
-                        allowedMimes: @js($allowedTypes),
-                        allowedDisks: @js($allowedDisks)
-                    } , //rest of the config you want 
-                }
-        } , 'filemanager-1');
-        fm.on('choose', files => {
-            console.log(files);
-        });
-    });
+document.addEventListener("DOMContentLoaded", () => {
 
+    const fm = initFileManager({
+        config: {
+            load: {
+                disks: @js($disks),
+                types: @js($mimes),
+                perPage: {{ $perPage }},
+            },
+            upload: {
+                allowedMimes: @js($allowedTypes),
+                allowedDisks: @js($allowedDisks),
+            },
+
+            // Additional configuration...
+        }
+    }, "filemanager-1");
+
+
+});
 </script>
+```
+
+#### Required Configuration
+
+The following values should normally be loaded from `config/filemanager.php` and passed to the component:
+
+| Variable | Description |
+|----------|-------------|
+| `$disks` | Available storage disks displayed in the browser. |
+| `$mimes` | Available MIME type filters. |
+| `$allowedDisks` | Storage disks that users are allowed to upload to. |
+| `$allowedTypes` | Allowed MIME types for uploads. |
+
+> **Important**
+>
+> These configuration values keep the frontend synchronized with the backend. They are used to build filters, validate uploads, and ensure that the browser behaves consistently with your package configuration.
+
+All other JavaScript options are optional and may be customized to fit your application's requirements.
+
+---
+
+## FRONTEND
+
+### configs
+
+```js
+{
+    api: {
+        baseUrl: '',
+        getUrl: '/api/filemanager',
+        uploadUrl: '/api/filemanager',
+        deleteUrl: '/api/filemanager',
+        updateUrl: '/api/filemanager'
+    },
+    request: {
+        timeout: 15000,
+        selectedDisk: null,
+        selectedType: null,
+        firstRequest: true
+    },
+    upload: {
+        concurrency: 3,
+        size: 5000,
+        chunkSize: 0,
+        requestTimeout: 15000,
+        allowedMimes: [],
+        allowedDisks: [],
+    },
+    load: {
+         perPage: 25,
+        cursorName: 'cursor',
+        userId: null,
+
+        selectedDisk: null,
+        selectedType: null,
+        getOnInit: true,
+    },
+    log: {
+        debug: false,
+        toServer: true,
+        serverUrl: null
+    },
+
+    selection: {
+        mode: 'multi', //single: only one file | multi,multiple : multi file
+        expect: 'url',  //url , id files,object |null : disable
+    },
+    debounce: {
+        delay: 300
+    },
+    ui: {
+        mainSelector: '.filemanager',
+        /* loader ui*/
+        gridSelector: '[data-grid]',
+        loadingSelector: '[data-loading]',
+        loadMoreSelector: '[data-load-more]',
+        mimesSelector: '[data-mimeList]',
+        disksSelector: '[data-diskList]',
+        filesCounterSelector: '[data-file-counter]',
+            
+        /* aside ui*/
+        baseInfoSelector: '[data-aside]',
+        filePreviewSelector: '[data-preview]',
+        idInfoSelector: '[data-id]',
+        titleInfoSelector: '[data-title]',
+        urlInfoSelector: '[data-url]',
+        sizeInfoSelector: '[data-size]',
+        mimeInfoSelector: '[data-mime]',
+        diskInfoSelector: '[data-disk]',
+        createdInfoSelector: '[data-created]',
+        deleteBtnSelector: '[data-delete]',
+        openUrlBtnSelector: '[data-open]',
+        copyUrlBtnSelector: '[data-copy]',
+
+        /* footer */
+        selectionButtonSelector: '[data-actions-sec]',
+        selectionGridSelector: '[data-selected-list]',
+
+        /* uploader ui*/
+        uploadFormSelector: '[data-upload-form]',
+        dropzoneSelector: '[data-dropzone]',
+        fileInputSelector: '[data-file-input]',
+        uploadDiskSelector: '[data-upload-disk]',
+        uploadPreviewSelector: '[data-upload-preview]',
+        uploadMessagesSelector: '[data-messages]',
+    }
+}
 
 
 ```
-`$disks, $mimesm, $allowedDisksm,$allowedTypes` pass this parameter from config file to front end and backend work perfectly with together, all other frontend are optional and can be manipulated optionally
+
+### Use
+
+Triggered when the user selects one or more files.
+
+```js
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const fm = initFileManager({
+        config: 
+            {
+            load: {
+                disks: [null , 'public','s3'],
+                types: [null , 'video' ,'image/jpeg' , 'image/png' ],
+                perPage: 25,
+            },
+            upload: {
+                 allowedMimes: ['image/png','imgae/jpg' ,'video/mp4'],
+                 allowedDisks: ['public','s3'],
+            },
+            selection: {
+                mode: 'single', //single: only one file | multi,multiple : array of files
+                expect: 'url',  //url, id files,object  | null : disable selection
+            },
+            // Additional configuration...
+            }
+    }, "filemanager-1");
+    fm.on("choose", (files) => {
+        console.log(files);
+    });
+
+});
 
 
-## FRONTEND
-the form end configuration in manipulate from what is stored in config file 
-or use can use other config
-> note that backend still work with config file configs
+```
+
+### Events
+
+The browser emits events that you can listen for.
+
+```js
+   fm.on("choose", (files) => {
+        console.log(files);
+    });
+```
 
 
 
-
-
----
-
----
 
 ---
 

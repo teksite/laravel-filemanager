@@ -66,7 +66,7 @@ class FileManagerServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom([$sourcePath, ...$this->publishableViewPaths($name),], $name);
 
-        Blade::componentNamespace('Teksite\\FileManager\\Views\\', $name);
+        Blade::componentNamespace('Teksite\\FileManager\\Views\\Components', $name);
     }
 
 

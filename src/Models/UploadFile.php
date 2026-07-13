@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Teksite\FileManager\Observer\UploadFileObserver;
 
 #[ObservedBy([UploadFileObserver::class])]
-#[Fillable(['original_name', 'title', 'path', 'size', 'mime_type', 'disk', 'other' ,'user_id'])]
+#[Fillable(['original_name', 'title', 'path', 'size', 'mime_type', 'disk' ,'user_id'])]
 class UploadFile extends Model
 {
     use HasUlids;
@@ -24,12 +24,6 @@ class UploadFile extends Model
         'url',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'other' => 'json',
-        ];
-    }
 
     public function models(): \Illuminate\Database\Eloquent\Relations\MorphToMany
     {

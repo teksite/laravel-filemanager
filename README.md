@@ -3,7 +3,12 @@
 ## About
 
 A lightweight and extensible Laravel File Manager built on top of Laravel's Filesystem.
-Since this package uses Laravel Filesystem, it supports every storage driver Laravel supports, including:
+
+The package follows a zero-dependency approach for the frontend. It uses only **vanilla JavaScript and pure CSS**, with no additional JavaScript libraries, CSS frameworks, or UI packages required.
+
+The backend relies only on **Laravel's native capabilities** and dependencies, ensuring a minimal footprint, better performance, and easier customization.
+
+Because it is built on Laravel Filesystem, it supports every storage driver supported by Laravel, including:
 
 - Local
 - Public
@@ -795,6 +800,8 @@ The returned value depends on the `selection.expect` option:
 | `"object"` | Complete file object(s) |
 | `null` | Selection is disabled |
 
+# Need optimization for viseos or images?
+this package is not 
 
 # What's Next?
 

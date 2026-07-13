@@ -38,16 +38,12 @@ const EVENTS = Object.freeze({
     FILE_URL_COPIED : 'file_copied_url',
     FILE_URL_COPIED_FAILED : 'file_copy_url_failed',
 
-
-
-
     /* Grid */
     GRID_UPDATED: 'grid:updated',
     GRID_CLEARED: 'grid:cleared',
     GRID_CLEAR: 'grid:clear',
     GRID_LOAD_START: 'grid:load:start',
     GRID_LOAD_END: 'grid:load:end',
-
 
     /* Selection */
     SELECTION_CLICK: 'selection:item_clicked',
@@ -60,13 +56,9 @@ const EVENTS = Object.freeze({
 
     SELECTION_SELECT_BUTTON_MADE : 'selection:make_button',
 
-
-
-
     /* Preview */
     PREVIEW_UPDATED: 'preview:updated',
     PREVIEW_CLEARED: 'preview:cleared',
-
 
     /* Filter */
     FILTER_CHANGED: 'filter:changed',

@@ -1,6 +1,12 @@
 {
     "name": "teksite/laravel-filemanager",
-    "description": "A simple package for managing files with different divers.",
+    "description": "A simple package for managing files with different drivers.",
+    "type": "library",
+    "keywords": [
+        "laravel",
+        "file manager",
+        "media manager"
+    ],
     "authors": [
         {
             "name": "Sina Zangiband",
@@ -15,7 +21,7 @@
         }
     },
     "require": {
-        "laravel/framework": "^13"
+        "laravel/framework": "^11|^12|^13"
     },
     "extra": {
         "laravel": {

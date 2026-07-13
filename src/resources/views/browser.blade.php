@@ -15,7 +15,7 @@
 
 <script type="module">
     import initFileManager
-        from "{{ Vite::asset('packages/teksite/laravel-filemanager/src/resources/assets/browser/index.js') }}";
+        from "{{ Vite::asset('packages/teksite/laravel-filemanager/src/resources/assets/browser/browser.js') }}";
 
     document.addEventListener('DOMContentLoaded', () => {
         const fm = initFileManager({

@@ -15,17 +15,17 @@ return [
         'web' => [
             'prefix' => '/filemanager/',            // Web route URI prefix
 
-            'name' => 'filemanager',         // Route name prefix
+            'name' => 'filemanager',                // Route name prefix
 
             'middlewares' => ['web'],               // Applied middleware stack
         ],
 
         'api' => [
-            'prefix' => '/api/filemanager/',   // API route URI prefix
+            'prefix' => '/api/filemanager/',         // API route URI prefix
 
-            'name' => 'api.filemanager',     // Route name prefix
+            'name' => 'api.filemanager',             // Route name prefix
 
-            'middlewares' => [],                    // Applied middleware stack
+            'middlewares' => [],                     // Applied middleware stack
         ],
     ],
     /*
@@ -36,19 +36,22 @@ return [
      | Configure file visibility and listing behavior.
      |
      */
-    'hiddenFiles' => true,                           // Hide system and hidden files from listings
+    'hiddenFiles' => true,         // Hide system and hidden files from listings
 
-    'disk_list' => [null,
+    'disk_list' => [null,          // Allowed filesystem disks ,[] means all disks without filter ,set it [null , public , ...] to have all and filter
         'local',
         'public',
         's3',
-        's3-arvan_private',
-        's3-arvan_public',
-    ],                 // Allowed filesystem disks ,[] means all disks without filter ,set it [null , public , ...] to have all and filter
+    ],
 
-    'type_list' => [null, 'image', 'text', 'video', 'audio' ,'application/pdf'],               // Allowed mime types ,[] means all mimes without filter ,set it [null , image , video/mp4 ...] to have all and filter
+    'type_list' => [null,          // Allowed mime types ,[] means all mimes without filter ,set it [null , image , video/mp4 ,application/pdf  ...] to have all and filter
+        'image',
+        'text',
+        'video',
+        'audio',
+    ],
 
-    'per_page' => 3,                                // Default pagination size
+    'per_page' => 25,              // Default pagination size
 
     /*
     |--------------------------------------------------------------------------
@@ -59,18 +62,18 @@ return [
     |
     */
 
-    'allow_upload_types' => [
-        'Image/Jpeg' ,'Image/Jpg'
-    ],                       // Allowed mime types or extensions (empty = allow all)
+    'allow_upload_types' => [           // Allowed mime types or extensions ([]] = allow all)
+        'Image/Jpeg', 'Image/Jpg',
+    ],
 
-    'allow_upload_disks' =>
-        ['public' ,'local', 's3', 's3-arvan_private', 's3-arvan_public',], //allowed disk to be upload to
+    'allow_upload_disks' =>[            // allowed disk to be uploaded to
+        'public', 'local', 's3'],
 
-    'forbidden_file_types' => [],                   // Forbidden mime types or extensions (empty = allow all)
+    'forbidden_file_types' => [],       // Forbidden mime types or extensions (empty = allow all)
 
-    'max_file_size' => null,                      // in KB, (null means no restrictions)
+    'max_file_size' => null,            // in KB, (null means no restrictions)
 
-    'min_file_size' => null,                      // in KB, (null means no restrictions)
+    'min_file_size' => null,            // in KB, (null means no restrictions)
 
 
     /*
@@ -83,7 +86,6 @@ return [
     */
 
     'default_store_disk' => 'public',            // Default storage disk
-
 
 
     'slugify_name' => true,                      // Convert original file names into URL-friendly slugs

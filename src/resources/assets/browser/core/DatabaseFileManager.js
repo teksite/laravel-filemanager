@@ -1,27 +1,27 @@
-import Config from "./core/Config.js";
-import EventEmitter from "./core/EventEmitter.js";
-import StateManager from "./core/StateManager.js";
-import ErrorService from "./core/ErrorService.js";
-import RequestService from "./core/RequestService.js";
+import Config from "./Config.js";
+import EventEmitter from "./EventEmitter.js";
+import StateManager from "./StateManager.js";
+import ErrorService from "./ErrorService.js";
+import RequestService from "./RequestService.js";
 
-import defaultState from "./constants/defaults.js";
-import Events from "./constants/events.js";
+import defaultState from "../constants/defaults.js";
+import Events from "../constants/events.js";
 
 // import UploadService from "./services/UploadService.js";
-import LoadService from "./services/LoadService.js";
-import DeleteService from "./services/DeleteService.js";
-import UpdateService from "./services/UpdateService.js";
-import SelectService from "./services/SelectService.js";
+import LoadService from "../services/LoadService.js";
+import DeleteService from "../services/DeleteService.js";
+import UpdateService from "../services/UpdateService.js";
+import SelectService from "../services/SelectService.js";
 
-import GridUi from "./ui/GridUi.js";
-import MoreButtonUi from "./ui/MoreButtonUi.js";
-import InfoUi from "./ui/InfoUi.js";
-import CounterUi from "./ui/CounterUi.js";
-import FilterUi from "./ui/FilterUi.js";
-import SelectionButtonUi from "./ui/SelectionButtonUi.js";
-import SelectionGridUi from "./ui/SelectionGridUi.js";
-import UploaderUi from "./ui/UploaderUi.js";
-import UploadService from "./services/UploadService.js";
+import GridUi from "../ui/GridUi.js";
+import MoreButtonUi from "../ui/MoreButtonUi.js";
+import InfoUi from "../ui/InfoUi.js";
+import CounterUi from "../ui/CounterUi.js";
+import FilterUi from "../ui/FilterUi.js";
+import SelectionButtonUi from "../ui/SelectionButtonUi.js";
+import SelectionGridUi from "../ui/SelectionGridUi.js";
+import UploaderUi from "../ui/UploaderUi.js";
+import UploadService from "../services/UploadService.js";
 
 
 export default class DatabaseFileManager {

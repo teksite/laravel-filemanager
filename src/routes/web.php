@@ -1,5 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Teksite\FileManager\Http\Controllers\DatabaseBrowserController;
 
-//Route::middleware([])->group(function () {});
+Route::get('browser', [DatabaseBrowserController::class, 'browser'])->name('browser');

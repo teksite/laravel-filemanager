@@ -1,12 +1,18 @@
-# Extra laravel Package
+# Teksite Laravel File Manager
+
+![Laravel](https://img.shields.io/badge/Laravel-13-red)
+![License](https://img.shields.io/badge/license-MIT-green)
+![PHP](https://img.shields.io/badge/PHP-8.3-blue)
 
 ## About
 
 A lightweight and extensible Laravel File Manager built on top of Laravel's Filesystem.
 
-The package follows a zero-dependency approach for the frontend. It uses only **vanilla JavaScript and pure CSS**, with no additional JavaScript libraries, CSS frameworks, or UI packages required.
+The package follows a zero-dependency approach for the frontend. It uses only **vanilla JavaScript and pure CSS**, with
+no additional JavaScript libraries, CSS frameworks, or UI packages required.
 
-The backend relies only on **Laravel's native capabilities** and dependencies, ensuring a minimal footprint, better performance, and easier customization.
+The backend relies only on **Laravel's native capabilities** and dependencies, ensuring a minimal footprint, better
+performance, and easier customization.
 
 Because it is built on Laravel Filesystem, it supports every storage driver supported by Laravel, including:
 
@@ -17,6 +23,9 @@ Because it is built on Laravel Filesystem, it supports every storage driver supp
 - SFTP
 - MinIO
 - Any custom filesystem driver
+
+**It is designed to be used as a standalone media manager or as a backend service for building your own custom file
+management interfaces.**
 
 For more information about supported drivers, visit the official Laravel documentation:
 [laravel File Storage docs](https://laravel.com/docs/13.x/filesystem)
@@ -31,12 +40,31 @@ For more information about supported drivers, visit the official Laravel documen
 - Pagination
 - MIME type filtering
 - Disk filtering
-- Authorization layer
 - Custom file naming strategies
 - Configurable upload paths
 - Automatic database synchronization
+- Vanilla JavaScript frontend
+- Zero frontend dependencies
+- No backend dependencies except Laravel
+- Event-driven architecture
+- Multiple upload support
+- Cursor pagination support
+- Custom authorization layer
+- Storage driver agnostic
+- Customizable UI selectors
 
 ---
+
+## Security
+
+The package provides:
+
+- Upload validation
+- MIME type filtering
+- Disk-level restrictions
+- Authorization hooks
+- Configurable file visibility
+- No direct filesystem access from frontend
 
 # Installation
 
@@ -87,7 +115,6 @@ php artisan vendor:publish --tag=filemanager-views
 > Future package updates may require you to manually update your published views.
 
 ---
-
 
 # Configuration
 
@@ -269,12 +296,49 @@ return [
 
 ```
 
+# File Browser (based ond DB):
+
+---
+
+---
 
 ## BACKEND
 
----
+## Events
 
----
+This package dispatches several Laravel events during the lifecycle of a file.
+
+You can listen to these events to execute your own logic alongside the main process, extend the package behavior, or
+integrate it with other packages and services.
+
+Each event provides the related file information as an argument.
+
+```php
+\Teksite\FileManager\Events\NewFileUploadEvent.php
+
+\Teksite\FileManager\Events\FileUploading.php       // Arguments: (UploadedFile $file)
+
+\Teksite\FileManager\Events\FileUploaded.php        // Arguments: (UploadFile $file)
+
+\Teksite\FileManager\Events\FileUpdating.php        // Arguments: (UploadFile $file)
+
+\Teksite\FileManager\Events\FileUpdated.php         // Arguments: (UploadFile $file)
+
+\Teksite\FileManager\Events\FileDeleting.php        // Arguments: (UploadFile $file)
+
+\Teksite\FileManager\Events\FileDeleted.php 
+
+```
+
+| Event              | Argument         | Description            |
+|--------------------|------------------|------------------------|
+| NewFileUploadEvent |                  | start to upload a file |
+| FileUploading      | UploadFile $file | Before storing file    |
+| FileUploaded       | UploadFile $file | After storing file     |
+| FileUpdating       | UploadFile $file | Before updating file   |
+| FileUpdated        | UploadFile $file | After updating file    |
+| FileDeleting       | UploadFile $file | Before deleting file   |
+| FileDeleted        | UploadFile $file | After deleting file    |
 
 ## Routes
 
@@ -286,23 +350,23 @@ The default route prefixes are configurable in `config/filemanager.php`.
 
 ### API Routes
 
-| Method | Route Name | URI | Description |
-|---------|------------|-----|-------------|
-| GET | `api.filemanager.index` | `/api/filemanager` | List uploaded files. |
-| GET | `api.filemanager.show` | `/api/filemanager/{file}` | Retrieve a single file. |
-| POST | `api.filemanager.store` | `/api/filemanager` | Upload a new file. |
-| PATCH | `api.filemanager.update` | `/api/filemanager/{file}` | Update a file's metadata. |
-| DELETE | `api.filemanager.destroy` | `/api/filemanager/{file}` | Delete a file from both the database and storage. |
-| DELETE | `api.filemanager.destroy.path` | `/api/filemanager/remove` | Delete a physical file directly from storage. |
-| GET | `api.filemanager.browser` | `/api/filemanager/browser` | Returns the file browser frontend. |
+| Method | Route Name                     | URI                        | Description                                       |
+|--------|--------------------------------|----------------------------|---------------------------------------------------|
+| GET    | `api.filemanager.index`        | `/api/filemanager`         | List uploaded files.                              |
+| GET    | `api.filemanager.show`         | `/api/filemanager/{file}`  | Retrieve a single file.                           |
+| POST   | `api.filemanager.store`        | `/api/filemanager`         | Upload a new file.                                |
+| PATCH  | `api.filemanager.update`       | `/api/filemanager/{file}`  | Update a file's metadata.                         |
+| DELETE | `api.filemanager.destroy`      | `/api/filemanager/{file}`  | Delete a file from both the database and storage. |
+| DELETE | `api.filemanager.destroy.path` | `/api/filemanager/remove`  | Delete a physical file directly from storage.     |
+| GET    | `api.filemanager.browser`      | `/api/filemanager/browser` | Returns the file browser frontend.                |
 
 ---
 
 ### Web Routes
 
-| Method | Route Name | URI | Description |
-|---------|------------|-----|-------------|
-| GET | `filemanager.browser` | `/filemanager/browser` | Displays the file manager browser interface. |
+| Method | Route Name            | URI                    | Description                                  |
+|--------|-----------------------|------------------------|----------------------------------------------|
+| GET    | `filemanager.browser` | `/filemanager/browser` | Displays the file manager browser interface. |
 
 ---
 
@@ -314,14 +378,14 @@ Returns a paginated list of uploaded files.
 
 #### Query Parameters
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `page` | integer | Page number when using pagination. |
-| `per_page` | integer | Number of items per page. |
-| `cursor` | string | Cursor value for cursor pagination. |
-| `user_id` | integer | Filter files by owner. |
-| `disk` | string | Filter by storage disk. |
-| `type` | string | Filter by MIME type or file category. |
+| Parameter  | Type    | Description                           |
+|------------|---------|---------------------------------------|
+| `page`     | integer | Page number when using pagination.    |
+| `per_page` | integer | Number of items per page.             |
+| `cursor`   | string  | Cursor value for cursor pagination.   |
+| `user_id`  | integer | Filter files by owner.                |
+| `disk`     | string  | Filter by storage disk.               |
+| `type`     | string  | Filter by MIME type or file category. |
 
 Example:
 
@@ -337,9 +401,9 @@ Returns information for a single uploaded file.
 
 #### Route Parameter
 
-| Parameter | Description |
-|-----------|-------------|
-| `file` | UploadFile model or file ID |
+| Parameter | Description                 |
+|-----------|-----------------------------|
+| `file`    | UploadFile model or file ID |
 
 ---
 
@@ -349,10 +413,10 @@ Uploads a single file.
 
 #### Form Data
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `file` | ✔ | File to upload. |
-| `disk` | ✖ | Destination storage disk. Uses the default disk if omitted. |
+| Field  | Required | Description                                                 |
+|--------|----------|-------------------------------------------------------------|
+| `file` | ✔        | File to upload.                                             |
+| `disk` | ✖        | Destination storage disk. Uses the default disk if omitted. |
 
 ---
 
@@ -362,10 +426,10 @@ Updates file information.
 
 #### Parameters
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `file` | ✔ | UploadFile model or file ID. |
-| `title` | ✔ | New file title. |
+| Field   | Required | Description                  |
+|---------|----------|------------------------------|
+| `file`  | ✔        | UploadFile model or file ID. |
+| `title` | ✔        | New file title.              |
 
 ---
 
@@ -375,9 +439,9 @@ Deletes a file from both the database and the configured storage disk.
 
 #### Route Parameter
 
-| Parameter | Description |
-|-----------|-------------|
-| `file` | UploadFile model or file ID |
+| Parameter | Description                 |
+|-----------|-----------------------------|
+| `file`    | UploadFile model or file ID |
 
 ---
 
@@ -387,10 +451,10 @@ Deletes a physical file without removing any database record.
 
 #### Body Parameters
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `path` | ✔ | Relative file path. |
-| `disk` | ✔ | Storage disk name. |
+| Field  | Required | Description         |
+|--------|----------|---------------------|
+| `path` | ✔        | Relative file path. |
+| `disk` | ✔        | Storage disk name.  |
 
 ---
 
@@ -435,20 +499,22 @@ return view('filemanager::browser', compact(
 
 The following variables **must** be passed to the view:
 
-| Variable | Description |
-|----------|-------------|
-| `$disks` | Available storage disks shown in the browser filter. |
-| `$mimes` | Available MIME type filters. |
-| `$allowedDisks` | Disks that users are allowed to upload files to. |
-| `$allowedTypes` | Allowed MIME types for file uploads. |
+| Variable        | Description                                          |
+|-----------------|------------------------------------------------------|
+| `$disks`        | Available storage disks shown in the browser filter. |
+| `$mimes`        | Available MIME type filters.                         |
+| `$allowedDisks` | Disks that users are allowed to upload files to.     |
+| `$allowedTypes` | Allowed MIME types for file uploads.                 |
 
 These values should normally come directly from your `config/filemanager.php` file.
 
 > **Important**
 >
-> These four variables are required for the frontend and backend to work correctly together. The browser uses them to build filters, validate uploads, and synchronize with the package's API.
+> These four variables are required for the frontend and backend to work correctly together. The browser uses them to
+> build filters, validate uploads, and synchronize with the package's API.
 
-All other frontend customizations are optional. You are free to modify the surrounding layout, styling, or integrate the browser into your own interface as long as these required variables are provided.
+All other frontend customizations are optional. You are free to modify the surrounding layout, styling, or integrate the
+browser into your own interface as long as these required variables are provided.
 
 ---
 
@@ -459,6 +525,7 @@ The package also provides a reusable Blade component that can be embedded anywhe
 First, include the package assets:
 
 ```html
+
 <link
     rel="stylesheet"
     href="/vendor/filemanager/browser/browser.min.css"
@@ -476,29 +543,29 @@ Then render the component:
 Finally, initialize it with JavaScript:
 
 ```html
+
 <script type="module">
-import initFileManager from "/vendor/filemanager/browser/browser.min.js";
+    import initFileManager from "/vendor/filemanager/browser/browser.min.js";
 
-document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", () => {
 
-    const fm = initFileManager({
-        config: {
-            load: {
-                disks: @js($disks),
-                types: @js($mimes),
-                perPage: {{ $perPage }},
-            },
-            upload: {
-                allowedMimes: @js($allowedTypes),
-                allowedDisks: @js($allowedDisks),
-            },
+        const fm = initFileManager({
+            config: {
+                load: {
+                    disks: @js($disks),
+                    types: @js($mimes),
+                    perPage: {{ $perPage }}
+                },
+                upload: {
+                    allowedMimes: @js($allowedTypes),
+                    allowedDisks: @js($allowedDisks),
+                },
 
-            // Additional configuration...
-        }
-    }, "filemanager-1");
+                // Additional configuration...
+            }
+        }, "filemanager-1");
 
-
-});
+    });
 </script>
 ```
 
@@ -506,16 +573,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 The following values should normally be loaded from `config/filemanager.php` and passed to the component:
 
-| Variable | Description |
-|----------|-------------|
-| `$disks` | Available storage disks displayed in the browser. |
-| `$mimes` | Available MIME type filters. |
+| Variable        | Description                                        |
+|-----------------|----------------------------------------------------|
+| `$disks`        | Available storage disks displayed in the browser.  |
+| `$mimes`        | Available MIME type filters.                       |
 | `$allowedDisks` | Storage disks that users are allowed to upload to. |
-| `$allowedTypes` | Allowed MIME types for uploads. |
+| `$allowedTypes` | Allowed MIME types for uploads.                    |
 
 > **Important**
 >
-> These configuration values keep the frontend synchronized with the backend. They are used to build filters, validate uploads, and ensure that the browser behaves consistently with your package configuration.
+> These configuration values keep the frontend synchronized with the backend. They are used to build filters, validate
+> uploads, and ensure that the browser behaves consistently with your package configuration.
 
 All other JavaScript options are optional and may be customized to fit your application's requirements.
 
@@ -523,7 +591,7 @@ All other JavaScript options are optional and may be customized to fit your appl
 
 ## Frontend
 
-The package includes a lightweight JavaScript library for interacting with the File Manager.
+The package includes a lightweight JavaScript library (vanilla JS and pure CSS) for interacting with the File Manager.
 
 ---
 
@@ -535,88 +603,187 @@ The package includes a lightweight JavaScript library for interacting with the F
 {
     api: {
         baseUrl: "",
-        getUrl: "/api/filemanager",
-        uploadUrl: "/api/filemanager",
-        deleteUrl: "/api/filemanager",
-        updateUrl: "/api/filemanager"
-    },
+            getUrl
+    :
+        "/api/filemanager",
+            uploadUrl
+    :
+        "/api/filemanager",
+            deleteUrl
+    :
+        "/api/filemanager",
+            updateUrl
+    :
+        "/api/filemanager"
+    }
+,
 
     request: {
         timeout: 15000,
-        selectedDisk: null,
-        selectedType: null,
-        firstRequest: true
-    },
+            selectedDisk
+    :
+        null,
+            selectedType
+    :
+        null,
+            firstRequest
+    :
+        true
+    }
+,
 
     upload: {
         concurrency: 3,
-        size: 5000,
-        chunkSize: 0,
-        requestTimeout: 15000,
-        allowedMimes: [],
-        allowedDisks: []
-    },
+            size
+    :
+        5000,
+            chunkSize
+    :
+        0,
+            requestTimeout
+    :
+        15000,
+            allowedMimes
+    :
+        [],
+            allowedDisks
+    :
+        []
+    }
+,
 
     load: {
         perPage: 25,
-        cursorName: "cursor",
-        userId: null,
-        selectedDisk: null,
-        selectedType: null,
-        getOnInit: true
-    },
+            cursorName
+    :
+        "cursor",
+            userId
+    :
+        null,
+            selectedDisk
+    :
+        null,
+            selectedType
+    :
+        null,
+            getOnInit
+    :
+        true
+    }
+,
 
     log: {
         debug: false,
-        toServer: false,
-        serverUrl: null
-    },
+            toServer
+    :
+        false,
+            serverUrl
+    :
+        null
+    }
+,
 
     selection: {
         mode: "multi",
-        expect: "url"
-    },
+            expect
+    :
+        "url"
+    }
+,
 
     debounce: {
         delay: 300
-    },
+    }
+,
 
     ui: {
         mainSelector: ".filemanager",
 
-        /* Grid */
-        gridSelector: "[data-grid]",
-        loadingSelector: "[data-loading]",
-        loadMoreSelector: "[data-load-more]",
-        mimesSelector: "[data-mimeList]",
-        disksSelector: "[data-diskList]",
-        filesCounterSelector: "[data-file-counter]",
+            /* Grid */
+            gridSelector
+    :
+        "[data-grid]",
+            loadingSelector
+    :
+        "[data-loading]",
+            loadMoreSelector
+    :
+        "[data-load-more]",
+            mimesSelector
+    :
+        "[data-mimeList]",
+            disksSelector
+    :
+        "[data-diskList]",
+            filesCounterSelector
+    :
+        "[data-file-counter]",
 
-        /* Sidebar */
-        baseInfoSelector: "[data-aside]",
-        filePreviewSelector: "[data-preview]",
-        idInfoSelector: "[data-id]",
-        titleInfoSelector: "[data-title]",
-        urlInfoSelector: "[data-url]",
-        sizeInfoSelector: "[data-size]",
-        mimeInfoSelector: "[data-mime]",
-        diskInfoSelector: "[data-disk]",
-        createdInfoSelector: "[data-created]",
-        deleteBtnSelector: "[data-delete]",
-        openUrlBtnSelector: "[data-open]",
-        copyUrlBtnSelector: "[data-copy]",
+            /* Sidebar */
+            baseInfoSelector
+    :
+        "[data-aside]",
+            filePreviewSelector
+    :
+        "[data-preview]",
+            idInfoSelector
+    :
+        "[data-id]",
+            titleInfoSelector
+    :
+        "[data-title]",
+            urlInfoSelector
+    :
+        "[data-url]",
+            sizeInfoSelector
+    :
+        "[data-size]",
+            mimeInfoSelector
+    :
+        "[data-mime]",
+            diskInfoSelector
+    :
+        "[data-disk]",
+            createdInfoSelector
+    :
+        "[data-created]",
+            deleteBtnSelector
+    :
+        "[data-delete]",
+            openUrlBtnSelector
+    :
+        "[data-open]",
+            copyUrlBtnSelector
+    :
+        "[data-copy]",
 
-        /* Footer */
-        selectionButtonSelector: "[data-actions-sec]",
-        selectionGridSelector: "[data-selected-list]",
+            /* Footer */
+            selectionButtonSelector
+    :
+        "[data-actions-sec]",
+            selectionGridSelector
+    :
+        "[data-selected-list]",
 
-        /* Upload */
-        uploadFormSelector: "[data-upload-form]",
-        dropzoneSelector: "[data-dropzone]",
-        fileInputSelector: "[data-file-input]",
-        uploadDiskSelector: "[data-upload-disk]",
-        uploadPreviewSelector: "[data-upload-preview]",
-        uploadMessagesSelector: "[data-messages]"
+            /* Upload */
+            uploadFormSelector
+    :
+        "[data-upload-form]",
+            dropzoneSelector
+    :
+        "[data-dropzone]",
+            fileInputSelector
+    :
+        "[data-file-input]",
+            uploadDiskSelector
+    :
+        "[data-upload-disk]",
+            uploadPreviewSelector
+    :
+        "[data-upload-preview]",
+            uploadMessagesSelector
+    :
+        "[data-messages]"
     }
 }
 ```
@@ -629,12 +796,12 @@ The package includes a lightweight JavaScript library for interacting with the F
 
 Configure the package API endpoints.
 
-| Option | Description |
-|---------|-------------|
-| `baseUrl` | Base URL used for all API requests. |
-| `getUrl` | Endpoint used to retrieve files. |
-| `uploadUrl` | Endpoint used to upload files. |
-| `deleteUrl` | Endpoint used to delete files. |
+| Option      | Description                            |
+|-------------|----------------------------------------|
+| `baseUrl`   | Base URL used for all API requests.    |
+| `getUrl`    | Endpoint used to retrieve files.       |
+| `uploadUrl` | Endpoint used to upload files.         |
+| `deleteUrl` | Endpoint used to delete files.         |
 | `updateUrl` | Endpoint used to update file metadata. |
 
 ---
@@ -643,11 +810,11 @@ Configure the package API endpoints.
 
 General request settings.
 
-| Option | Description |
-|---------|-------------|
-| `timeout` | Request timeout in milliseconds. |
-| `selectedDisk` | Initial selected storage disk. |
-| `selectedType` | Initial selected MIME type filter. |
+| Option         | Description                                               |
+|----------------|-----------------------------------------------------------|
+| `timeout`      | Request timeout in milliseconds.                          |
+| `selectedDisk` | Initial selected storage disk.                            |
+| `selectedType` | Initial selected MIME type filter.                        |
 | `firstRequest` | Automatically perform the first request when initialized. |
 
 ---
@@ -656,14 +823,14 @@ General request settings.
 
 Upload behavior.
 
-| Option | Description |
-|---------|-------------|
-| `concurrency` | Maximum simultaneous uploads. |
-| `size` | Maximum upload size (KB). |
-| `chunkSize` | Chunk upload size. Set `0` to disable chunk uploads. |
-| `requestTimeout` | Upload request timeout in milliseconds. |
-| `allowedMimes` | Allowed MIME types. |
-| `allowedDisks` | Allowed destination disks. |
+| Option           | Description                                          |
+|------------------|------------------------------------------------------|
+| `concurrency`    | Maximum simultaneous uploads.                        |
+| `size`           | Maximum upload size (KB).                            |
+| `chunkSize`      | Chunk upload size. Set `0` to disable chunk uploads. |
+| `requestTimeout` | Upload request timeout in milliseconds.              |
+| `allowedMimes`   | Allowed MIME types.                                  |
+| `allowedDisks`   | Allowed destination disks.                           |
 
 ---
 
@@ -671,13 +838,13 @@ Upload behavior.
 
 Controls how files are loaded.
 
-| Option | Description |
-|---------|-------------|
-| `perPage` | Number of files loaded per request. |
-| `userId` | Load files belonging to a specific user. |
-| `selectedDisk` | Default disk filter. |
-| `selectedType` | Default MIME filter. |
-| `getOnInit` | Automatically load files after initialization. |
+| Option         | Description                                    |
+|----------------|------------------------------------------------|
+| `perPage`      | Number of files loaded per request.            |
+| `userId`       | Load files belonging to a specific user.       |
+| `selectedDisk` | Default disk filter.                           |
+| `selectedType` | Default MIME filter.                           |
+| `getOnInit`    | Automatically load files after initialization. |
 
 ---
 
@@ -685,9 +852,9 @@ Controls how files are loaded.
 
 Controls file selection.
 
-| Option | Description |
-|---------|-------------|
-| `mode` | `single` or `multi`. |
+| Option   | Description                                                                                                      |
+|----------|------------------------------------------------------------------------------------------------------------------|
+| `mode`   | `single` or `multi`.                                                                                             |
 | `expect` | Returned value when a file is selected. Supported values: `url`, `id`, `object`, or `null` to disable selection. |
 
 ---
@@ -696,8 +863,8 @@ Controls file selection.
 
 Debounce configuration.
 
-| Option | Description |
-|---------|-------------|
+| Option  | Description                                               |
+|---------|-----------------------------------------------------------|
 | `delay` | Delay in milliseconds before executing debounced actions. |
 
 ---
@@ -706,10 +873,10 @@ Debounce configuration.
 
 Debugging options.
 
-| Option | Description |
-|---------|-------------|
-| `debug` | Enables console debugging. |
-| `toServer` | Sends logs to a remote server. |
+| Option      | Description                       |
+|-------------|-----------------------------------|
+| `debug`     | Enables console debugging.        |
+| `toServer`  | Sends logs to a remote server.    |
 | `serverUrl` | Endpoint used for remote logging. |
 
 ---
@@ -721,6 +888,91 @@ Contains all DOM selectors used by the package.
 Override these values if your HTML structure differs from the default browser component.
 
 ---
+
+#### events
+
+The Database File browser emits a set of events throughout its lifecycle.
+
+You can listen to these events from your frontend code to extend the behavior of the file manager, update your UI,
+trigger custom actions, or integrate it with other parts of your application.
+
+```js
+{
+
+
+    /* Upload */
+    UPLOAD_SIGNAL: 'upload:selected_remove',
+        UPLOAD_SELECTED_REMOVE: 'upload:selected_remove',
+        UPLOAD_SELECTED: 'upload:selected',
+        UPLOAD_START: 'upload:start',
+        UPLOAD_PROGRESS: 'upload:progress',
+        UPLOAD_SUCCESS: 'upload:success',
+        UPLOAD_FAILED: 'upload:failed',
+        UPLOAD_COMPLETE: 'upload:complete',
+
+        /* load */
+        FILES_LOADED: 'files:loaded',
+        FILES_REQUEST: 'files:request_send',
+        FILES_REQUEST_FAILED: 'files:request_send_failed',
+        FILES_RECEIVE: 'files:response_get',
+        FILES_RECEIVE_FAILED: 'files:response_get_failed',
+
+        FILES_NO_MORE: 'files:no_more',
+        FILES_NEED_MORE: 'files:need_more',
+        FILES_NEW: 'files:need_more',
+
+
+        /* info */
+
+        FILE_DELETE_SIGNAL: 'file:send_delete_signal',
+        FILE_DELETED: 'file:send_deleted',
+        FILE_DELETE_FAILED: 'file:delete_file_failed',
+        FILE_SELECT:'file_selected',
+
+
+        FILE_UPDATE_TITLE_SIGNAL: 'file:send_update_title_signal',
+        FILE_UPDATED_TITLE : 'file_updated_title',
+        FILE_UPDATE_TITLE_FAILED : 'file_updated_title_failed',
+
+        FILE_URL_COPIED : 'file_copied_url',
+        FILE_URL_COPIED_FAILED : 'file_copy_url_failed',
+
+        /* Grid */
+        GRID_UPDATED: 'grid:updated',
+        GRID_CLEARED: 'grid:cleared',
+        GRID_CLEAR: 'grid:clear',
+        GRID_LOAD_START: 'grid:load:start',
+        GRID_LOAD_END: 'grid:load:end',
+
+        /* Selection */
+        SELECTION_CLICK: 'selection:item_clicked',
+        SELECTION_REMOVE_SIGNAL: 'selection:item_remove_signal',
+        SELECTION_REMOVED: 'selection:item_remove',
+        SELECTION_CHANGED: 'selection:changed',
+        SELECTION_CLEARED: 'selection:cleared',
+        SELECTION_ON_CHOOSE: 'selection:return_selected_files',
+        SELECTION_CHOSEN: 'selection:return_selected_files',
+
+        SELECTION_SELECT_BUTTON_MADE : 'selection:make_button',
+
+        /* Preview */
+        PREVIEW_UPDATED: 'preview:updated',
+        PREVIEW_CLEARED: 'preview:cleared',
+
+        /* Filter */
+        FILTER_CHANGED: 'filter:changed',
+
+        /* Error */
+
+        CHOOSE: 'choose',
+        UPLOAD: 'upload',
+        DELETE: 'delete',
+        UPDATE: 'update',
+        ERROR: 'error',
+
+}
+
+```
 
 ### Usage
 
@@ -782,8 +1034,8 @@ fm.on("choose", (files) => {
 
 ###### Parameters
 
-| Name | Description |
-|------|-------------|
+| Name    | Description                                                                                 |
+|---------|---------------------------------------------------------------------------------------------|
 | `files` | The selected file or an array of selected files depending on the configured selection mode. |
 
 When `selection.mode` is:
@@ -793,15 +1045,95 @@ When `selection.mode` is:
 
 The returned value depends on the `selection.expect` option:
 
-| Value | Returns |
-|--------|---------|
-| `"url"` | File URL(s) |
-| `"id"` | Database ID(s) |
+| Value      | Returns                 |
+|------------|-------------------------|
+| `"url"`    | File URL(s)             |
+| `"id"`     | Database ID(s)          |
 | `"object"` | Complete file object(s) |
-| `null` | Selection is disabled |
+| `null`     | Selection is disabled   |
 
-# Need optimization for viseos or images?
-this package is not 
+---
+
+---
+
+## Extensibility & Integration
+
+This package does not rely on any additional packages, either on the backend or frontend side.
+
+The reason behind this approach is to keep the package lightweight and give you complete freedom to choose and integrate
+the tools that best fit your project's needs.
+
+You can easily connect your preferred packages, customize the workflow, and build your own features on top of this
+package without fighting against unnecessary dependencies.
+
+For image processing tasks, such as resizing, quality adjustment, format conversion, thumbnail generation, or optimization, you can integrate packages like:
+ 
+[Intervention Image](https://github.com/Intervention/image)
+
+### Managing Generated Files
+
+If you need to generate multiple versions of a file (for example different image sizes or optimized formats), you can
+extend the file manager table.
+
+Add a nullable `parent_id` column to the package's files table:
+
+```php
+$table->string('parent_id')->nullable()->index();
+```
+
+I recommend using a simple string column instead of a foreign key relation.
+
+The reason is flexibility. In some workflows, you may want to delete the original file while keeping generated
+versions (or the opposite). A strict database relationship may limit your options.
+
+Then, in your model, you can create a one-to-many relationship with itself:
+
+```php
+public function children()
+{
+    return $this->hasMany(File::class, 'parent_id');
+}
+
+
+public function parent()
+{
+    return $this->belongsTo(File::class, 'parent_id');
+}
+```
+
+With this approach:
+
+- You can manage generated files from the frontend.
+- You can keep track of file variations.
+- You have more flexibility for future extensions.
+- Different processing workflows can be implemented without changing the core package.
+
+### Using Upload Events
+
+You can use the upload event to process files immediately after they are uploaded.
+
+Listen to:
+
+\Teksite\FileManager\Events\FileUploaded::class
+
+Example:
+
+```php
+Event::listen(FileUploaded::class, function ($event) {
+
+    $file = $event->file;
+
+    // Resize image
+    // Generate thumbnails
+    // Convert formats
+    // Optimize quality
+
+});
+```
+
+This allows you to extend the upload pipeline while keeping the core package clean and independent.
+
+---
 
 # What's Next?
 
@@ -818,11 +1150,18 @@ And much more...
 
 
 
->You can use the backend endpoints to build your own frontend file browse
+> You can use the backend endpoints to build your own frontend file browse
 
+## Philosophy
+
+This package provides the core file management layer and intentionally avoids forcing a specific workflow.
+You own the final implementation.
+
+Choose your preferred image processors, frontend frameworks, queues, and integrations.
 # Support
 
-If you encounter a bug, have a feature request, or need help using the package, feel free to open an issue or contact us.
+If you encounter a bug, have a feature request, or need help using the package, feel free to open an issue or contact
+us.
 
 ## Author
 

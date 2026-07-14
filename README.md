@@ -600,190 +600,97 @@ The package includes a lightweight JavaScript library (vanilla JS and pure CSS) 
 `initFileManager()` accepts a configuration object. Every option is optional unless otherwise noted.
 
 ```javascript
-{
+ {
     api: {
-        baseUrl: "",
-            getUrl
-    :
-        "/api/filemanager",
-            uploadUrl
-    :
-        "/api/filemanager",
-            deleteUrl
-    :
-        "/api/filemanager",
-            updateUrl
-    :
-        "/api/filemanager"
-    }
-,
+        baseUrl: '',
+            getUrl: '/api/filemanager',
+            uploadUrl: '/api/filemanager',
+
+            deleteUrl: '/api/filemanager',
+            updateUrl: '/api/filemanager',
+    },
 
     request: {
+
         timeout: 15000,
-            selectedDisk
-    :
-        null,
-            selectedType
-    :
-        null,
-            firstRequest
-    :
-        true
-    }
-,
+            selectedDisk: null,
+            selectedType: null,
+            firstRequest: true
+    },
 
     upload: {
         concurrency: 3,
-            size
-    :
-        5000,
-            chunkSize
-    :
-        0,
-            requestTimeout
-    :
-        15000,
-            allowedMimes
-    :
-        [],
-            allowedDisks
-    :
-        []
-    }
-,
+            size: 5000,
+            chunkSize: 0,
+            requestTimeout: 15000,
+            allowedMimes: [],
+            allowedDisks: [],
+    },
 
     load: {
         perPage: 25,
-            cursorName
-    :
-        "cursor",
-            userId
-    :
-        null,
-            selectedDisk
-    :
-        null,
-            selectedType
-    :
-        null,
-            getOnInit
-    :
-        true
-    }
-,
+            cursorName: 'cursor',
+            userId: null,
+
+            selectedDisk: null,
+            selectedType: null,
+            getOnInit: true,
+    },
 
     log: {
         debug: false,
-            toServer
-    :
-        false,
-            serverUrl
-    :
-        null
-    }
-,
+            toServer: true,
+            serverUrl: null
+    },
+
 
     selection: {
-        mode: "multi",
-            expect
-    :
-        "url"
-    }
-,
+        mode: 'multi', //single: only one file | multi,multiple : multi file
+        expect: 'url',  //url , id ,files ,object |null : disable
+    },
 
     debounce: {
         delay: 300
-    }
-,
+    },
 
     ui: {
-        mainSelector: ".filemanager",
+        mainSelector: '.filemanager',
 
-            /* Grid */
-            gridSelector
-    :
-        "[data-grid]",
-            loadingSelector
-    :
-        "[data-loading]",
-            loadMoreSelector
-    :
-        "[data-load-more]",
-            mimesSelector
-    :
-        "[data-mimeList]",
-            disksSelector
-    :
-        "[data-diskList]",
-            filesCounterSelector
-    :
-        "[data-file-counter]",
+            /* loader ui*/
+            gridSelector: '[data-grid]',
+            loadingSelector: '[data-loading]',
+            loadMoreSelector: '[data-load-more]',
+            mimesSelector: '[data-mimeList]',
+            disksSelector: '[data-diskList]',
 
-            /* Sidebar */
-            baseInfoSelector
-    :
-        "[data-aside]",
-            filePreviewSelector
-    :
-        "[data-preview]",
-            idInfoSelector
-    :
-        "[data-id]",
-            titleInfoSelector
-    :
-        "[data-title]",
-            urlInfoSelector
-    :
-        "[data-url]",
-            sizeInfoSelector
-    :
-        "[data-size]",
-            mimeInfoSelector
-    :
-        "[data-mime]",
-            diskInfoSelector
-    :
-        "[data-disk]",
-            createdInfoSelector
-    :
-        "[data-created]",
-            deleteBtnSelector
-    :
-        "[data-delete]",
-            openUrlBtnSelector
-    :
-        "[data-open]",
-            copyUrlBtnSelector
-    :
-        "[data-copy]",
+            filesCounterSelector: '[data-file-counter]',
 
-            /* Footer */
-            selectionButtonSelector
-    :
-        "[data-actions-sec]",
-            selectionGridSelector
-    :
-        "[data-selected-list]",
 
-            /* Upload */
-            uploadFormSelector
-    :
-        "[data-upload-form]",
-            dropzoneSelector
-    :
-        "[data-dropzone]",
-            fileInputSelector
-    :
-        "[data-file-input]",
-            uploadDiskSelector
-    :
-        "[data-upload-disk]",
-            uploadPreviewSelector
-    :
-        "[data-upload-preview]",
-            uploadMessagesSelector
-    :
-        "[data-messages]"
+            /* aside ui*/
+            baseInfoSelector: '[data-aside]',
+            filePreviewSelector: '[data-preview]',
+            idInfoSelector: '[data-id]',
+            titleInfoSelector: '[data-title]',
+            urlInfoSelector: '[data-url]',
+            sizeInfoSelector: '[data-size]',
+            mimeInfoSelector: '[data-mime]',
+            diskInfoSelector: '[data-disk]',
+            createdInfoSelector: '[data-created]',
+            deleteBtnSelector: '[data-delete]',
+            openUrlBtnSelector: '[data-open]',
+            copyUrlBtnSelector: '[data-copy]',
+
+            /* footer */
+            selectionButtonSelector: '[data-actions-sec]',
+            selectionGridSelector: '[data-selected-list]',
+
+            /* uploader ui*/
+            uploadFormSelector: '[data-upload-form]',
+            dropzoneSelector: '[data-dropzone]',
+            fileInputSelector: '[data-file-input]',
+            uploadDiskSelector: '[data-upload-disk]',
+            uploadPreviewSelector: '[data-upload-preview]',
+            uploadMessagesSelector: '[data-messages]',
     }
 }
 ```
@@ -1138,7 +1045,6 @@ This allows you to extend the upload pipeline while keeping the core package cle
 # What's Next?
 
 Here's what I'm currently working on:
-
 - Report frontend errors to a configurable backend endpoint.
 - Add a logging service (store logs locally or send them to a remote endpoint).
 - Create a File Explorer to manage filesystem disks independently of the database.
@@ -1146,6 +1052,13 @@ Here's what I'm currently working on:
 And much more...
 
 **Coming soon 🙂**
+
+- integrated : 
+  - standalone
+  - Ckeditor
+  - tinyMic
+  - my own WYSWG
+
 ---
 
 

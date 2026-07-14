@@ -1,4 +1,5 @@
-<div class="filemanager" id="fileManagerRoot">
+@props(['id'])
+<div class="filemanager" id="fileManagerRoot" data-database-filemanager="{{$id}}">
     <section class="media-container" data-fm>
         @include('filemanager::partials.uploader')
         @include('filemanager::partials.sidebar')

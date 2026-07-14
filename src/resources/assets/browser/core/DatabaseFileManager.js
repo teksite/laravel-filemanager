@@ -27,21 +27,14 @@ import UploadService from "../services/UploadService.js";
 export default class DatabaseFileManager {
 
 
-    constructor({config = {}, root = document} = {}) {
+    constructor({config = {}, root =document} = {}) {
+        console.log('#fileManagerRoot-'+root)
 
-        this.root = typeof root === "string" ? document.querySelector(root) : root;
+        this.root = typeof root === "string" ? document.querySelector(`[data-database-filemanager='${root}']`) : root;
 
-        if (!this.root) {
-            throw new Error("FileManager root element not found");
-        }
-
+        if (!this.root)  throw new Error("FileManager root element not found");
 
         this.config = new Config(config);
-
-        this.root = typeof root === 'string'
-            ? document.querySelector(root)
-            : root;
-
 
         this.eventBus = new EventEmitter();
 

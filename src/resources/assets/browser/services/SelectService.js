@@ -114,8 +114,10 @@ export default class SelectService extends BaseService {
                     return file.url;
 
                 case 'file':
-                case 'object':
                     return file;
+
+                case 'object':
+                    return {[file.id] : file.url};
 
                 default:
                     return null;
@@ -123,7 +125,6 @@ export default class SelectService extends BaseService {
         };
 
         if (['multi', 'multiple'].includes(mode)) {
-
             return values.map(format);
         }
 

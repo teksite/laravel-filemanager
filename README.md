@@ -1084,6 +1084,7 @@ And much more...
   - standalone
   - Ckeditor
   - tinyMic
+  - chunk upload : large file
   - my own WYSWG
 
 ---

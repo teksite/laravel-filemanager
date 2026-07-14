@@ -516,6 +516,7 @@ These values should normally come directly from your `config/filemanager.php` fi
 All other frontend customizations are optional. You are free to modify the surrounding layout, styling, or integrate the
 browser into your own interface as long as these required variables are provided.
 
+
 ---
 
 ### Component
@@ -1041,6 +1042,32 @@ Event::listen(FileUploaded::class, function ($event) {
 This allows you to extend the upload pipeline while keeping the core package clean and independent.
 
 ---
+
+---
+
+# Components
+
+## Simple database file manager
+If you don't need a custom frontend, the package includes a ready-to-use browser interface.
+
+It allows users to:
+
+- Upload files
+- Browse uploaded files
+- Rename file titles
+- Delete files
+
+Simply embed the browser anywhere in your application:
+
+```html
+<iframe
+    src="/filemanager/browser"
+    style="width:100%;min-height:900px;border:0;"
+></iframe>
+```
+
+This is the quickest way to integrate the file manager without writing any frontend code.
+
 
 # What's Next?
 

@@ -30,7 +30,7 @@ export default class DatabaseFileManager {
 
         this.root = typeof root === "string" ? document.querySelector(`[data-database-filemanager='${root}']`) : root;
 
-        if (!this.root)  throw new Error("FileManager root element not found");
+        if (!this.root)  throw new Error("FileManager root element not found:" + root);
 
         this.config = new Config(config);
 

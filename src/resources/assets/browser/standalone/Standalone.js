@@ -6,21 +6,16 @@ export default class Standalone {
 
     constructor(options = {}) {
 
-        this.options = {
-
-            trigger: "[data-filemanager]",
-
-            ...options
-        };
+        this.options = {trigger: "[data-filemanager]", ...options};
 
         this.modal = new Modal();
 
         this.manager = new DatabaseFileManager({
-
             root: this.modal.root,
-
             ...options
         });
+
+        console.log( this.modal.root)
 
         this.currentTrigger = null;
 

@@ -10,17 +10,18 @@ export default class Modal {
 
         this.modal = wrapper.firstElementChild;
 
-        this.root = this.modal.querySelector("[data-fm-root]");
+        this.root =this.modal.querySelector("[data-fm-root]");
 
         document.body.append(this.modal);
 
-        this.clickHandler = this.clickHandler.bind(this);
+        this.clickHandler =this.clickHandler.bind(this);
 
-        this.escapeHandler = this.escapeHandler.bind(this);
+        this.escapeHandler =this.escapeHandler.bind(this);
 
         this.modal.addEventListener("click", this.clickHandler);
 
         document.addEventListener("keydown", this.escapeHandler);
+
     }
 
     open() {
@@ -31,6 +32,7 @@ export default class Modal {
     }
 
     close() {
+
         this.modal.classList.add("is-hidden");
 
         document.body.classList.remove("fm-lock");
@@ -45,7 +47,7 @@ export default class Modal {
 
     escapeHandler(event) {
 
-        if (event.key !== "Escape")   return;
+        if (event.key !== "Escape") return;
 
         this.close();
     }

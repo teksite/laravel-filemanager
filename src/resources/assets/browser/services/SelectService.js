@@ -102,7 +102,6 @@ export default class SelectService extends BaseService {
 
         const expect = this.options.expect ?? 'url';
 
-
         const format = file => {
 
             switch (expect) {

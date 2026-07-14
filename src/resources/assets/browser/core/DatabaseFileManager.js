@@ -7,7 +7,6 @@ import RequestService from "./RequestService.js";
 import defaultState from "../constants/defaults.js";
 import Events from "../constants/events.js";
 
-// import UploadService from "./services/UploadService.js";
 import LoadService from "../services/LoadService.js";
 import DeleteService from "../services/DeleteService.js";
 import UpdateService from "../services/UpdateService.js";
@@ -28,7 +27,6 @@ export default class DatabaseFileManager {
 
 
     constructor({config = {}, root =document} = {}) {
-        console.log('#fileManagerRoot-'+root)
 
         this.root = typeof root === "string" ? document.querySelector(`[data-database-filemanager='${root}']`) : root;
 

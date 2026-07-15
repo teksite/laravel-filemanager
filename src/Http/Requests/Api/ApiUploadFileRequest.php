@@ -1,11 +1,10 @@
 <?php
 
-namespace Teksite\FileManager\Http\Requests;
+namespace Teksite\FileManager\Http\Requests\Api;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
-use function Aws\map;
+use Teksite\FileManager\Http\Requests\BaseApiRequest;
 
 class ApiUploadFileRequest  extends BaseApiRequest
 {

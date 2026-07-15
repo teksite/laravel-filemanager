@@ -1,3 +1,5 @@
+import * as url from "node:url";
+
 export default class StandaloneButton {
 
     constructor(trigger = '[data-filemanager]') {
@@ -45,7 +47,9 @@ export default class StandaloneButton {
 
             document.body.appendChild(overlay);
 
-            overlay.addEventListener('click' , e=>{overlay.remove()})
+            overlay.addEventListener('click', e => {
+                overlay.remove()
+            })
         }
 
         overlay.innerHTML = await this.fetchView(config);
@@ -54,15 +58,24 @@ export default class StandaloneButton {
     async fetchView(config = {}) {
 
         const response = await fetch('/api/filemanager/browser', {
+            method :'POST',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: {
+                config:{
+                    selection: {
+                        expect: 'url',
+                        mode: 'single'
+                    }
+                }
             }
         });
 
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
-        const prevent=(e)=>{
+        const prevent = (e) => {
             e.preventDefault();
             e.stopPropagation();
         }

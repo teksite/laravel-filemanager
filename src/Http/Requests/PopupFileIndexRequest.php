@@ -21,21 +21,21 @@ class PopupFileIndexRequest extends BaseApiRequest
 
     protected function generalFailedValidationMessages(): string
     {
-        return trans('failed to get files');
+        return trans('failed to get browser');
     }
 
     protected function setAction(): string
     {
-        return 'get_all';
+        return 'get_browser';
     }
 
-    public function after()
+  /*  public function after()
     {
         return [
             fn(Validator $validator) => fn() => $this->checkType($validator),
             fn(Validator $validator) => fn() => $this->checkDisk($validator),
         ];
-    }
+    }*/
 
 
     private function checkDisk(Validator $validator)

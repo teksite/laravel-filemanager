@@ -1,8 +1,9 @@
 <?php
 
-namespace Teksite\FileManager\Http\Requests;
+namespace Teksite\FileManager\Http\Requests\Api;
 
 use Illuminate\Validation\Rule;
+use Teksite\FileManager\Http\Requests\BaseApiRequest;
 
 class ApiDeleteFilePathRequest extends BaseApiRequest
 {

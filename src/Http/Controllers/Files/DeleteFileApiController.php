@@ -1,8 +1,8 @@
 <?php
 
-namespace Teksite\FileManager\Http\Controllers;
+namespace Teksite\FileManager\Http\Controllers\Files;
 
-use Teksite\FileManager\Http\Requests\ApiDeleteFilePathRequest;
+use Teksite\FileManager\Http\Requests\Api\ApiDeleteFilePathRequest;
 use Teksite\FileManager\Models\UploadFile;
 use Teksite\FileManager\Services\UploaderService;
 

@@ -16,6 +16,7 @@ class DatabaseBrowserApiController
 {
     public function browser(PopupFileIndexRequest $request)
     {
+        dd($request->array());
         $disks = $this->resolveListDisks();
         $mimes = $this->resolveListTypes();
 

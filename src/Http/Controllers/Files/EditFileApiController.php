@@ -1,12 +1,9 @@
 <?php
 
-namespace Teksite\FileManager\Http\Controllers;
+namespace Teksite\FileManager\Http\Controllers\Files;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Teksite\FileManager\DTO\UploadOptions;
-use Teksite\FileManager\Http\Requests\ApiUpdateFileRequest;
-use Teksite\FileManager\Http\Requests\ApiUploadFileRequest;
+use Teksite\FileManager\Http\Requests\Api\ApiUpdateFileRequest;
 use Teksite\FileManager\Http\Resources\FileResource;
 use Teksite\FileManager\Models\UploadFile;
 use Teksite\FileManager\Services\UploaderService;

@@ -26,7 +26,7 @@ class RenderPopupController
 
         $perPage= config('filemanager.per_page' , 25);
 
-        return view('filemanager::browser', compact('id' , 'config', 'disks', 'mimes' ,'allowedDisks' ,'allowedTypes' ,'perPage'));
+        return view('filemanager::db-browser', compact('id' , 'config', 'disks', 'mimes' ,'allowedDisks' ,'allowedTypes' ,'perPage'));
     }
 
     private function resolveListDisks(): array

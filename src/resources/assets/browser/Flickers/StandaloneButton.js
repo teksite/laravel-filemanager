@@ -9,7 +9,6 @@ export default class StandaloneButton {
 
         this.trigger = trigger;
 
-        console.log(options)
         this.bind();
     }
 

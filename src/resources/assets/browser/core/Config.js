@@ -33,8 +33,8 @@ const defaultConfig = {
         selectedDisk: null,
         selectedType: null,
         getOnInit: true,
-        disks: null,
-        types: null,
+        disks: [],
+        types: [],
     },
 
     log: {
@@ -97,6 +97,7 @@ const defaultConfig = {
 export default class Config {
 
     constructor(configs = {}) {
+
         this.config = this.deepFreeze(
             this.deepMerge(
                 structuredClone(defaultConfig),
@@ -122,7 +123,9 @@ export default class Config {
     }
 
     getPath(path = '') {
+
         if (!path) return undefined;
+
         return path
             .split('.')
             .reduce((obj, key) => obj?.[key], this.config);
@@ -130,9 +133,10 @@ export default class Config {
 
     deepMerge(target, source) {
 
-        if (!this.isObject(source)) {
-            return source ?? target;
-        }
+        console.log('1111',target)
+        console.log('222',source)
+        if (!this.isObject(source))  return source ?? target;
+
 
         Object.keys(source).forEach(key => {
 

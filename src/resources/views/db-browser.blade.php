@@ -14,23 +14,22 @@
 
     </section>
 </div>
+
 <script type="module">
     import initFileManager from "{{ asset('/vendor/filemanager/browser.min.js') }}";
 
     document.addEventListener('DOMContentLoaded', () => {
         const fm = initFileManager({
-            config:
-                {
-                    load: {
-                        disks:@js($disks),
-                        types:@js($mimes),
-                        perPage: {{$perPage}}
-                    },
-                    upload: {
-                        allowedMimes: @js($allowedTypes),
-                        allowedDisks: @js($allowedDisks)
-                    }
-                }
+
+            load: {
+                disks:@js($disks),
+                types:@js($mimes),
+                perPage: {{$perPage}}
+            },
+            upload: {
+                allowedMimes: @js($allowedTypes),
+                allowedDisks: @js($allowedDisks)
+            }
         }, '{{$uniqueId}}');
 
     });

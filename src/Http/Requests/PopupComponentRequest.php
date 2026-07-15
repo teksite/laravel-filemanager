@@ -13,6 +13,7 @@ class PopupFileIndexRequest extends BaseApiRequest
 {
     public function rules(): array
     {
+        dd(request()->all());
         return [
             'config' =>'nullable'
         ];

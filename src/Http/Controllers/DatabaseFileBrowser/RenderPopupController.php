@@ -1,26 +1,19 @@
 <?php
 
-namespace Teksite\FileManager\Http\Controllers;
+namespace Teksite\FileManager\Http\Controllers\DatabaseFileBrowser;
 
-use Illuminate\Http\Request;
-use Teksite\FileManager\Http\Requests\FileIndexRequest;
-use Teksite\FileManager\Http\Requests\PopupFileIndexRequest;
-use Teksite\FileManager\Http\Requests\ShowRequest;
-use Teksite\FileManager\Http\Resources\FileCollection;
-use Teksite\FileManager\Http\Resources\FileResource;
-use Teksite\FileManager\Http\Resources\PaginateFileCollection;
-use Teksite\FileManager\Models\UploadFile;
-use Teksite\FileManager\Services\GetFileService;
+use Teksite\FileManager\Http\Requests\PopupComponentRequest;
 
 class DatabaseBrowserApiController
 {
-    public function browser(PopupFileIndexRequest $request)
+    public function browser(PopupComponentRequest $request)
     {
-        dd($request->array());
         $disks = $this->resolveListDisks();
+
         $mimes = $this->resolveListTypes();
 
         $allowedDisks = $this->allowedDisks();
+
         $allowedTypes = $this->allowedTypes();
 
         $perPage= config('filemanager.per_page' , 25);

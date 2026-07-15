@@ -1,13 +1,9 @@
 <?php
 
-namespace Teksite\FileManager\Http\Requests;
+namespace Teksite\FileManager\Http\Requests\Api;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
-use Teksite\FileManager\Support\AuthorizeRequestResolver;
+use Teksite\FileManager\Http\Requests\BaseApiRequest;
 
 class FileIndexRequest extends BaseApiRequest
 {

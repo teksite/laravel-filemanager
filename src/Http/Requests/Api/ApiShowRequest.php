@@ -1,9 +1,8 @@
 <?php
 
-namespace Teksite\FileManager\Http\Requests;
+namespace Teksite\FileManager\Http\Requests\Api;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Teksite\FileManager\Support\AuthorizeRequestResolver;
+use Teksite\FileManager\Http\Requests\BaseApiRequest;
 
 class ShowRequest extends BaseApiRequest
 {

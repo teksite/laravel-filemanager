@@ -26,12 +26,12 @@ import UploadService from "../services/UploadService.js";
 export default class DatabaseFileManager {
 
 
-    constructor({config = {}, root =document} = {}) {
+    constructor({config = {}, root = document} = {}) {
 
 
         this.root = typeof root === "string" ? document.querySelector(`[data-database-filemanager='${root}']`) : root;
 
-        if (!this.root)  throw new Error("FileManager root element not found:" + root);
+        if (!this.root) throw new Error("FileManager root element not found:" + root);
 
 
         this.config = new Config(config);
@@ -61,13 +61,16 @@ export default class DatabaseFileManager {
 
     }
 
+    setConfig(config) {
+        this.config = new Config(config);
+
+    }
 
     /*
     |--------------------------------------------------------------------------
     | Components Registry
     |--------------------------------------------------------------------------
     */
-
 
     components() {
 
@@ -196,7 +199,7 @@ export default class DatabaseFileManager {
             }],
 
 
-                [UploadService, {
+            [UploadService, {
                 url: this.config.get('api.updateUrl'),
                 ...this.config.section('upload'),
             }],

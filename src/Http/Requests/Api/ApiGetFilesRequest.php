@@ -5,7 +5,7 @@ namespace Teksite\FileManager\Http\Requests\Api;
 use Illuminate\Validation\Validator;
 use Teksite\FileManager\Http\Requests\BaseApiRequest;
 
-class FileIndexRequest extends BaseApiRequest
+class ApiGetFilesRequest extends BaseApiRequest
 {
     public function rules(): array
     {

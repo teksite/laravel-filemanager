@@ -33,6 +33,8 @@ const defaultConfig = {
         selectedDisk: null,
         selectedType: null,
         getOnInit: true,
+        disks: null,
+        types: null,
     },
 
     log: {
@@ -44,7 +46,7 @@ const defaultConfig = {
 
     selection: {
         mode: 'single', //single: only one file | multi,multiple : multi file
-        expect: null,  //url , id files,object |null : disable
+        expect: null,   //url , id files,object |null : disable
     },
 
     debounce: {

@@ -1,19 +1,12 @@
 <?php
 
-namespace Teksite\FileManager\Http\Controllers;
+namespace Teksite\FileManager\Http\Controllers\DatabaseFileBrowser;
 
-use Illuminate\Http\Request;
-use Teksite\FileManager\Http\Requests\FileIndexRequest;
-use Teksite\FileManager\Http\Requests\ShowRequest;
-use Teksite\FileManager\Http\Resources\FileCollection;
-use Teksite\FileManager\Http\Resources\FileResource;
-use Teksite\FileManager\Http\Resources\PaginateFileCollection;
-use Teksite\FileManager\Models\UploadFile;
-use Teksite\FileManager\Services\GetFileService;
+use Teksite\FileManager\Http\Requests\Api\ApiGetFilesRequest;
 
 class DatabaseBrowserController
 {
-    public function browser(FileIndexRequest $request)
+    public function browser(ApiGetFilesRequest $request)
     {
         $disks = $this->resolveListDisks();
         $mimes = $this->resolveListTypes();

@@ -1,10 +1,9 @@
 <?php
 
-namespace Teksite\FileManager\Http\Controllers;
+namespace Teksite\FileManager\Http\Controllers\Files;
 
-use Illuminate\Http\Request;
-use Teksite\FileManager\Http\Requests\FileIndexRequest;
-use Teksite\FileManager\Http\Requests\ShowRequest;
+use Teksite\FileManager\Http\Requests\Api\ApiGetFilesRequest;
+use Teksite\FileManager\Http\Requests\Api\ApiShowRequest;
 use Teksite\FileManager\Http\Resources\FileCollection;
 use Teksite\FileManager\Http\Resources\FileResource;
 use Teksite\FileManager\Http\Resources\PaginateFileCollection;
@@ -16,7 +15,7 @@ class GetFilesController
 
     public function __construct(protected GetFileService $getFiles) {}
 
-    public function index(FileIndexRequest $request)
+    public function index(ApiGetFilesRequest $request)
     {
 
         $type = strtolower(trim($request->input('type', 'cursor')));
@@ -31,7 +30,7 @@ class GetFilesController
     }
 
 
-    public function show(ShowRequest $request, UploadFile $file)
+    public function show(ApiShowRequest $request, UploadFile $file)
     {
         $file = FileResource::make($file);
 

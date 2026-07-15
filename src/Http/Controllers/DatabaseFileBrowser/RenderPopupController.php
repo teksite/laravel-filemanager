@@ -2,15 +2,23 @@
 
 namespace Teksite\FileManager\Http\Controllers\DatabaseFileBrowser;
 
+use Illuminate\Support\Facades\Log;
 use Teksite\FileManager\Http\Requests\PopupComponentRequest;
 
-class DatabaseBrowserApiController
+class RenderPopupController
 {
     public function browser(PopupComponentRequest $request)
     {
-        $disks = $this->resolveListDisks();
 
-        $mimes = $this->resolveListTypes();
+        $id =  $request->validated('id');
+
+        $config =  $request->validated('config');
+
+        $disks =  $request->validated('config.load.disks') ?? $this->resolveListDisks();
+
+        $mimes = $request->validated('config.load.types') ?? $this->resolveListTypes();
+
+
 
         $allowedDisks = $this->allowedDisks();
 
@@ -18,7 +26,7 @@ class DatabaseBrowserApiController
 
         $perPage= config('filemanager.per_page' , 25);
 
-        return view('filemanager::browser', compact('disks', 'mimes' ,'allowedDisks' ,'allowedTypes' ,'perPage'));
+        return view('filemanager::browser', compact('id' , 'config', 'disks', 'mimes' ,'allowedDisks' ,'allowedTypes' ,'perPage'));
     }
 
     private function resolveListDisks(): array

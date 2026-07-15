@@ -1,14 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Teksite\FileManager\Http\Controllers\DatabaseBrowserApiController;
+use Teksite\FileManager\Http\Controllers\DatabaseFileBrowser\RenderPopupController;
 use Teksite\FileManager\Http\Controllers\Files\DeleteFileApiController;
 use Teksite\FileManager\Http\Controllers\Files\EditFileApiController;
+use Teksite\FileManager\Http\Controllers\Files\GetFilesController;
 use Teksite\FileManager\Http\Controllers\Files\StoreFileApiController;
-use Teksite\FileManager\Http\Controllers\GetFilesController;
 
 
-Route::Post('browser', [DatabaseBrowserApiController::class, 'browser'])->name('browser');
+Route::Post('browser', [RenderPopupController::class, 'browser'])->name('browser');
 
 
 Route::delete('remove', [DeleteFileApiController::class, 'deleteByPath'])->name('destroy.path');

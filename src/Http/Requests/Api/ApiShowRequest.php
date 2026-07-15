@@ -4,7 +4,7 @@ namespace Teksite\FileManager\Http\Requests\Api;
 
 use Teksite\FileManager\Http\Requests\BaseApiRequest;
 
-class ShowRequest extends BaseApiRequest
+class ApiShowRequest extends BaseApiRequest
 {
     public function rules(): array
     {

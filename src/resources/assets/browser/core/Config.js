@@ -99,26 +99,27 @@ export default class Config {
     constructor(configs = {}) {
 
         this.config = this.deepFreeze(
-            this.deepMerge(
-                structuredClone(defaultConfig),
-                configs
-            )
+            this.deepMerge(structuredClone(defaultConfig), configs)
         );
     }
 
     all() {
+
         return this.config;
     }
 
     get(path, defaultValue = null) {
+
         return this.getPath(path) ?? defaultValue;
     }
 
     section(key, defaultValue = []) {
+
         return this.config[key] ?? defaultValue;
     }
 
     clone() {
+
         return structuredClone(this.config);
     }
 
@@ -126,55 +127,43 @@ export default class Config {
 
         if (!path) return undefined;
 
-        return path
-            .split('.')
+        return path.split('.')
             .reduce((obj, key) => obj?.[key], this.config);
     }
 
     deepMerge(target, source) {
 
-        console.log('defaultConfig',target)
-        console.log('changedConfig',source)
-        if (!this.isObject(source))  return source ?? target;
-
+        if (!this.isObject(source)) return source ?? target;
 
         Object.keys(source).forEach(key => {
 
             const sourceValue = source[key];
             const targetValue = target[key];
 
-            if (sourceValue == null) {
-                return;
-            }
+            if (sourceValue == null) return;
 
-            if (
-                this.isObject(sourceValue) &&
-                this.isObject(targetValue)
-            ) {
-                target[key] = this.deepMerge(
-                    targetValue,
-                    sourceValue
-                );
+
+            if (this.isObject(sourceValue) && this.isObject(targetValue)) {
+
+                target[key] = this.deepMerge(targetValue, sourceValue);
             } else {
+
                 target[key] = sourceValue;
             }
-
         });
 
         return target;
     }
 
     isObject(value) {
+
         return (value !== null && typeof value === 'object' && !Array.isArray(value));
     }
 
     deepFreeze(obj) {
         Object.keys(obj).forEach(key => {
 
-            if (this.isObject(obj[key])) {
-                this.deepFreeze(obj[key]);
-            }
-
+            if (this.isObject(obj[key])) this.deepFreeze(obj[key]);
         });
 
         return Object.freeze(obj);

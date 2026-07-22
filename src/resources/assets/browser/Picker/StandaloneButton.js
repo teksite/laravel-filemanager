@@ -3,7 +3,7 @@ import FilePicker from "./FilePicker.js";
 
 export default class StandaloneButton {
 
-    constructor(id, {trigger, ...options}){
+    constructor(id, {trigger, ...options}) {
 
         this.picker = new FilePicker(id, options);
 
@@ -13,8 +13,7 @@ export default class StandaloneButton {
     }
 
 
-
-    bind(){
+    bind() {
 
         this.clickHandler = this.clickHandler.bind(this);
 
@@ -22,12 +21,11 @@ export default class StandaloneButton {
     }
 
 
-
-    clickHandler(event){
+    clickHandler(event) {
 
         const btnEl = event.target.closest(this.trigger);
 
-        if(!btnEl) return;
+        if (!btnEl) return;
 
         event.preventDefault();
 
@@ -35,7 +33,7 @@ export default class StandaloneButton {
     }
 
 
-    on(callback){
+    on(callback) {
 
         this.picker.on(callback);
 
@@ -43,8 +41,7 @@ export default class StandaloneButton {
     }
 
 
-
-    destroy(){
+    destroy() {
 
         document.removeEventListener("click", this.clickHandler);
 

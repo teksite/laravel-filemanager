@@ -22,20 +22,15 @@ export default class FilePicker {
 
         };
 
-
         this.overlay = null;
 
         this.dialog = null;
 
-
         this.fileManager = null;
-
 
         this.controller = null;
 
-
         this.listeners = new Set();
-
 
         this.opened = false;
 
@@ -44,16 +39,19 @@ export default class FilePicker {
 
     normalizeConfig(config) {
 
-        return { selection:{
-                expect : 'object',
-                mode:'single'
-            }, ...config};
+        return {
+            selection: {
+                expect: 'object',
+                mode: 'single'
+            }, ...config
+        };
     }
 
 
     on(callback) {
-
         if (typeof callback === "function") this.listeners.add(callback);
+
+        console.log(this.listeners)
         return this;
     }
 
@@ -86,12 +84,10 @@ export default class FilePicker {
             this.dialog.innerHTML = await this.loadView();
 
             const root = this.dialog.querySelector("[data-database-filemanager]");
-            console.log(this.config)
-            this.fileManager = initFileManager({config: this.config}, root);
 
-            this.fileManager.once(Events.CHOOSE,
+            this.fileManager = initFileManager(this.config, root);
 
-                files => {
+            this.fileManager.once(Events.CHOOSE, files => {
 
                     this.emit(files);
 

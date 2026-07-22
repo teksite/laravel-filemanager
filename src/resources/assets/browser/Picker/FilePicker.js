@@ -1,6 +1,6 @@
 import initFileManager from "../browser.js";
-import * as Events from "node:events";
 
+import Events from "../constants/events.js";
 export default class FilePicker {
 
 
@@ -33,7 +33,6 @@ export default class FilePicker {
         this.listeners = new Set();
 
         this.opened = false;
-
     }
 
 
@@ -49,9 +48,9 @@ export default class FilePicker {
 
 
     on(callback) {
+
         if (typeof callback === "function") this.listeners.add(callback);
 
-        console.log(this.listeners)
         return this;
     }
 

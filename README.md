@@ -594,6 +594,8 @@ All other JavaScript options are optional and may be customized to fit your appl
 
 The package includes a lightweight JavaScript library (vanilla JS and pure CSS) for interacting with the File Manager.
 
+<img src="https://teksite.net/uploads/images/packages/filemanager-browser.jpg" alt="DB File Browser">
+
 ---
 
 ### Configuration
@@ -1060,14 +1062,39 @@ It allows users to:
 Simply embed the browser anywhere in your application:
 
 ```html
-<iframe
-    src="/filemanager/browser"
-    style="width:100%;min-height:900px;border:0;"
-></iframe>
+<iframe src="/filemanager/browser" style="width:100%;min-height:900px;border:0;"></iframe>
 ```
 
 This is the quickest way to integrate the file manager without writing any frontend code.
+ ---
 
+# Integration
+
+## standalone button
+
+```html
+<button id="imageBtn" data-filemanager data-mode="single" data-mime="image">
+    Image
+</button>
+```
+
+```js
+const picker = new StandaloneButton('#imageBtn',{
+    trigger:"#imageBtn",
+    config:{
+        load:{
+            types:["image"],
+            disks:["public"],
+        },
+        selection:{
+            mode:"multi",
+            expect:"object"
+        }
+    }
+}).on(files => {
+    console.log(files);
+});
+```
 
 # What's Next?
 
@@ -1081,7 +1108,6 @@ And much more...
 **Coming soon 🙂**
 
 - integrated : 
-  - standalone
   - Ckeditor
   - tinyMic
   - chunk upload : large file

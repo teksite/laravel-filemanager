@@ -25,9 +25,9 @@ export default class StandaloneButton {
 
     clickHandler(event){
 
-        const btn = event.target.closest(this.trigger);
+        const btnEl = event.target.closest(this.trigger);
 
-        if(!btn) return;
+        if(!btnEl) return;
 
         event.preventDefault();
 

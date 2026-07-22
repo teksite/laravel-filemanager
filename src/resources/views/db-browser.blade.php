@@ -29,7 +29,11 @@
             upload: {
                 allowedMimes: @js($allowedTypes),
                 allowedDisks: @js($allowedDisks)
-            }
+            },
+            // selection:{
+            //     expect : 'object',
+            //     mode:'multi'
+            // }
         }, '{{$uniqueId}}');
 
     });

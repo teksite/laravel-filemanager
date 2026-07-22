@@ -133,8 +133,8 @@ export default class Config {
 
     deepMerge(target, source) {
 
-        console.log('1111',target)
-        console.log('222',source)
+        console.log('defaultConfig',target)
+        console.log('changedConfig',source)
         if (!this.isObject(source))  return source ?? target;
 
 

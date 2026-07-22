@@ -1,6 +1,7 @@
 import initFileManager from "../browser.js";
 
 import Events from "../constants/events.js";
+
 export default class FilePicker {
 
 
@@ -50,6 +51,22 @@ export default class FilePicker {
     on(callback) {
 
         if (typeof callback === "function") this.listeners.add(callback);
+
+        return this;
+    }
+
+    once(callback) {
+
+        if (typeof callback !== 'function') return this;
+
+        const wrapper = files => {
+
+            callback(files);
+
+            this.off(wrapper);
+        };
+
+        this.on(wrapper);
 
         return this;
     }

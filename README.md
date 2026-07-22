@@ -1066,6 +1066,7 @@ Simply embed the browser anywhere in your application:
 ```
 
 This is the quickest way to integrate the file manager without writing any frontend code.
+
  ---
 
 # Integration

@@ -30,10 +30,10 @@
                 allowedMimes: @js($allowedTypes),
                 allowedDisks: @js($allowedDisks)
             },
-            selection:{
-                expect : 'object',
-                mode:'multi'
-            }
+            // selection:{
+            //     expect : 'object',
+            //     mode:'multi'
+            // }
         }, '{{$uniqueId}}');
 
     });

@@ -76,11 +76,22 @@ export default class DatabaseFileManager {
 
         return [
 
+
+            [FilterUi, {
+                elements: {
+                    mimesEl: this.config.get('ui.mimesSelector'),
+                    disksEl: this.config.get('ui.disksSelector')
+                }
+            }],
+
             [LoadService, {
                 url: this.config.get('api.getUrl'),
 
                 ...this.config.section('load'),
-                ...this.config.section('filter')
+                ...this.config.section('filter'),
+                mimesEl: this.config.get('ui.mimesSelector'),
+                disksEl: this.config.get('ui.disksSelector'),
+
 
             }],
 
@@ -154,14 +165,6 @@ export default class DatabaseFileManager {
             [CounterUi, {
                 elements: {
                     counterEl: this.config.get('ui.filesCounterSelector')
-                }
-            }],
-
-
-            [FilterUi, {
-                elements: {
-                    mimesEl: this.config.get('ui.mimesSelector'),
-                    disksEl: this.config.get('ui.disksSelector')
                 }
             }],
 

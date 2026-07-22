@@ -37,6 +37,15 @@
     backdrop-filter: blur(6px);
 }
 
+.filemanager.dialog {
+    width: 90%;
+    margin: auto;
+}
+.filemanager.dialog .media-container {
+    width: 100%;
+    margin: auto;
+}
+
 .filemanager .is-hidden {
     display: none !important;
 }

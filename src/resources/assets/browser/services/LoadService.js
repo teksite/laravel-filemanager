@@ -6,6 +6,7 @@ export default class LoadService extends Service {
 
 
     initialize() {
+
         if (this.options.getOnInit) this.sendRequest();
     }
 
@@ -26,6 +27,7 @@ export default class LoadService extends Service {
         if (this.state.get("load.loading")) return;
 
         if (!this.state.get("load.hasMore", true)) return;
+
 
         this.abortRequest();
 
@@ -143,6 +145,4 @@ export default class LoadService extends Service {
 
         super.destroy();
     }
-
-
 }

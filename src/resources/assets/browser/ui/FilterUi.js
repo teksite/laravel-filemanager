@@ -3,6 +3,12 @@ import Events from "../constants/events.js";
 
 export default class FilterUi extends UiService {
 
+    initialize(){
+
+       this.state.set("load.disk", this.disksEl.value);
+
+       this.state.set("load.type", this.mimesEl.value);
+    }
 
     defineElements() {
 

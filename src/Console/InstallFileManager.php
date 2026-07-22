@@ -7,9 +7,9 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
-#[Signature('filemanager:install')]
+#[Signature('install:filemanager')]
 #[Description('install Authorize migrations')]
-class Install extends Command
+class InstallFileManager extends Command
 {
 
     /**

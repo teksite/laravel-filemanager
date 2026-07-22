@@ -20,6 +20,7 @@ class FileManagerServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->bootCommands();
         $this->publish();
         $this->bootViews();
     }
@@ -82,6 +83,14 @@ class FileManagerServiceProvider extends ServiceProvider
             }
         }
         return $paths;
+    }
+
+    protected function bootCommands(): void
+    {
+        $this->commands([
+            \Teksite\FileManager\Console\InstallFileManager::class
+        ]);
+
     }
 }
 

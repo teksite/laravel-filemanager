@@ -8,46 +8,53 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
 #[Signature('install:filemanager')]
-#[Description('install Authorize migrations')]
+#[Description('Install FileManager migrations')]
 class InstallFileManager extends Command
 {
-
-    /**
-     * Execute the console command.
-     */
-    public function handle(): void
+    public function handle(): int
     {
-        $stubPath = __DIR__ . '/../stub';
+        $stubPath = __DIR__ . '/../resources/stubs';
 
-        $stubFiles = [
-            'migration' => $stubPath . '/2026_01_01_100100_create_file_table.stub',
-            'model'     => $stubPath . '/FileManager.stub',
+        $files = [
+            [
+                'stub' => $stubPath . '/create_file_table.stub',
+                'name' => 'create_file_table',
+            ],
+
         ];
+        $migrationPath = database_path('migrations');
 
-        $targetPaths = [
-            'migration' => database_path('migrations'),
-            'model'     => app_path('models'),
-        ];
+        File::ensureDirectoryExists($migrationPath);
 
+        foreach ($files as $file) {
+            $exists = collect(File::files($migrationPath))
+                ->contains(function ($migration) use ($file) {
+                    return str_ends_with(
+                        $migration->getFilename(),
+                        $file['name'] . '.php'
+                    );
+                });
 
-        foreach ($targetPaths as $type => $targetPath) {
-            if (!File::isDirectory($targetPath)) {
-                File::makeDirectory($targetPath, 0755, true);
-            }
-        }
-        $targetPaths = [
-            'permission' => $targetPath . '/0001_01_01_100100_create_permissions_table.php',
-            'role'       => $targetPath . '/0001_01_01_100101_create_roles_table.php',
-        ];
-
-        foreach ($targetPaths as $key => $target) {
-            if (!File::exists($target)) {
-                File::copy($stubFiles[$key], $target);
-                $this->info('Created migration: ' . $target);
-            } else {
-                $this->warn('Migration already exists: ' . $target);
+            if ($exists) {
+                $this->warn("Migration already exists: {$file['name']}");
+                continue;
             }
 
+            $filename = now()->format('Y_m_d_His') . '_' . $file['name'] . '.php';
+
+            File::copy(
+                $file['stub'],
+                $migrationPath . DIRECTORY_SEPARATOR . $filename
+            );
+
+            $this->info("Published: {$filename}");
+
+            sleep(1);
         }
+
+        $this->newLine();
+        $this->info('✅ FileManager installed successfully.');
+
+        return self::SUCCESS;
     }
 }

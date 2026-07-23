@@ -98,7 +98,9 @@ export default class UploaderUi extends UiService {
         ];
     }
 
-
+    preventDefault(e){
+        e.preventDefault();
+    }
     changeDiskHandler() {
 
         const value = this.diskEl.value;
@@ -114,7 +116,6 @@ export default class UploaderUi extends UiService {
     }
 
     openFileDialog() {
-
         this.inputEl.click();
     }
 

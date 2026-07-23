@@ -1,9 +1,23 @@
 import {getMimeGroup, getMimeIcon} from "./mime.js";
 import {escapeHtml} from "./dom.js";
 
-export function renderMedia(item, controls = false) {
+export function renderMedia(item, controls = false, wrapper = true) {
 
     if (!item?.id) return;
+
+    const view = renderPreview(item, controls);
+
+    const mime = item.mime_type ?? '';
+
+    const icon= getMimeIcon(mime);
+
+    return `<div class="preview-wrapper">${wrapper ? `<span class="preview-wrapper-icon">${icon} ${mime}</span>` : ''}${view}</div>`
+
+
+}
+
+function renderPreview(item, controls) {
+
 
     const mime = item.mime_type ?? '';
 
@@ -12,6 +26,7 @@ export function renderMedia(item, controls = false) {
     const title = item.title ?? item.original_name ?? '';
 
     const id = item.id ?? '';
+
 
     switch (type) {
 

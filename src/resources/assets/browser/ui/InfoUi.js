@@ -219,10 +219,7 @@ export default class InfoUi extends UiService {
         }
 
 
-        this.filePreviewEl.innerHTML =
-            renderMedia(item , true);
-
-
+        this.filePreviewEl.innerHTML = renderMedia(item , true , false);
     }
 
 

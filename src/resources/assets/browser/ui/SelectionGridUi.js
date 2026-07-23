@@ -76,7 +76,7 @@ export default class SelectionGridUi extends UiService {
 
         return `
             <div class="selected-item" data-selected-item data-id="${file.id}">
-                ${renderMedia(file)}
+                ${renderMedia(file , false , false)}
                 <button class="selected-item-delete-btn" data-selected-remove data-id="${file.id}" type="button">
                     ✖
                 </button>

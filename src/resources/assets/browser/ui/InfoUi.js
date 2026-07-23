@@ -16,7 +16,7 @@ export default class InfoUi extends UiService {
     defineElements() {
 
         return {
-            
+
             baseInfoEl: this.config.get('ui.baseInfoSelector', '[data-aside]'),
 
             filePreviewEl: this.config.get('ui.filePreviewSelector', '[data-preview]'),
@@ -220,7 +220,7 @@ export default class InfoUi extends UiService {
 
 
         this.filePreviewEl.innerHTML =
-            renderMedia(item);
+            renderMedia(item , true);
 
 
     }

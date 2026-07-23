@@ -197,6 +197,8 @@ export default class DatabaseFileManager {
                     previewEl: this.config.get('ui.uploadPreviewSelector'),
 
                     diskSelectorEl: this.config.get('ui.uploadDiskSelector'),
+
+                    waitingEl: this.config.get('ui.uploadWaitingSelector'),
                 },
 
             }],

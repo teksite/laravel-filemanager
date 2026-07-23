@@ -91,6 +91,7 @@ const defaultConfig = {
         uploadDiskSelector: '[data-upload-disk]',
         uploadPreviewSelector: '[data-upload-preview]',
         uploadMessagesSelector: '[data-messages]',
+        uploadWaitingSelector: '[data-upload-waiting]',
     }
 };
 

@@ -27,9 +27,6 @@ export default class UploaderUi extends UiService {
 
         this.disk = preChosenDisk;
 
-        this.formElView = this.formEl.innerHTML
-
-
     }
 
 
@@ -46,6 +43,8 @@ export default class UploaderUi extends UiService {
             inputEl: this.config.get('ui.fileInputSelector'),
 
             diskEl: this.config.get('ui.uploadDiskSelector'),
+
+            waitingEl: this.config.get('ui.uploadWaitingSelector'),
         };
     }
 
@@ -98,9 +97,10 @@ export default class UploaderUi extends UiService {
         ];
     }
 
-    preventDefault(e){
+    preventDefault(e) {
         e.preventDefault();
     }
+
     changeDiskHandler() {
 
         const value = this.diskEl.value;
@@ -186,9 +186,21 @@ export default class UploaderUi extends UiService {
     }
 
     renderForm(isLoading) {
-        this.formEl.innerHTML = isLoading
-            ? this.renderWaiting()
-            : this.formElView;
+
+        if (!this.waitingEl) return;
+
+        if (isLoading) {
+
+            this.waitingEl.classList.remove('is-hidden');
+
+            this.waitingEl.innerHTML = this.renderWaiting();
+
+        } else {
+
+            this.waitingEl.classList.add('is-hidden');
+
+            this.waitingEl.innerHTML = '';
+        }
     }
 
 

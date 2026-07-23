@@ -1,10 +1,12 @@
 <div data-uploader-section class="uploader-section">
+    <div class="data-upload-waiting is-hidden" data-upload-waiting></div>
 
-    @if(count($allowedDisks))
+@if(count($allowedDisks))
         <span>Upload</span>
         <form data-upload-form enctype="multipart/form-data" method="POST">
 
             <div class="upload-dropzone" data-dropzone>
+
                 <input name="file" type="file" hidden multiple data-file-input>
                 <div class="upload-content">
                     <div class="upload-icon">

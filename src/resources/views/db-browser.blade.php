@@ -16,7 +16,7 @@
 </div>
 
 <script type="module">
-    import initFileManager from "{{ asset('/vendor/filemanager/browser.min.js') }}";
+    import {initFileManager} from "{{ asset('/vendor/filemanager/browser.min.js') }}";
 
     document.addEventListener('DOMContentLoaded', () => {
         const fm = initFileManager({

@@ -1,4 +1,4 @@
-import initFileManager from "../browser.js";
+import {initFileManager} from "../browser.js";
 
 import Events from "../constants/events.js";
 

@@ -87,7 +87,6 @@ return [
 
     'default_store_disk' => 'public',            // Default storage disk
 
-
     'slugify_name' => true,                      // Convert original file names into URL-friendly slugs
 
     'overwrite'               => false,          // Replace existing files with identical names
@@ -149,6 +148,8 @@ return [
     */
 
     'authorization' => [
+
+        'get_browser' => \Teksite\FileManager\Http\Requests\Authorization\CanGetBrowser::class,
 
         'upload' => \Teksite\FileManager\Http\Requests\Authorization\CanUpload::class,
 

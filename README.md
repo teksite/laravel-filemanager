@@ -546,7 +546,8 @@ Finally, initialize it with JavaScript:
 ```html
 
 <script type="module">
-    import initFileManager from "/vendor/filemanager/browser/browser.min.js";
+
+    import {initFileManager} from "path_to_browser.min.js";
 
     document.addEventListener("DOMContentLoaded", () => {
 
@@ -555,16 +556,26 @@ Finally, initialize it with JavaScript:
                 load: {
                     disks: @js($disks),
                     types: @js($mimes),
-                    perPage: {{ $perPage }}
-                },
-                upload: {
-                    allowedMimes: @js($allowedTypes),
-                    allowedDisks: @js($allowedDisks),
-                },
+                    perPage: {
+        {
+            $perPage
+        }
+    }
+    },
+        upload: {
+            allowedMimes: @js($allowedTypes)
+        ,
+            allowedDisks: @js($allowedDisks)
+        ,
+        }
+    ,
 
-                // Additional configuration...
-            }
-        }, "filemanager-1");
+        // Additional configuration...
+    }
+    },
+        "filemanager-1"
+    )
+        ;
 
     });
 </script>
@@ -1080,7 +1091,7 @@ This is the quickest way to integrate the file manager without writing any front
 ```
 
 ```js
-const picker = new StandaloneButton('#imageBtn',{
+const picker = new Standalone('#imageBtn',{
     trigger:"#imageBtn",
     config:{
         load:{

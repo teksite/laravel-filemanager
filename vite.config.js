@@ -7,7 +7,7 @@ export default defineConfig({
         emptyOutDir: false,
 
         lib: {
-            entry: path.resolve(__dirname, 'src/resources/assets/browser/browser.js'),
+            entry: path.resolve(__dirname, 'src/frontend/browser/browser.js'),
             formats: ['es'],
             fileName: () => 'browser.min.js',
         },

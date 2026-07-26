@@ -4,7 +4,6 @@ import FilePicker from "./FilePicker.js";
 export default class StandaloneButton {
 
     constructor(id, {trigger, ...options}) {
-
         this.picker = new FilePicker(id, options);
 
         this.trigger = trigger;

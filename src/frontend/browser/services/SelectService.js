@@ -116,7 +116,7 @@ export default class SelectService extends BaseService {
                     return file;
 
                 case 'object':
-                    return {[file.id] : file.url};
+                    return {url:file.url , id : file.id};
 
                 default:
                     return null;

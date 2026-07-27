@@ -22,13 +22,19 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->unique(['path', 'disk']);
-            $table->index(['path', 'disk']);
         });
 
         Schema::create('uploaded_files_models', function (Blueprint $table) {
+            $table->id();
             $table->foreignUlid('file_id')->constrained('uploaded_files', 'id')->cascadeOnDelete();
             $table->morphs('model');
+            $table->string('collection')->nullable()->index();
             $table->string('name')->nullable();
+            $table->unsignedInteger('order')->default(0);
+            $table->timestamps();
+
+            $table->unique(['file_id', 'model_id', 'model_type', 'collection'], 'file_model_collection_unique');
+
         });
 
 

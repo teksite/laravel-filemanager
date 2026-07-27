@@ -26,7 +26,7 @@ return new class extends Migration {
         });
 
         Schema::create('uploaded_files_models', function (Blueprint $table) {
-            $table->foreignUlid('upload_id')->constrained('uploaded_files', 'id')->cascadeOnDelete();
+            $table->foreignUlid('file_id')->constrained('uploaded_files', 'id')->cascadeOnDelete();
             $table->morphs('model');
             $table->string('name')->nullable();
         });

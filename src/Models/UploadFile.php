@@ -61,10 +61,11 @@ class UploadFile extends Model
         return Number::fileSize($this->size);
     }
 
-    public function relations()
+    public function models()
     {
         return $this->hasMany(UploadFileRelation::class, 'file_id');
     }
+
 
     public function scopeImages($query)
     {
@@ -83,7 +84,7 @@ class UploadFile extends Model
 
     public function scopeOrphan($query)
     {
-        return $query->whereDoesntHave('relations');
+        return $query->whereDoesntHave('models');
     }
 
 
@@ -117,5 +118,10 @@ class UploadFile extends Model
             : $disk->url($this->path);
     }
 
+    public function deleteFile(): void
+    {
+        Storage::disk($this->disk)->delete($this->path);
 
+        $this->delete();
+    }
 }

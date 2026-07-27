@@ -2,6 +2,7 @@
 
 namespace Teksite\FileManager\Concerts;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Facades\DB;
 use Teksite\FileManager\Models\UploadFile;
@@ -61,6 +62,20 @@ trait HasAttachedFile
 
             if ($records) $this->files()->attach($records);
         });
+    }
+
+    public function firstAttachedFile(string $collection): Model|UploadFile|null
+    {
+        return $this->files()
+                    ->wherePivot('collection', $collection)
+                    ->first();
+    }
+
+    public function attachedFiles(?string $collection = null): \Illuminate\Support\Collection
+    {
+        return $collection === null
+            ? $this->files()->get()
+            : $this->files()->wherePivot('collection', $collection)->get();
     }
 
 }

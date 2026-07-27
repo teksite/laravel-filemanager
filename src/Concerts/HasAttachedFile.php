@@ -78,4 +78,10 @@ trait HasAttachedFile
             : $this->files()->wherePivot('collection', $collection)->get();
     }
 
+
+    public function primaryMedia()
+    {
+        return $this->belongsTo(UploadFile::class , 'primary_media_id');
+    }
+
 }

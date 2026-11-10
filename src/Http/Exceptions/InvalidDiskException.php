@@ -1,17 +1,16 @@
 <?php
 
-namespace Teksite\FileManager\Http\Exceptions;
+namespace Teksite\FileManager\Exceptions;
 
-use Exception;
-use Throwable;
-
-class InvalidDiskException extends Exception
+final class InvalidDiskException extends FileManagerException
 {
-    public function __construct(
-        string $message = 'The selected disk is invalid or not defined in the filesystem.disks configuration.',
-        int $code = 0,
-        ?Throwable $previous = null
-    ) {
-        parent::__construct($message, $code, $previous);
+    public static function notAllowed(string $disk): self
+    {
+        return new self("The disk [{$disk}] is not allowed.");
+    }
+
+    public static function notConfigured(string $disk): self
+    {
+        return new self("The disk [{$disk}] is not defined in filesystems.disks.");
     }
 }

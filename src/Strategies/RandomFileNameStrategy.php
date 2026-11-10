@@ -8,10 +8,18 @@ use Teksite\FileManager\Contracts\FileNameGeneratorInterface;
 
 class RandomFileNameStrategy implements FileNameGeneratorInterface
 {
-    public function generate(UploadedFile $file , ?array $options = null): string
+
+
+    public function generate(UploadedFile $file, array $options = []): string
     {
-        $length = $options['length'] ??  config('filemanager.random_length', 32);
-        return Str::random($length);
+        $length = (int)($options['length'] ?? config('filemanager.storage.random_length', 32));
+
+        return Str::lower(Str::random(max(8, min($length, 64))));
+    }
+
+    public function isUnique(): bool
+    {
+        return true;
     }
 }
 

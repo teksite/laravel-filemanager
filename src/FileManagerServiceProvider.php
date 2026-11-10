@@ -59,12 +59,12 @@ class FileManagerServiceProvider extends ServiceProvider
 
     private function registerAlias(): void
     {
-        foreach ([
-                     StorageService::class, FileInspector::class, FileNameResolver::class, FileQuery::class,
-                     FolderService::class, ThumbnailService::class, UploaderService::class,
-                 ] as $service) {
-            $this->app->singleton($service);
-        }
+//        foreach ([
+//                     StorageService::class, FileInspector::class, FileNameResolver::class, FileQuery::class,
+//                     FolderService::class, ThumbnailService::class, UploaderService::class,
+//                 ] as $service) {
+//            $this->app->singleton($service);
+//        }
     }
 
 
@@ -102,20 +102,20 @@ class FileManagerServiceProvider extends ServiceProvider
 
     protected function bootCommands(): void
     {
-        if ($this->app->runningInConsole()) {
-            $this->commands([InstallCommand::class, PruneCommand::class]);
-            $this->scheduleCleanup();
-        }
+//        if ($this->app->runningInConsole()) {
+//            $this->commands([InstallCommand::class, PruneCommand::class]);
+//            $this->scheduleCleanup();
+//        }
 
     }
 
 
     private function registerPolicies(): void
     {
-        $policy = config('filemanager.authorization.policy', UploadFilePolicy::class);
-
-        Gate::policy(UploadFile::class, $policy);
-        Gate::policy(UploadFolder::class, $policy);
+//        $policy = config('filemanager.authorization.policy', UploadFilePolicy::class);
+//
+//        Gate::policy(UploadFile::class, $policy);
+//        Gate::policy(UploadFolder::class, $policy);
     }
 
     private function registerRateLimiters(): void

@@ -16,15 +16,29 @@ class FileResource extends JsonResource
     {
         return [
             'id'            => $this->id,
+            'folder_id'     => $this->folder_id,
             'original_name' => $this->original_name,
             'title'         => $this->title,
-            'path'          => $this->path,
-            'url'           => $this->url,
+            'alt'           => $this->alt,
+            'description'   => $this->when(array_key_exists('description', $this->resource->getAttributes()), fn() => $this->description),
+            'url'           => $this->url(),
+            'thumbnail_url' => $this->isImage() ? $this->thumbnailUrl() : null,
             'size'          => $this->size,
+            'human_size'    => $this->humanSize(),
             'mime_type'     => $this->mime_type,
-            'other'         => $this->other,
+            'extension'     => $this->extension,
             'disk'          => $this->disk,
-            'created_at'    => $this->created_at,
+            'width'         => $this->width,
+            'height'        => $this->height,
+            'variants'      => collect($this->variants ?? [])->map(fn($v, $name) => [
+                'url'    => $this->url($name),
+                'width'  => $v['width'] ?? null,
+                'height' => $v['height'] ?? null,
+                'type'   => $v['type'] ?? null,
+            ])->all() ?: (object)[],
+            'created_at'    => $this->created_at?->toIso8601String(),
+            'updated_at'    => $this->updated_at?->toIso8601String(),
+            'deleted_at'    => $this->deleted_at?->toIso8601String(),
         ];
     }
 }

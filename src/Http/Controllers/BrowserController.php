@@ -19,16 +19,12 @@ class BrowserController
      */
     public function index(): View
     {
-        Gate::authorize('browse', UploadFile::class);
-
         return view('filemanager::page', $this->viewData('fm-'.bin2hex(random_bytes(4))));
     }
 
     /** HTML fragment used by the modal picker. Only the DOM id is taken from the client. */
     public function popup(Request $request): View
     {
-        Gate::authorize('browse', UploadFile::class);
-
         $id = (string) $request->validate(['id' => ['required', 'string', 'max:64', 'regex:/^[A-Za-z0-9_-]+$/']])['id'];
 
         return view('filemanager::browser', $this->viewData($id));

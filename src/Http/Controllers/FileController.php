@@ -4,9 +4,11 @@ namespace Teksite\FileManager\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
-use Teksite\FileManager\Http\Requests\IndexFilesRequest;
-use Teksite\FileManager\Http\Requests\StoreFileRequest;
-use Teksite\FileManager\Http\Requests\UpdateFileRequest;
+
+use Teksite\FileManager\Http\Requests\Api\IndexFilesRequest;
+use Teksite\FileManager\Http\Requests\Api\ShowFileRequest;
+use Teksite\FileManager\Http\Requests\Api\StoreFileRequest;
+use Teksite\FileManager\Http\Requests\Api\UpdateFileRequest;
 use Teksite\FileManager\Http\Resources\FileCollection;
 use Teksite\FileManager\Http\Resources\FileResource;
 use Teksite\FileManager\Models\UploadFile;
@@ -21,10 +23,7 @@ use Teksite\FileManager\Services\UploaderService;
  */
 class FileController
 {
-    public function __construct(
-        protected UploaderService $uploader,
-        protected FileQuery $files,
-    ) {}
+    public function __construct(protected UploaderService $uploader, protected FileQuery $files) {}
 
     public function index(IndexFilesRequest $request): JsonResponse
     {
@@ -38,7 +37,7 @@ class FileController
         return (new FileCollection($result))->response();
     }
 
-    public function show(UploadFile $file): JsonResponse
+    public function show(ShowFileRequest $request, UploadFile $file): JsonResponse
     {
         Gate::authorize('view', $file);
 
@@ -52,7 +51,6 @@ class FileController
             $request->options(),
         );
 
-        // Nothing could be stored: surface the first reason as a validation-style error.
         if ($uploaded->isEmpty()) {
             return response()->json([
                 'success' => false,
@@ -67,7 +65,7 @@ class FileController
             // "file" keeps the single upload contract; "files" serves multi uploads.
             'file'    => new FileResource($uploaded->first()),
             'files'   => FileResource::collection($uploaded),
-            'failed'  => (object) $failed,
+            'failed'  => (object)$failed,
         ], 201);
     }
 
@@ -77,7 +75,7 @@ class FileController
 
         $data = $request->validated();
 
-        if (! empty($data['folder_id'])) {
+        if (!empty($data['folder_id'])) {
             Gate::authorize('update', UploadFolder::query()->findOrFail($data['folder_id']));
         }
 

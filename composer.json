@@ -21,7 +21,9 @@
         }
     },
     "require": {
-        "laravel/framework": "^11|^12|^13"
+        "laravel/framework": "^11|^12|^13",
+        "ext-gd": "*",
+        "ext-fileinfo": "*"
     },
     "extra": {
         "laravel": {

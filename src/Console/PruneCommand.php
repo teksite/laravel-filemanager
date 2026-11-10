@@ -25,7 +25,7 @@ class PruneCommand extends Command
                           $count++;
                       }
                   });
-        
+
         $this->components->info("Permanently deleted {$count} file(s).");
         return self::SUCCESS;
     }

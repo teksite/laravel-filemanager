@@ -14,29 +14,26 @@ class StorageService
 {
     public function disk(string $name): Filesystem
     {
-        if (! array_key_exists($name, (array) config('filesystems.disks', []))) {
-            throw InvalidDiskException::notConfigured($name);
-        }
+        if (!array_key_exists($name, (array)config('filesystems.disks', []))) throw InvalidDiskException::notConfigured($name);
+
         return Storage::disk($name);
     }
 
     /** Disks a user may upload to (configured AND defined). */
     public function uploadDisks(): array
     {
-        return $this->existing((array) config('filemanager.upload_disks', []));
+        return $this->existing((array)config('filemanager.upload_disks', []));
     }
 
     /** Disks that can be browsed (configured AND defined). */
     public function browseDisks(): array
     {
-        return $this->existing((array) config('filemanager.browse_disks', []));
+        return $this->existing((array)config('filemanager.browse_disks', []));
     }
 
     public function assertUploadDisk(string $disk): void
     {
-        if (! in_array($disk, $this->uploadDisks(), true)) {
-            throw InvalidDiskException::notAllowed($disk);
-        }
+        if (!in_array($disk, $this->uploadDisks(), true)) throw InvalidDiskException::notAllowed($disk);
     }
 
     /**
@@ -52,7 +49,7 @@ class StorageService
 
         $stored = $this->disk($disk)->putFileAs($directory, $file, $filename, $options);
 
-        if (! is_string($stored) || $stored === '')  throw new FileUploadException();
+        if (!is_string($stored) || $stored === '') throw new FileUploadException();
 
         return $stored;
     }
@@ -75,22 +72,22 @@ class StorageService
     {
         $name = "{$base}.{$extension}";
 
-        if ($isUnique || $overwrite)  return $name;
+        if ($isUnique || $overwrite)return $name;
 
         for ($i = 1; $i <= 20; $i++) {
-            if (! $this->exists($disk, "{$directory}/{$name}")) return $name;
+            if (!$this->exists($disk, "{$directory}/{$name}")) return $name;
 
             $name = "{$base}-{$i}.{$extension}";
         }
 
-        // Extremely crowded directory: stop probing and use a random suffix.
+        // Packed directory: stop probing and use a random suffix.
         return $base.'-'.Str::lower(Str::random(8)).".{$extension}";
     }
 
     /** @return list<string> */
     private function existing(array $names): array
     {
-        $defined = array_keys((array) config('filesystems.disks', []));
+        $defined = array_keys((array)config('filesystems.disks', []));
 
         return array_values(array_intersect(array_filter($names, 'is_string'), $defined));
     }

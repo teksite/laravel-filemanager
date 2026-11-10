@@ -4,7 +4,7 @@ namespace Teksite\FileManager\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
-use Teksite\FileManager\Http\Requests\BulkFilesRequest;
+use Teksite\FileManager\Http\Requests\Api\BulkFilesRequest;
 use Teksite\FileManager\Models\UploadFile;
 use Teksite\FileManager\Models\UploadFolder;
 use Teksite\FileManager\Services\UploaderService;

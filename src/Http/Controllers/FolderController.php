@@ -5,11 +5,10 @@ namespace Teksite\FileManager\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Teksite\FileManager\Http\Requests\FolderRequest;
+use Teksite\FileManager\Http\Requests\Api\FolderRequest;
 use Teksite\FileManager\Http\Resources\FolderResource;
 use Teksite\FileManager\Models\UploadFile;
 use Teksite\FileManager\Models\UploadFolder;
-use Teksite\FileManager\Services\FolderService;
 
 class FolderController
 {

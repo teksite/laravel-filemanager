@@ -15,7 +15,7 @@ use Teksite\FileManager\Models\UploadFile;
 class ServeFileController
 {
     /** Types a browser may render inline; everything else is forced to download. */
-    private const INLINE = '#^(image/(jpeg|png|gif|webp|avif|bmp)|video/(mp4|webm|ogg)|audio/(mpeg|ogg|wav|webm|mp4)|application/pdf)$#';
+    private const string INLINE = '#^(image/(jpeg|png|gif|webp|avif|bmp)|video/(mp4|webm|ogg)|audio/(mpeg|ogg|wav|webm|mp4)|application/pdf)$#';
 
     public function serve(Request $request, UploadFile $file): StreamedResponse
     {

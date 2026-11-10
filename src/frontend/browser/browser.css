@@ -747,3 +747,10 @@
 }
 
 
+
+/* ---- toolbar: search, sort, folders, trash ---- */
+.filemanager .fm-search{min-width:180px;padding:6px 10px;border:1px solid #d0d5dd;border-radius:6px;font:inherit}
+.filemanager [data-trash-toggle].is-active{background:#fee4e2;border-color:#f04438}
+.filemanager .is-hidden{display:none!important}
+.filemanager [data-move-box]{display:flex;flex-direction:column;gap:4px;margin:8px 0}
+.filemanager [data-move-box] select,.filemanager [data-restore]{width:100%}

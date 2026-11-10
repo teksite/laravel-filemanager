@@ -27,6 +27,10 @@ export default class StateManager {
                 cursor: null,
                 disk: null,
                 type: null,
+                search: null,
+                sort: '-created_at',
+                folder: null,
+                trashed: null,
             },
 
             upload: {
@@ -54,25 +58,17 @@ export default class StateManager {
         return path.split('.').reduce((acc, key) => acc?.[key], obj);
     }
 
-    setByPath(obj, path, value) {
+    /**
+     * Immutable update: only the objects along the path are copied, everything
+     * else (e.g. the thousands of loaded files) is shared with the old state.
+     */
+    assoc(node, keys, value) {
 
-        const keys = path.split('.');
-        let current = obj;
-        for (let i = 0; i < keys.length - 1; i++) {
-            const key = keys[i];
-            if (
-                current[key] === undefined ||
-                typeof current[key] !== 'object'
-            ) {
-                current[key] = {};
-            }
+        const [key, ...rest] = keys;
 
-            current = current[key];
-        }
+        const base = node !== null && typeof node === 'object' ? node : {};
 
-        current[keys.at(-1)] = value;
-
-        return obj;
+        return {...base, [key]: rest.length ? this.assoc(base[key], rest, value) : value};
     }
 
     // -------------------------
@@ -91,18 +87,15 @@ export default class StateManager {
 
         const prev = this.get(path);
 
-        const newState = structuredClone(this.state);
-
-        this.setByPath(newState, path, value);
-
-        this.state = newState;
+        this.state = this.assoc(this.state, path.split('.'), value);
 
         if (dispatchEvent && !silent) {
             this.emit(path, {value, prev}, {action: 'setState'});
         }
 
         if (!silent) {
-            this.emit('state:changed', {key: path, value, prev, state: this.getState()});
+            // The state tree is immutable, so listeners can keep this reference safely.
+            this.emit('state:changed', {key: path, value, prev, state: this.state});
         }
 
         return this;

@@ -1,3 +1,4 @@
+import {escapeHtml} from "../helpers/dom.js";
 import UiService from "../Foundation/UiService.js";
 import Events from "../constants/events.js";
 import {renderMedia} from "../helpers/preview.js";
@@ -75,9 +76,9 @@ export default class SelectionGridUi extends UiService {
     renderItem(file) {
 
         return `
-            <div class="selected-item" data-selected-item data-id="${file.id}">
+            <div class="selected-item" data-selected-item data-id="${escapeHtml(file.id)}">
                 ${renderMedia(file , false , false)}
-                <button class="selected-item-delete-btn" data-selected-remove data-id="${file.id}" type="button">
+                <button class="selected-item-delete-btn" data-selected-remove data-id="${escapeHtml(file.id)}" type="button">
                     ✖
                 </button>
             </div>

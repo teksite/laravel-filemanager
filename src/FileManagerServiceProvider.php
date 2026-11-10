@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\ServiceProvider;
-use Teksite\FileManager\Console\InstallCommand;
+use Teksite\FileManager\Console\InstallFileManager;
 use Teksite\FileManager\Console\PruneCommand;
 use Teksite\FileManager\Models\UploadFile;
 use Teksite\FileManager\Models\UploadFolder;
@@ -59,12 +59,12 @@ class FileManagerServiceProvider extends ServiceProvider
 
     private function registerAlias(): void
     {
-//        foreach ([
-//                     StorageService::class, FileInspector::class, FileNameResolver::class, FileQuery::class,
-//                     FolderService::class, ThumbnailService::class, UploaderService::class,
-//                 ] as $service) {
-//            $this->app->singleton($service);
-//        }
+        foreach ([
+                     StorageService::class, FileInspector::class, FileNameResolver::class, FileQuery::class,
+                     FolderService::class, ThumbnailService::class, UploaderService::class,
+                 ] as $service) {
+            $this->app->singleton($service);
+        }
     }
 
 
@@ -102,10 +102,10 @@ class FileManagerServiceProvider extends ServiceProvider
 
     protected function bootCommands(): void
     {
-//        if ($this->app->runningInConsole()) {
-//            $this->commands([InstallCommand::class, PruneCommand::class]);
-//            $this->scheduleCleanup();
-//        }
+        if ($this->app->runningInConsole()) {
+            $this->commands([InstallFileManager::class, PruneCommand::class]);
+            $this->scheduleCleanup();
+        }
 
     }
 

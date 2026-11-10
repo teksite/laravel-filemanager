@@ -1,5 +1,6 @@
 import Events from "../constants/events.js";
 import BaseService from "../Foundation/BaseServices.js";
+import {apiHeaders, extractMessage} from "../helpers/http.js";
 
 export default class UploadService extends BaseService {
 
@@ -133,7 +134,19 @@ export default class UploadService extends BaseService {
                     form.append('disk', disk);
                 }
 
+                const folder = this.state.get('load.folder', null);
+
+                // "root" and "all" are filters, only a real folder id is a valid upload target.
+                if (folder && folder !== 'root') {
+
+                    form.append('folder_id', folder);
+                }
+
                 xhr.open('POST', this.options.url);
+
+                xhr.withCredentials = true;
+
+                Object.entries(apiHeaders()).forEach(([name, value]) => xhr.setRequestHeader(name, value));
 
                 xhr.timeout = this.options.requestTimeout;
 
@@ -164,8 +177,12 @@ export default class UploadService extends BaseService {
                             resolve(res.data ?? res);
 
                         } else {
-                            //Todo add response 422 403
-                            reject(new Error(`HTTP error | status ${xhr.status}`));
+
+                            const error = new Error(extractMessage(res, `HTTP error | status ${xhr.status}`));
+
+                            error.status = xhr.status;
+
+                            reject(error);
                         }
                     } catch {
 

@@ -38,7 +38,10 @@ export default class DeleteService extends BaseServices {
         const {success} = await this.safe(
             () => {
 
-                return this.request.deleteFile(encodeURIComponent(id));
+                // In the trash view the delete button removes the file for good.
+                return this.state.get('load.trashed') === 'only'
+                    ? this.request.forceDeleteFile(id)
+                    : this.request.deleteFile(id);
             },
 
             (error) => {

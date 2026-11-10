@@ -20,6 +20,7 @@ import FilterUi from "../ui/FilterUi.js";
 import SelectionButtonUi from "../ui/SelectionButtonUi.js";
 import SelectionGridUi from "../ui/SelectionGridUi.js";
 import UploaderUi from "../ui/UploaderUi.js";
+import ToolbarUi from "../ui/ToolbarUi.js";
 import UploadService from "../services/UploadService.js";
 
 
@@ -83,6 +84,8 @@ export default class DatabaseFileManager {
                     disksEl: this.config.get('ui.disksSelector')
                 }
             }],
+
+            [ToolbarUi, {}],
 
             [LoadService, {
                 url: this.config.get('api.getUrl'),
@@ -157,11 +160,6 @@ export default class DatabaseFileManager {
             }],
 
 
-            [DeleteService, {
-                url: this.config.get('api.deleteUrl')
-            }],
-
-
             [CounterUi, {
                 elements: {
                     counterEl: this.config.get('ui.filesCounterSelector')
@@ -205,7 +203,7 @@ export default class DatabaseFileManager {
 
 
             [UploadService, {
-                url: this.config.get('api.updateUrl'),
+                url: this.config.get('api.uploadUrl'),
                 ...this.config.section('upload'),
             }],
 

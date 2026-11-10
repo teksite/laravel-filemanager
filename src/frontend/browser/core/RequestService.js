@@ -1,4 +1,5 @@
 import handler from "../helpers/handler.js";
+import {apiHeaders, extractMessage} from "../helpers/http.js";
 
 export default class RequestService {
 
@@ -31,13 +32,18 @@ export default class RequestService {
             resolve: async () => {
 
                 const response = await fetch(fullUrl, {
+                    credentials: 'same-origin',
                     ...options,
+                    headers: apiHeaders(options.headers),
                     signal: controller.signal
                 });
 
                 if (!response.ok) {
-                    const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    const body = await response.json().catch(() => null);
+
+                    const error = new Error(extractMessage(body, `HTTP ${response.status}: ${response.statusText}`));
                     error.status = response.status;
+                    error.errors = body?.errors ?? null;
 
                     throw error;
                 }
@@ -176,23 +182,28 @@ export default class RequestService {
         );
     }
 
-    deleteFileByPath(path, options = {}) {
-        if (!path) {
-            throw new Error('File path is required.');
-        }
+    forceDeleteFile(id, options = {}) {
+        if (!id) throw new Error('File id is required.');
 
-        return this.request(
-            `${this.options.deleteUrl ?? '/api/filemanager'}/remove`,
-            {
-                ...options,
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...options.headers,
-                },
-                body: JSON.stringify({ path }),
-            }
-        );
+        return this.delete(`${this.options.deleteUrl ?? '/api/filemanager'}/${encodeURIComponent(id)}/force`, options);
+    }
+
+    restoreFile(id, options = {}) {
+        if (!id) throw new Error('File id is required.');
+
+        return this.post(`${this.options.updateUrl ?? '/api/filemanager'}/${encodeURIComponent(id)}/restore`, {}, options);
+    }
+
+    moveFile(id, folderId, options = {}) {
+        return this.patch(`${this.options.updateUrl ?? '/api/filemanager'}/${encodeURIComponent(id)}`, {folder_id: folderId}, options);
+    }
+
+    getFolders(options = {}) {
+        return this.get(`${this.options.getUrl ?? '/api/filemanager'}/folders`, {}, options);
+    }
+
+    createFolder(name, parentId = null, options = {}) {
+        return this.post(`${this.options.getUrl ?? '/api/filemanager'}/folders`, {name, parent_id: parentId}, options);
     }
 
 }

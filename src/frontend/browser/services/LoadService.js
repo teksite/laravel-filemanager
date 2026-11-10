@@ -18,6 +18,16 @@ export default class LoadService extends Service {
             'load.disk': this.updateFilter,
 
             'load.type': this.updateFilter,
+
+            'load.search': this.updateFilter,
+
+            'load.sort': this.updateFilter,
+
+            'load.folder': this.updateFilter,
+
+            'load.trashed': this.updateFilter,
+
+            'files:reload': this.updateFilter,
         };
     }
 
@@ -39,11 +49,18 @@ export default class LoadService extends Service {
 
             disk: this.state.get("load.disk", null),
 
-            mime_type: this.state.get("load.type", null),
+            type: this.state.get("load.type", null),
+
+            search: this.state.get("load.search", null),
+
+            sort: this.state.get("load.sort", null),
+
+            // "all" (null) sends nothing; "root" and folder ids filter the listing.
+            folder_id: this.state.get("load.folder", null),
+
+            trashed: this.state.get("load.trashed", null),
 
             per_page: this.options.perPage,
-
-            user_id: this.options.userId ?? null,
 
         };
 

@@ -7,10 +7,16 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
-#[Signature('install:filemanager')]
-#[Description('Install FileManager migrations')]
 class InstallFileManager extends Command
 {
+
+    protected $signature = 'filemanager:install {--force : Overwrite published files}';
+
+    protected $description = 'Publish the FileManager assets and config';
+
+    protected $aliases = ['install:filemanager'];
+
+
     public function handle(): int
     {
 

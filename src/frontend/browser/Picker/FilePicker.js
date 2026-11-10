@@ -200,7 +200,13 @@ export default class FilePicker {
 
     showError(message) {
 
-        this.dialog.innerHTML = `<div class="fm-error">${message}</div>`;
+        const box = document.createElement("div");
+
+        box.className = "fm-error";
+
+        box.textContent = message;
+
+        this.dialog.replaceChildren(box);
     }
 
 

@@ -344,24 +344,24 @@ export default class UploaderUi extends UiService {
     renderFileItem([id, file], valid) {
 
         return `
-            <div class="upload-item ${valid ? 'is-success' : 'is-error'}" data-upload-preview data-file-id="${file.id}">
+            <div class="upload-item ${valid ? 'is-success' : 'is-error'}" data-upload-preview data-file-id="${escapeHtml(file.id)}">
                 <div class="upload-file-info">
                      ${getMimeIcon(file.type)}
                      ${escapeHtml(file.name)}
                     <div class="info">
-                        <div class="upload-progress"><div class="progress-bar" data-progress-bar="${file.id}"></div></div>
+                        <div class="upload-progress"><div class="progress-bar" data-progress-bar="${escapeHtml(file.id)}"></div></div>
                     </div>
                 </div>
-                <div class="upload-file-action" data-upload-action-box="${file.id}">
+                <div class="upload-file-action" data-upload-action-box="${escapeHtml(file.id)}">
                    <div>
                         <small>
                             ${formatSize(file.size)}
                         </small>
-                        <small data-upload-status data-id="${file.id}">
-                            ${valid ? 'ready to upload' : (file?.reason ? `${file.error}` : "invalid file")}
+                        <small data-upload-status data-id="${escapeHtml(file.id)}">
+                            ${valid ? 'ready to upload' : (file?.error ? escapeHtml(file.error) : "invalid file")}
                         </small>
                    </div>
-                    <button type="button" data-remove-message="${file.id}">
+                    <button type="button" data-remove-message="${escapeHtml(file.id)}">
                         ×
                     </button>
                 </div>
@@ -371,7 +371,7 @@ export default class UploaderUi extends UiService {
 
     updateProgress(file, percent) {
 
-        const progressBarEl = this.$(`[data-progress-bar='${file.id}']`);
+        const progressBarEl = this.$(`[data-progress-bar='${CSS.escape(file.id)}']`);
 
         const messageBoxEl = progressBarEl?.closest('[data-upload-preview]');
 
@@ -395,7 +395,7 @@ export default class UploaderUi extends UiService {
 
     showUploadResult(response, file, success, error) {
 
-        const progressBarEl = this.$(`[data-progress-bar='${file.id}']`);
+        const progressBarEl = this.$(`[data-progress-bar='${CSS.escape(file.id)}']`);
 
         const messageBoxEl = progressBarEl?.closest('[data-upload-preview]');
 

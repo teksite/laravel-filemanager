@@ -5,32 +5,31 @@ namespace Teksite\FileManager\Views\Components;
 
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
+use Random\RandomException;
+use Teksite\FileManager\Services\StorageService;
 
 class Browser extends Component
 {
-    /**
-     * Create a new component instance.
-     */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct(public ?string $id = null) {}
 
     /**
      * Get the view / contents that represent the component.
+     *
+     * @throws RandomException
      */
     public function render(): View
     {
-        $disks = config('filemanager.disk_list', []);
-        $mimes = config('filemanager.type_list', []);
+        $storage = app(StorageService::class);
 
-        $allowedDisks = config('filemanager.allow_upload_disks', []);
-        $allowedTypes = config('filemanager.allow_upload_types', []);
-
-        $perPage= config('filemanager.per_page' , 25);
-
-        return view('filemanager::browser', compact('disks', 'mimes' ,'allowedDisks' ,'allowedTypes' ,'perPage'));
-
+        return view('filemanager::browser', [
+            'id'           => $this->id ?? 'fm-'.bin2hex(random_bytes(4)),
+            'disks'        => array_merge([null], $storage->browseDisks()),
+            'mimes'        => array_merge([null], (array)config('filemanager.browse_types', [])),
+            'allowedDisks' => $storage->uploadDisks(),
+            'allowedTypes' => (array)config('filemanager.upload.allowed_types', []),
+            'perPage'      => (int)config('filemanager.per_page', 25),
+        ]);
     }
+
 
 }

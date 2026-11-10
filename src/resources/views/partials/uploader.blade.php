@@ -1,7 +1,7 @@
 <div data-uploader-section class="uploader-section">
     <div class="data-upload-waiting is-hidden" data-upload-waiting></div>
 
-@if(count($allowedDisks))
+    @if(count($allowedDisks))
         <span>Upload</span>
         <form data-upload-form enctype="multipart/form-data" method="POST">
 
@@ -13,7 +13,7 @@
                         <svg width="56" height="56" viewBox="0 0 24 24">
                             <path fill="currentColor" d="M19 20H5a3 3 0 0 1-3-3a3 3 0 0 1 3-3h1.26A8 8 0 1 1 20 13.13A3.5 3.5 0 0 1 19 20m-7-11l-4 4h2.5v4h3v-4H16z"/>
                         </svg>
-                    <div>{{strtolower(implode(' | ' ,$allowedTypes ?? []))}}</div>
+                        <div>{{ strtolower(implode(" | ", $allowedTypes ?? [])) }}</div>
                     </div>
                     <div class="upload-title">
                         Drag files here

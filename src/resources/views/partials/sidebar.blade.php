@@ -1,7 +1,7 @@
 <aside class="aside" data-aside>
 
     <div class="preview-box" data-preview>
-       {{__('select media')}}
+        {{__('select media')}}
     </div>
 
     <div class="file-info">
@@ -49,6 +49,15 @@
         </div>
 
     </div>
+    <div data-move-box>
+        <b>{{ __('Folder') }}</b>
+        <select data-move-folder disabled aria-label="{{ __('Move to folder') }}">
+            <option value="root">{{ __('Without folder') }}</option>
+        </select>
+    </div>
+
+    <button data-restore type="button" class="is-hidden" disabled>↩ {{ __('Restore') }}</button>
+
     <button data-delete type="button" class="delete-button" disabled>
         🗑 {{__('delete')}}
     </button>

@@ -15,8 +15,6 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
-use League\Flysystem\FilesystemException;
-use LogicException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Teksite\FileManager\Enums\MediaType;
 use Teksite\FileManager\Observer\UploadFileObserver;

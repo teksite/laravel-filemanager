@@ -10,7 +10,7 @@ class FolderRequest extends BaseApiRequest
 {
     public function authorize(): bool
     {
-        return Gate::allows('upload', UploadFile::class);
+        return $this->canUser('upload');
     }
 
     public function rules(): array

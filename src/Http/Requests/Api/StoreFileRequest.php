@@ -21,7 +21,7 @@ class StoreFileRequest extends BaseApiRequest
 {
     public function authorize(): bool
     {
-        return Gate::allows('upload', UploadFile::class);
+        return $this->canUser('upload');
     }
 
     public function rules(): array
@@ -43,7 +43,7 @@ class StoreFileRequest extends BaseApiRequest
     public function after(): array
     {
         return [function ($validator) {
-            if ($validator->errors()->isNotEmpty() || !$this->filled('folder_id'))  return;
+            if ($validator->errors()->isNotEmpty() || !$this->filled('folder_id')) return;
 
             $folder = UploadFolder::query()->find($this->input('folder_id'));
 

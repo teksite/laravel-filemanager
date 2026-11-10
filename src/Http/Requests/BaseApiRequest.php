@@ -8,6 +8,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 
 abstract class BaseApiRequest extends FormRequest
 {
+    use ShouldAuthorize;
     public function authorize(): bool
     {
         return true;

@@ -39,14 +39,9 @@ class FileManagerServiceProvider extends ServiceProvider
         $this->registerPolicies();
         $this->registerRateLimiters();
         $this->registerRoutes();
-
         $this->registerViews();
         $this->registerPublishing();
-
-
         $this->loadmigrations();
-
-
         $this->bootCommands();
         $this->bootViews();
     }

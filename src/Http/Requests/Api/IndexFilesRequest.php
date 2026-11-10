@@ -14,7 +14,7 @@ class IndexFilesRequest extends BaseApiRequest
 {
     public function authorize(): bool
     {
-        return Gate::allows('browse', UploadFile::class);
+        return $this->canUser('browse');
     }
 
     public function rules(): array

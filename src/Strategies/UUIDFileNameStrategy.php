@@ -11,4 +11,9 @@ class UUIDFileNameStrategy implements FileNameGeneratorInterface {
     {
         return Str::uuid();
     }
+
+    public function isUnique(): bool
+    {
+       return true;
+    }
 }

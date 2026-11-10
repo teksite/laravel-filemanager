@@ -27,7 +27,8 @@ class FileQuery
      */
     public function query(array $filters, ?Authenticatable $user): Builder
     {
-        $query = UploadFile::query()->select(self::LIST_COLUMNS)->visibleTo($user);
+        $query = UploadFile::query()->select(self::LIST_COLUMNS);
+        if ($user) $query->visibleTo($user);
 
         $this->applyDisk($query, $filters['disk'] ?? null);
         $this->applyTrash($query, $filters['trashed'] ?? null);

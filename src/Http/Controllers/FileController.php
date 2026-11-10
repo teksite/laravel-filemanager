@@ -9,6 +9,7 @@ use Teksite\FileManager\Http\Requests\Api\IndexFilesRequest;
 use Teksite\FileManager\Http\Requests\Api\ShowFileRequest;
 use Teksite\FileManager\Http\Requests\Api\StoreFileRequest;
 use Teksite\FileManager\Http\Requests\Api\UpdateFileRequest;
+use Teksite\FileManager\Http\Requests\ShouldAuthorize;
 use Teksite\FileManager\Http\Resources\FileCollection;
 use Teksite\FileManager\Http\Resources\FileResource;
 use Teksite\FileManager\Models\UploadFile;
@@ -23,6 +24,7 @@ use Teksite\FileManager\Services\UploaderService;
  */
 class FileController
 {
+    use ShouldAuthorize;
     public function __construct(protected UploaderService $uploader, protected FileQuery $files) {}
 
     public function index(IndexFilesRequest $request): JsonResponse
@@ -39,8 +41,7 @@ class FileController
 
     public function show(ShowFileRequest $request, UploadFile $file): JsonResponse
     {
-        Gate::authorize('view', $file);
-
+        $this->canUser('view' , $file);
         return response()->json(['success' => true, 'file' => new FileResource($file)]);
     }
 
@@ -71,7 +72,7 @@ class FileController
 
     public function update(UpdateFileRequest $request, UploadFile $file): JsonResponse
     {
-        Gate::authorize('update', $file);
+        $this->canUser('update' , $file);
 
         $data = $request->validated();
 
@@ -88,7 +89,6 @@ class FileController
 
     public function destroy(UploadFile $file): JsonResponse
     {
-        Gate::authorize('delete', $file);
 
         $this->uploader->delete($file);
 
@@ -97,7 +97,7 @@ class FileController
 
     public function restore(UploadFile $file): JsonResponse
     {
-        Gate::authorize('restore', $file);
+        $this->canUser('restore' , $file);
 
         $this->uploader->restore($file);
 
@@ -106,7 +106,7 @@ class FileController
 
     public function forceDestroy(UploadFile $file): JsonResponse
     {
-        Gate::authorize('forceDelete', $file);
+        $this->canUser('forceDelete' , $file);
 
         $this->uploader->forceDelete($file);
 

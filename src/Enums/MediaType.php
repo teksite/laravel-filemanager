@@ -48,7 +48,6 @@ enum MediaType: string
 
         if ($type = self::tryFrom($value)) return $type->patterns();
 
-        // Explicit mime type or "group/*" wildcard.
         if (preg_match('#^[a-z0-9.+-]+/(\*|[a-z0-9.+-]+)$#', $value)) return [str_replace('*', '%', $value)];
 
         return [];

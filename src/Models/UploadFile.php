@@ -11,13 +11,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Teksite\FileManager\Enums\MediaType;
 use Teksite\FileManager\Observer\UploadFileObserver;
+use Illuminate\Database\Eloquent\Builder;
+
 use Throwable;
 
 #[ObservedBy([UploadFileObserver::class])]
@@ -48,10 +49,8 @@ class UploadFile extends Model
 
     protected static function booted(): void
     {
-        static::updating(function (self $file) {
-            if ($file->isDirty(['path', 'disk', 'hash', 'mime_type', 'size'])) {
-                throw new \LogicException('The stored file cannot be changed, upload a new file instead.');
-            }
+        static::updating(static function (self $file) {
+            if ($file->isDirty(['path', 'disk', 'hash', 'mime_type', 'size'])) throw new \LogicException('The stored file cannot be changed, upload a new file instead.');
         });
 
         // Physical cleanup lives on the model so it also runs when application
@@ -236,12 +235,4 @@ class UploadFile extends Model
             ...collect($this->variants ?? [])->pluck('path')->all(),
         ]));
     }
-
-
-    public function deleteFile(): void
-    {
-        Storage::disk($this->disk)->delete($this->path);
-        $this->delete();
-    }
-
 }

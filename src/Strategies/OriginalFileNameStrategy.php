@@ -18,7 +18,6 @@ class OriginalFileNameStrategy implements FileNameGeneratorInterface
 
         $name = $slugify ? Str::slug($name) : FilenameSanitizer::safe($name);
 
-        // An empty result (e.g. a name made only of symbols) must never become ".ext".
         return $name !== '' ? Str::limit($name, 100, '') : (string)Str::uuid();
     }
 

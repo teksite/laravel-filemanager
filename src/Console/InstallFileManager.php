@@ -13,11 +13,23 @@ class InstallFileManager extends Command
 {
     public function handle(): int
     {
-        $stubPath = __DIR__ . '/../resources/stubs';
+
+        $this->publishMigration();
+        $this->publishConfigs();
+        $this->publishConfigs();
+
+        $this->components->info('FileManager installed. Run "php artisan migrate" to create its tables.');
+
+        return self::SUCCESS;
+    }
+
+    private function publishMigration(): void
+    {
+        $stubPath = __DIR__.'/../resources/stubs';
 
         $files = [
             [
-                'stub' => $stubPath . '/create_file_table.stub',
+                'stub' => $stubPath.'/create_file_table.stub',
                 'name' => 'create_file_table',
             ],
 
@@ -31,7 +43,7 @@ class InstallFileManager extends Command
                 ->contains(function ($migration) use ($file) {
                     return str_ends_with(
                         $migration->getFilename(),
-                        $file['name'] . '.php'
+                        $file['name'].'.php'
                     );
                 });
 
@@ -40,11 +52,11 @@ class InstallFileManager extends Command
                 continue;
             }
 
-            $filename = now()->format('Y_m_d_His') . '_' . $file['name'] . '.php';
+            $filename = now()->format('Y_m_d_His').'_'.$file['name'].'.php';
 
             File::copy(
                 $file['stub'],
-                $migrationPath . DIRECTORY_SEPARATOR . $filename
+                $migrationPath.DIRECTORY_SEPARATOR.$filename
             );
 
             $this->info("Published: {$filename}");
@@ -53,8 +65,15 @@ class InstallFileManager extends Command
         }
 
         $this->newLine();
-        $this->info('✅ FileManager installed successfully.');
+    }
 
-        return self::SUCCESS;
+    private function publishAssets(): void
+    {
+        $this->call('vendor:publish', ['--tag' => 'filemanager-assets', '--force' => true]);
+    }
+
+    private function publishConfigs(): void
+    {
+        $this->call('vendor:publish', ['--tag' => 'filemanager-config', '--force' => (bool)$this->option('force')]);
     }
 }

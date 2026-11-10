@@ -112,10 +112,10 @@ class FileManagerServiceProvider extends ServiceProvider
 
     private function registerPolicies(): void
     {
-//        $policy = config('filemanager.authorization.policy', UploadFilePolicy::class);
-//
-//        Gate::policy(UploadFile::class, $policy);
-//        Gate::policy(UploadFolder::class, $policy);
+        $policy = config('filemanager.authorization.policy', UploadFilePolicy::class);
+
+        Gate::policy(UploadFile::class, $policy);
+        Gate::policy(UploadFolder::class, $policy);
     }
 
     private function registerRateLimiters(): void

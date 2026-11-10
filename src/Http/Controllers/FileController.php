@@ -1,0 +1,117 @@
+<?php
+
+namespace Teksite\FileManager\Http\Controllers;
+
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Gate;
+use Teksite\FileManager\Http\Requests\IndexFilesRequest;
+use Teksite\FileManager\Http\Requests\StoreFileRequest;
+use Teksite\FileManager\Http\Requests\UpdateFileRequest;
+use Teksite\FileManager\Http\Resources\FileCollection;
+use Teksite\FileManager\Http\Resources\FileResource;
+use Teksite\FileManager\Models\UploadFile;
+use Teksite\FileManager\Models\UploadFolder;
+use Teksite\FileManager\Services\FileQuery;
+use Teksite\FileManager\Services\UploaderService;
+
+/**
+ * Thin HTTP layer: validate (FormRequest) -> authorize (policy) -> delegate
+ * (service) -> shape the response. Unexpected errors are left to Laravel's
+ * exception handler so internal messages never leak to the client.
+ */
+class FileController
+{
+    public function __construct(
+        protected UploaderService $uploader,
+        protected FileQuery $files,
+    ) {}
+
+    public function index(IndexFilesRequest $request): JsonResponse
+    {
+        $filters = $request->filters();
+        $user = $request->user();
+
+        $result = ($filters['mode'] ?? 'cursor') === 'pagination'
+            ? $this->files->paginate($filters, $user)
+            : $this->files->cursor($filters, $user);
+
+        return (new FileCollection($result))->response();
+    }
+
+    public function show(UploadFile $file): JsonResponse
+    {
+        Gate::authorize('view', $file);
+
+        return response()->json(['success' => true, 'file' => new FileResource($file)]);
+    }
+
+    public function store(StoreFileRequest $request): JsonResponse
+    {
+        ['uploaded' => $uploaded, 'failed' => $failed] = $this->uploader->uploadMany(
+            $request->uploadedFiles(),
+            $request->options(),
+        );
+
+        // Nothing could be stored: surface the first reason as a validation-style error.
+        if ($uploaded->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => __('Failed to upload the file.'),
+                'errors'  => ['file' => array_values($failed)],
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => __('File uploaded successfully.'),
+            // "file" keeps the single upload contract; "files" serves multi uploads.
+            'file'    => new FileResource($uploaded->first()),
+            'files'   => FileResource::collection($uploaded),
+            'failed'  => (object) $failed,
+        ], 201);
+    }
+
+    public function update(UpdateFileRequest $request, UploadFile $file): JsonResponse
+    {
+        Gate::authorize('update', $file);
+
+        $data = $request->validated();
+
+        if (! empty($data['folder_id'])) {
+            Gate::authorize('update', UploadFolder::query()->findOrFail($data['folder_id']));
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => __('File updated successfully.'),
+            'file'    => new FileResource($this->uploader->update($file, $data)),
+        ]);
+    }
+
+    public function destroy(UploadFile $file): JsonResponse
+    {
+        Gate::authorize('delete', $file);
+
+        $this->uploader->delete($file);
+
+        return response()->json(['success' => true, 'message' => __('File deleted successfully.')]);
+    }
+
+    public function restore(UploadFile $file): JsonResponse
+    {
+        Gate::authorize('restore', $file);
+
+        $this->uploader->restore($file);
+
+        return response()->json(['success' => true, 'message' => __('File restored successfully.'), 'file' => new FileResource($file->refresh())]);
+    }
+
+    public function forceDestroy(UploadFile $file): JsonResponse
+    {
+        Gate::authorize('forceDelete', $file);
+
+        $this->uploader->forceDelete($file);
+
+        return response()->json(['success' => true, 'message' => __('File permanently deleted.')]);
+    }
+}

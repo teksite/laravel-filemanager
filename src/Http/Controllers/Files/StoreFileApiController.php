@@ -3,7 +3,7 @@
 namespace Teksite\FileManager\Http\Controllers\Files;
 
 use Illuminate\Support\Facades\Log;
-use Teksite\FileManager\DTO\UploadOptions;
+use Teksite\FileManager\DTO\InspectedFile;
 use Teksite\FileManager\Http\Requests\Api\ApiUploadFileRequest;
 use Teksite\FileManager\Http\Resources\FileResource;
 use Teksite\FileManager\Services\UploaderService;
@@ -20,7 +20,7 @@ class StoreFileApiController
     public function store(ApiUploadFileRequest $request)
     {
         try {
-            $options = UploadOptions::fromArray($request->validated());
+            $options = InspectedFile::fromArray($request->validated());
 
             $userId = $request->user_id  ?? auth()->id();
 

@@ -6,7 +6,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Teksite\FileManager\Contracts\FileUploaderInterface;
-use Teksite\FileManager\DTO\UploadOptions;
+use Teksite\FileManager\DTO\InspectedFile;
 use Teksite\FileManager\Events\FileDeleted;
 use Teksite\FileManager\Events\FileDeleting;
 use Teksite\FileManager\Events\FileUploaded;
@@ -23,13 +23,13 @@ class UploaderService implements FileUploaderInterface
     /**
      * @throws \Throwable
      */
-    public function upload(UploadedFile $file, UploadOptions|array $options, ?string $title = null, ?int $userId = null): UploadFile
+    public function upload(UploadedFile $file, InspectedFile|array $options, ?string $title = null, ?int $userId = null): UploadFile
     {
         event(new FileUploading($file));
 
         return DB::transaction(function () use ($userId, $title, $file, $options) {
 
-            $options = $options instanceof UploadOptions ? $options : UploadOptions::fromArray($options);
+            $options = $options instanceof InspectedFile ? $options : InspectedFile::fromArray($options);
 
             $disk = $options->disk ?? config('filemanager.default_store_disk');
 

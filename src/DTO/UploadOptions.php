@@ -6,17 +6,44 @@ class UploadOptions
 {
     public function __construct(
         public ?string $disk = null,
-        public ?string $path = null,
+        public ?string $folderId = null,
         public ?string $strategy = null,
-        public bool    $overwrite = false,
-        public bool    $slugify = false,
-        public ?int    $length = null,
+        public ?bool $overwrite = null,
+        public ?bool $slugify = null,
+        public ?int $length = null,
+        public ?string $title = null,
+        public ?string $alt = null,
+        public string|int|null $userId = null,
+        public ?string $path = null,
+        public bool $visibilityPrivate = false,
     ) {}
 
-    public static function make(): static
+    public static function make(): self
     {
-        return new static();
+        return new self();
     }
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            disk     : $data['disk'] ?? null,
+            folderId : $data['folder_id'] ?? null,
+            strategy : $data['strategy'] ?? null,
+            overwrite: isset($data['overwrite']) ? (bool)$data['overwrite'] : null,
+            slugify  : isset($data['slugify']) ? (bool)$data['slugify'] : null,
+            length   : isset($data['length']) ? (int)$data['length'] : null,
+            title    : $data['title'] ?? null,
+            alt      : $data['alt'] ?? null,
+            userId   : $data['user_id'] ?? null,
+            path     : $data['path'] ?? null,
+        );
+    }
+
+    public function with(mixed ...$changes): self
+    {
+        return new self(...array_merge(get_object_vars($this), $changes));
+    }
+
 
     public function disk(string $disk): static
     {
@@ -66,15 +93,5 @@ class UploadOptions
         ];
     }
 
-    public static function fromArray(array $options = []): static
-    {
-        return new static(
-            disk: $options['disk'] ?? null,
-            path: $options['path'] ?? null,
-            strategy: $options['strategy'] ?? null,
-            overwrite: $options['overwrite'] ?? false,
-            slugify: $options['slugify'] ?? false,
-            length: $options['length'] ?? false,
-        );
-    }
+
 }

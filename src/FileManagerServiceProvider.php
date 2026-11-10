@@ -2,6 +2,7 @@
 
 namespace Teksite\FileManager;
 
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
@@ -141,7 +142,7 @@ class FileManagerServiceProvider extends ServiceProvider
                  ->prefix($config['prefix'] ?? 'filemanager')
                  ->name($config['name'] ?? 'filemanager.')
                  ->domain($config['domain'] ?? null)
-                 ->group(__DIR__."/../routes/{$type}.php");
+                 ->group(__DIR__."/routes/{$type}.php");
         }
     }
 

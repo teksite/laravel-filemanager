@@ -37,7 +37,7 @@ class FileController
 
     public function show(ShowFileRequest $request, UploadFile $file): JsonResponse
     {
-        if (!$this->canUser('view', $file)) abort(401 , 'unauthorized');
+        $this->userAuthorize('view', $file);
 
         return response()->json(['success' => true, 'file' => new FileResource($file)]);
     }
@@ -69,7 +69,7 @@ class FileController
 
     public function update(UpdateFileRequest $request, UploadFile $file): JsonResponse
     {
-        if (!$this->canUser('update', $file)) abort(401 , 'unauthorized');
+        $this->userAuthorize('update', $file);
 
         $data = $request->validated();
 
@@ -84,7 +84,7 @@ class FileController
 
     public function destroy(UploadFile $file): JsonResponse
     {
-      $result=  $this->uploader->delete($file);
+        $result = $this->uploader->delete($file);
         return $result
             ? response()->json(['success' => true, 'message' => __('File deleted successfully.')])
             : response()->json(['success' => false, 'message' => __('deleting the file is failed.')]);
@@ -92,7 +92,7 @@ class FileController
 
     public function restore(UploadFile $file): JsonResponse
     {
-        if (!$this->canUser('restore', $file)) abort(401 , 'unauthorized');
+        $this->userAuthorize('restore', $file);
 
         $this->uploader->restore($file);
 
@@ -101,7 +101,7 @@ class FileController
 
     public function forceDestroy(UploadFile $file): JsonResponse
     {
-        if (!$this->canUser('forceDelete', $file)) abort(401 , 'unauthorized');
+        $this->userAuthorize('forceDelete', $file);
 
         $this->uploader->forceDelete($file);
 

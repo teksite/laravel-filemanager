@@ -22,10 +22,6 @@ use Teksite\FileManager\Support\FilenameSanitizer;
 use Teksite\FileManager\Support\PathBuilder;
 use Throwable;
 
-/**
- * Application service for the whole file life cycle. Controllers stay thin and
- * every rule (inspection, naming, cleanup, events) lives here.
- */
 class UploaderService
 {
     public function __construct(protected StorageService $storage, protected FileInspector $inspector, protected FileNameResolver $names) {}
@@ -86,7 +82,6 @@ class UploaderService
                 'height'        => $inspected->height,
             ]);
         } catch (Throwable $e) {
-            // Never leave an orphan on the disk when the insert fails.
             $this->storage->delete($disk, $stored);
             Log::error($e);
 
@@ -140,7 +135,7 @@ class UploaderService
 
     private function queueThumbnails(UploadFile $file): void
     {
-        if (!$file->isImage() || !config('filemanager.thumbnails.enabled', true) || !function_exists('imagecreatefromstring')) {
+        if (!function_exists('imagecreatefromstring') || !$file->isImage()  ||!config('filemanager.thumbnails.enabled', true) ) {
             return;
         }
 
@@ -196,7 +191,7 @@ class UploaderService
     {
         event(new FileDeleting($file));
 
-        $result = config('filemanager.trash.enabled', true) ? $file->delete() : $file->forceDelete();
+       $result = config('filemanager.trash.enabled', true) ? $file->delete() : $file->forceDelete();
 
         event(new FileDeleted($file));
 

@@ -169,9 +169,7 @@ class FileManagerServiceProvider extends ServiceProvider
 
     private function scheduleCleanup(): void
     {
-        if (!config('filemanager.trash.enabled', true)) {
-            return;
-        }
+        if (!config('filemanager.trash.enabled', true))  return;
 
         $this->callAfterResolving(Schedule::class, fn(Schedule $schedule) => $schedule->command('filemanager:prune')->daily());
     }

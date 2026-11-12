@@ -12,6 +12,6 @@ class FileDeleted
     /**
      * Create a new event instance.
      */
-    public function __construct(public readonly UploadFile $file) {}
+    public function __construct(public UploadFile $file) {}
 
 }

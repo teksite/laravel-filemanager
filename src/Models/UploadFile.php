@@ -43,10 +43,6 @@ class UploadFile extends Model
         ];
     }
 
-    protected $appends = [
-        'url',
-    ];
-
     protected static function booted(): void
     {
         static::updating(static function (self $file) {

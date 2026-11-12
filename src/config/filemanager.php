@@ -15,18 +15,18 @@ return [
         'web' => [
             'enabled'    => true,
             'prefix'     => 'filemanager',             // Web route URI prefix
-            'name'       => 'filemanager.',         // Route name prefix
-            'middleware' => ['web', 'auth'],        // Applied middleware stack
+            'name'       => 'filemanager.',            // Route name prefix
+            'middleware' => ['web', 'auth'],           // Applied middleware stack
             'domain'     => null,
         ],
 
         'api' => [
             'enabled'    => true,
-            'prefix'     => 'api/filemanager',      // API route URI prefix
-            'name'       => 'api.filemanager.',     // Route name prefix
+            'prefix'     => 'api/filemanager',         // API route URI prefix
+            'name'       => 'api.filemanager.',        // Route name prefix
             'domain'     => null,
-            'middleware' => ['api'],        // Applied middleware stack
-            'throttle'   => [                         // Rate limits per minute (per user, falling back to IP).
+            'middleware' => ['api'],                    // Applied middleware stack
+            'throttle'   => [                           // Rate limits per minute (per user, falling back to IP).
                                                       'read'   => 120,
                                                       'write'  => 60,
                                                       'upload' => 30,

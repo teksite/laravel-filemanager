@@ -5,8 +5,6 @@ namespace Teksite\FileManager\Providers;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Teksite\FileManager\Events\NewFileUploadEvent;
-use Teksite\FileManager\Listeners\NewFileUploadListener;
 
 class EventServiceProvider  extends ServiceProvider
 {
@@ -16,9 +14,7 @@ class EventServiceProvider  extends ServiceProvider
      * @var array<string, array<int, string>>
      */
     protected $listen = [
-        NewFileUploadEvent::class => [
-            NewFileUploadListener::class
-        ]
+
     ];
 
 

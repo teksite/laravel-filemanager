@@ -84,9 +84,10 @@ class FileController
 
     public function destroy(UploadFile $file): JsonResponse
     {
-        $this->uploader->delete($file);
-
-        return response()->json(['success' => true, 'message' => __('File deleted successfully.')]);
+      $result=  $this->uploader->delete($file);
+        return $result
+            ? response()->json(['success' => true, 'message' => __('File deleted successfully.')])
+            : response()->json(['success' => false, 'message' => __('deleting the file is failed.')]);
     }
 
     public function restore(UploadFile $file): JsonResponse

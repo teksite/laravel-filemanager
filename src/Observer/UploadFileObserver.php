@@ -30,9 +30,7 @@ class UploadFileObserver
      */
     public function deleted(UploadFile $file): void
     {
-        if (config('file-manager.delete_file_with_model', true)) {
-            Storage::disk($file->disk)->delete($file->path);
-        }
+       // ...
     }
 
 
@@ -47,8 +45,16 @@ class UploadFileObserver
     /**
      * Handle the UploadFile "forceDeleted" event.
      */
-    public function forceDeleted(UploadFile $user): void
+
+    public function forceDeleted(UploadFile $file): void
     {
-        // ...
+        if (!config('filemanager.storage.delete_physical', true)) return;
+
+        try {
+            Storage::disk($file->disk)->delete($file->allPaths());
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
     }
 }

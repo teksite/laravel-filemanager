@@ -22,7 +22,7 @@ class InstallFileManager extends Command
 
         $this->publishMigration();
         $this->publishConfigs();
-        $this->publishConfigs();
+        $this->publishAssets();
 
         $this->components->info('FileManager installed. Run "php artisan migrate" to create its tables.');
 

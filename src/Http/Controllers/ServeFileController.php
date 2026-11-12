@@ -22,9 +22,10 @@ class ServeFileController
 
     public function serve(Request $request, UploadFile $file): StreamedResponse
     {
-        $this->userAuthorize('view', $file);
+        $this->userAuthorizeFile('view', $file);
 
         $variant = $request->query('variant');
+
         $path = is_string($variant) && isset($file->variants[$variant]) ? $file->variants[$variant]['path'] : $file->path;
         $disk = Storage::disk($file->disk);
 
@@ -42,7 +43,7 @@ class ServeFileController
 
     public function download(UploadFile $file): StreamedResponse
     {
-        $this->userAuthorize('view', $file);
+        $this->userAuthorizeFile('view', $file);
 
         abort_unless(Storage::disk($file->disk)->exists($file->path), 404);
         return $file->download($this->headers());

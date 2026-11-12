@@ -7,6 +7,7 @@ use Illuminate\Validation\Rule;
 use Teksite\FileManager\Enums\MediaType;
 use Teksite\FileManager\Http\Requests\BaseApiRequest;
 use Teksite\FileManager\Models\UploadFile;
+use Teksite\FileManager\Models\UploadFolder;
 use Teksite\FileManager\Services\FileQuery;
 use Teksite\FileManager\Services\StorageService;
 
@@ -14,7 +15,7 @@ class IndexFilesRequest extends BaseApiRequest
 {
     public function authorize(): bool
     {
-        return $this->canUser('browse');
+        return $this->canUser('browse', UploadFolder::class);
     }
 
     public function rules(): array

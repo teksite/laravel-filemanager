@@ -5,12 +5,13 @@ namespace Teksite\FileManager\Http\Requests\Api;
 use Illuminate\Support\Facades\Gate;
 use Teksite\FileManager\Http\Requests\BaseApiRequest;
 use Teksite\FileManager\Models\UploadFile;
+use Teksite\FileManager\Models\UploadFolder;
 
 class FolderRequest extends BaseApiRequest
 {
     public function authorize(): bool
     {
-        return $this->canUser('upload');
+        return $this->canUser('upload' ,UploadFolder::class);
     }
 
     public function rules(): array

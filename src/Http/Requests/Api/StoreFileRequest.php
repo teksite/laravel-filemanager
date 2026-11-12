@@ -18,7 +18,7 @@ class StoreFileRequest extends BaseApiRequest
 {
     public function authorize(): bool
     {
-        return $this->canUser('upload');
+        return $this->canUser('upload' , UploadFolder::class);
     }
 
     public function rules(): array

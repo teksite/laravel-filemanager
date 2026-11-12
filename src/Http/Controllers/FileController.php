@@ -101,7 +101,7 @@ class FileController
 
     public function forceDestroy(UploadFile $file): JsonResponse
     {
-       if ( $this->canUser('forceDelete', $file)) abort(401 , 'unauthorized');
+        if (!$this->canUser('forceDelete', $file)) abort(401 , 'unauthorized');
 
         $this->uploader->forceDelete($file);
 

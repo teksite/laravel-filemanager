@@ -2,14 +2,11 @@
 
 namespace Teksite\FileManager\Http\Requests\Api;
 
-namespace Teksite\FileManager\Http\Requests\Api;
-
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Teksite\FileManager\DTO\UploadOptions;
 use Teksite\FileManager\Http\Requests\BaseApiRequest;
-use Teksite\FileManager\Models\UploadFile;
 use Teksite\FileManager\Models\UploadFolder;
 use Teksite\FileManager\Services\StorageService;
 
@@ -43,7 +40,7 @@ class StoreFileRequest extends BaseApiRequest
     public function after(): array
     {
         return [function ($validator) {
-            if ($validator->errors()->isNotEmpty() || !$this->filled('folder_id')) return;
+            if (!$this->filled('folder_id') || $validator->errors()->isNotEmpty() ) return;
 
             $folder = UploadFolder::query()->find($this->input('folder_id'));
 
@@ -58,7 +55,7 @@ class StoreFileRequest extends BaseApiRequest
     {
         return array_values(array_filter(
             $this->hasFile('files') ? (array)$this->file('files') : [$this->file('file')],
-            fn($file) => $file instanceof UploadedFile
+            static fn($file) => $file instanceof UploadedFile
         ));
     }
 

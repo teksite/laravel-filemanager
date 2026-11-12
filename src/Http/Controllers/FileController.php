@@ -17,14 +17,10 @@ use Teksite\FileManager\Models\UploadFolder;
 use Teksite\FileManager\Services\FileQuery;
 use Teksite\FileManager\Services\UploaderService;
 
-/**
- * Thin HTTP layer: validate (FormRequest) -> authorize (policy) -> delegate
- * (service) -> shape the response. Unexpected errors are left to Laravel's
- * exception handler so internal messages never leak to the client.
- */
 class FileController
 {
     use ShouldAuthorize;
+
     public function __construct(protected UploaderService $uploader, protected FileQuery $files) {}
 
     public function index(IndexFilesRequest $request): JsonResponse
@@ -41,7 +37,8 @@ class FileController
 
     public function show(ShowFileRequest $request, UploadFile $file): JsonResponse
     {
-        $this->canUser('view' , $file);
+        if (!$this->canUser('view', $file)) abort(401);
+
         return response()->json(['success' => true, 'file' => new FileResource($file)]);
     }
 
@@ -59,11 +56,11 @@ class FileController
                 'errors'  => ['file' => array_values($failed)],
             ], 422);
         }
+        //TODO remove file or files based on existence of file or files
 
         return response()->json([
             'success' => true,
             'message' => __('File uploaded successfully.'),
-            // "file" keeps the single upload contract; "files" serves multi uploads.
             'file'    => new FileResource($uploaded->first()),
             'files'   => FileResource::collection($uploaded),
             'failed'  => (object)$failed,
@@ -72,13 +69,11 @@ class FileController
 
     public function update(UpdateFileRequest $request, UploadFile $file): JsonResponse
     {
-        $this->canUser('update' , $file);
+        if (!$this->canUser('update', $file)) abort(401);
 
         $data = $request->validated();
 
-        if (!empty($data['folder_id'])) {
-            Gate::authorize('update', UploadFolder::query()->findOrFail($data['folder_id']));
-        }
+        if (!empty($data['folder_id'])) Gate::authorize('update', UploadFolder::query()->findOrFail($data['folder_id']));
 
         return response()->json([
             'success' => true,
@@ -89,7 +84,6 @@ class FileController
 
     public function destroy(UploadFile $file): JsonResponse
     {
-
         $this->uploader->delete($file);
 
         return response()->json(['success' => true, 'message' => __('File deleted successfully.')]);
@@ -97,7 +91,7 @@ class FileController
 
     public function restore(UploadFile $file): JsonResponse
     {
-        $this->canUser('restore' , $file);
+       if ( $this->canUser('restore', $file)) abort(401);
 
         $this->uploader->restore($file);
 
@@ -106,7 +100,7 @@ class FileController
 
     public function forceDestroy(UploadFile $file): JsonResponse
     {
-        $this->canUser('forceDelete' , $file);
+       if ( $this->canUser('forceDelete', $file)) abort(401);
 
         $this->uploader->forceDelete($file);
 

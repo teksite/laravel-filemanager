@@ -19,7 +19,7 @@ class IndexFilesRequest extends BaseApiRequest
 
     public function rules(): array
     {
-        $sorts = collect(FileQuery::SORTABLE)->flatMap(fn ($c) => [$c, "-{$c}"])->all();
+        $sorts = collect(FileQuery::SORTABLE)->flatMap(fn($c) => [$c, "-{$c}"])->all();
 
         return [
             'disk'      => ['nullable', 'string', Rule::in(app(StorageService::class)->browseDisks())],
@@ -33,7 +33,7 @@ class IndexFilesRequest extends BaseApiRequest
             'trashed'   => ['nullable', Rule::in(['only', 'with'])],
             'sort'      => ['nullable', Rule::in($sorts)],
             'mode'      => ['nullable', Rule::in(['cursor', 'pagination'])],
-            'per_page'  => ['nullable', 'integer', 'min:1', 'max:'.(int) config('filemanager.max_per_page', 100)],
+            'per_page'  => ['nullable', 'integer', 'min:1', 'max:'.(int)config('filemanager.max_per_page', 100)],
             'cursor'    => ['nullable', 'string', 'max:500'],
         ];
     }
@@ -43,9 +43,7 @@ class IndexFilesRequest extends BaseApiRequest
     {
         $filters = $this->validated();
 
-        if (! $this->has('folder_id')) {
-            unset($filters['folder_id']);
-        }
+        if (!$this->has('folder_id')) unset($filters['folder_id']);
 
         return $filters;
     }

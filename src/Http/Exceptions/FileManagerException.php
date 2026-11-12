@@ -1,6 +1,6 @@
 <?php
 
-namespace Teksite\FileManager\Exceptions;
+namespace Teksite\FileManager\Http\Exceptions;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Teksite\FileManager\Exceptions;
+namespace Teksite\FileManager\Http\Exceptions;
 
 /** Thrown when an uploaded file fails the server-side security inspection. */
 final class UnsafeFileException extends FileManagerException

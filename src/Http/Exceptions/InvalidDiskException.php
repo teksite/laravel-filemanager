@@ -1,6 +1,6 @@
 <?php
 
-namespace Teksite\FileManager\Exceptions;
+namespace Teksite\FileManager\Http\Exceptions;
 
 final class InvalidDiskException extends FileManagerException
 {

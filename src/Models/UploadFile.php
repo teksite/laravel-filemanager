@@ -218,9 +218,9 @@ class UploadFile extends Model
         return Storage::disk($this->disk)->readStream($this->path);
     }
 
-    public function download(): StreamedResponse
+    public function download(array $headers = []): StreamedResponse
     {
-        return Storage::disk($this->disk)->download($this->path, $this->original_name);
+        return Storage::disk($this->disk)->download($this->path, $this->original_name, $headers);
     }
 
     /** Every physical path that belongs to this record (original + variants). */

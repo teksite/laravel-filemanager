@@ -5,7 +5,7 @@ namespace Teksite\FileManager\Services;
 use Illuminate\Http\UploadedFile;
 use Symfony\Component\Mime\MimeTypes;
 use Teksite\FileManager\DTO\InspectedFile;
-use Teksite\FileManager\Exceptions\UnsafeFileException;
+use Teksite\FileManager\Http\Exceptions\UnsafeFileException;
 use Teksite\FileManager\Support\FilenameSanitizer;
 
 /**

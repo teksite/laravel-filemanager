@@ -6,8 +6,8 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Teksite\FileManager\Exceptions\FileUploadException;
-use Teksite\FileManager\Exceptions\InvalidDiskException;
+use Teksite\FileManager\Http\Exceptions\FileUploadException;
+use Teksite\FileManager\Http\Exceptions\InvalidDiskException;
 
 /** Thin, validated wrapper around Laravel's filesystem. */
 class StorageService

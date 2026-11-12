@@ -25,7 +25,7 @@ return [
             'prefix'     => 'api/filemanager',      // API route URI prefix
             'name'       => 'api.filemanager.',     // Route name prefix
             'domain'     => null,
-            'middleware' => ['web', 'auth'],        // Applied middleware stack
+            'middleware' => ['api'],        // Applied middleware stack
             'throttle'   => [                         // Rate limits per minute (per user, falling back to IP).
                                                       'read'   => 120,
                                                       'write'  => 60,

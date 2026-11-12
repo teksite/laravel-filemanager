@@ -5,7 +5,7 @@ namespace Teksite\FileManager\Services;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use Teksite\FileManager\Exceptions\FolderException;
+use Teksite\FileManager\Http\Exceptions\FolderException;
 use Teksite\FileManager\Models\UploadFile;
 use Teksite\FileManager\Models\UploadFolder;
 use Teksite\FileManager\Support\FilenameSanitizer;

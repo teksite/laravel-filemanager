@@ -2,6 +2,7 @@
 
 namespace Teksite\FileManager\Services;
 
+use GdImage;
 use Teksite\FileManager\Models\UploadFile;
 use Throwable;
 
@@ -62,8 +63,8 @@ class ThumbnailService
         }
     }
 
-    /** @return array{image: \GdImage, width: int, height: int} */
-    private function resize(\GdImage $source, int $maxWidth, int $maxHeight): array
+    /** @return array{image: GdImage, width: int, height: int} */
+    private function resize(GdImage $source, int $maxWidth, int $maxHeight): array
     {
         $width = imagesx($source);
         $height = imagesy($source);
@@ -83,7 +84,7 @@ class ThumbnailService
     }
 
     /** @return array{0: string, 1: string} binary + extension */
-    private function encode(\GdImage $image, string $sourceMime): array
+    private function encode(GdImage $image, string $sourceMime): array
     {
         $quality = (int) config('filemanager.thumbnails.quality', 82);
 
@@ -116,7 +117,7 @@ class ThumbnailService
         return "{$directory}{$info['filename']}-{$variant}.{$extension}";
     }
 
-    private function applyExifOrientation(\GdImage $image, UploadFile $file): \GdImage
+    private function applyExifOrientation(GdImage $image, UploadFile $file): GdImage
     {
         if ($file->mime_type !== 'image/jpeg' || ! function_exists('exif_read_data') || ! function_exists('imagerotate')) {
             return $image;

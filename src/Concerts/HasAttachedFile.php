@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Teksite\FileManager\Models\UploadFile;
 use Teksite\FileManager\Models\UploadFileRelation;
+use Throwable;
 
 trait HasAttachedFile
 {
@@ -29,7 +30,7 @@ trait HasAttachedFile
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function attachFile(UploadFile $file, ?string $collection = null, ?int $order = null, ?string $name = null): void
     {
@@ -59,7 +60,7 @@ trait HasAttachedFile
      * Replaces the content of a collection with the given ordered file ids.
      *
      * @param iterable<string> $fileIds
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function syncFilesOfCollection(iterable $fileIds, string $collection, ?string $name = null): void
     {

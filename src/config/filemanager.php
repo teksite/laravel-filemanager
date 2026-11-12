@@ -27,9 +27,9 @@ return [
             'domain'     => null,
             'middleware' => ['api'],                    // Applied middleware stack
             'throttle'   => [                           // Rate limits per minute (per user, falling back to IP).
-                                                      'read'   => 120,
-                                                      'write'  => 60,
-                                                      'upload' => 30,
+                                                        'read'   => 120,
+                                                        'write'  => 60,
+                                                        'upload' => 30,
             ],
         ],
     ],
@@ -213,7 +213,7 @@ return [
     |
     */
 
-    'allow_upload_types' => [           // Allowed mime types or extensions ([]] = allow all)
+    'allow_upload_types' => [           // Allowed mime types or extensions ([] = allow all)
                                         'Image/Jpeg', 'Image/Jpg',
     ],
 

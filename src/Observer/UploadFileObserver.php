@@ -4,6 +4,7 @@ namespace Teksite\FileManager\Observer;
 
 use Illuminate\Support\Facades\Storage;
 use Teksite\FileManager\Models\UploadFile;
+use Throwable;
 
 class UploadFileObserver
 {
@@ -52,7 +53,7 @@ class UploadFileObserver
 
         try {
             Storage::disk($file->disk)->delete($file->allPaths());
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             report($e);
         }
 

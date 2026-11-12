@@ -1,30 +1,42 @@
 {
     "name": "teksite/laravel-filemanager",
-    "description": "A simple package for managing files with different drivers.",
+    "description": "A secure, dependency-free media and file manager for Laravel built on top of the Filesystem.",
     "type": "library",
-    "keywords": [
-        "laravel",
-        "file manager",
-        "media manager"
-    ],
+    "keywords": ["laravel", "file manager", "media manager", "uploads", "filesystem"],
+
     "authors": [
         {
             "name": "Sina Zangiband",
             "email": "sina.zangiband@gmail.com"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+
     "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "ext-fileinfo": "*",
+        "laravel/framework": "^11.0|^12.0|^13.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0|^10.0",
+        "phpunit/phpunit": "^11.0"
+    },
+    "suggest": {
+        "ext-gd": "Required for automatic image thumbnail generation."
+    },
     "autoload": {
         "psr-4": {
             "Teksite\\FileManager\\": "src/"
         }
     },
-    "require": {
-        "laravel/framework": "^11|^12|^13",
-        "ext-gd": "*",
-        "ext-fileinfo": "*"
+    "autoload-dev": {
+        "psr-4": {
+            "Teksite\\FileManager\\Tests\\": "tests/"
+        }
     },
+
     "extra": {
         "laravel": {
             "providers": [

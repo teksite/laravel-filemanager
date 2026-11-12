@@ -22,7 +22,7 @@ class ServeFileController
 
     public function serve(Request $request, UploadFile $file): StreamedResponse
     {
-        $this->userAuthorizeFile('view', $file);
+        $this->userAuthorize('view', $file);
 
         $variant = $request->query('variant');
 
@@ -43,7 +43,7 @@ class ServeFileController
 
     public function download(UploadFile $file): StreamedResponse
     {
-        $this->userAuthorizeFile('view', $file);
+        $this->userAuthorize('view', $file);
 
         abort_unless(Storage::disk($file->disk)->exists($file->path), 404);
         return $file->download($this->headers());

@@ -73,7 +73,7 @@ class FileController
 
         $data = $request->validated();
 
-        if (!empty($data['folder_id'])) Gate::authorize('update', UploadFolder::query()->findOrFail($data['folder_id']));
+        if (!empty($data['folder_id'])) $this->userAuthorize('update', UploadFolder::query()->findOrFail($data['folder_id']));
 
         return response()->json([
             'success' => true,

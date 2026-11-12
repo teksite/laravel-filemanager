@@ -78,7 +78,7 @@ class FolderService
      */
     public function delete(UploadFolder $folder): void
     {
-        DB::transaction(function () use ($folder) {
+        DB::transaction(static function () use ($folder) {
             UploadFile::query()->where('folder_id', $folder->getKey())->update(['folder_id' => $folder->parent_id]);
             UploadFolder::query()->where('parent_id', $folder->getKey())->update(['parent_id' => $folder->parent_id]);
             $folder->delete();

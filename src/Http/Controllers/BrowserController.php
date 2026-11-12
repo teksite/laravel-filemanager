@@ -6,11 +6,14 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Random\RandomException;
+use Teksite\FileManager\Http\Requests\ShouldAuthorize;
 use Teksite\FileManager\Models\UploadFile;
 use Teksite\FileManager\Services\StorageService;
 
 class BrowserController
 {
+    use ShouldAuthorize;
+
     public function __construct(protected StorageService $storage) {}
 
     /** Full page browser (embed it in an iframe or open it directly).
@@ -19,7 +22,7 @@ class BrowserController
      */
     public function index(): View
     {
-        Gate::authorize('browse', UploadFile::class);
+        $this->userAuthorize('browse', UploadFile::class);
 
         return view('filemanager::page', $this->viewData('fm-'.bin2hex(random_bytes(4))));
     }
@@ -27,7 +30,7 @@ class BrowserController
     /** HTML fragment used by the modal picker. Only the DOM id is taken from the client. */
     public function popup(Request $request): View
     {
-        Gate::authorize('browse', UploadFile::class);
+        $this->userAuthorize('browse', UploadFile::class);
 
         $id = (string) $request->validate(['id' => ['required', 'string', 'max:64', 'regex:/^[A-Za-z0-9_-]+$/']])['id'];
 
